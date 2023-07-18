@@ -38,9 +38,8 @@ public class PackageController {
 
 	@Autowired
 	private PackagesService packageService;
-	
 
-
+	//code to get all packages
 	@GetMapping("/getAllPackages")
 	 public ApiResponse<String> getAllPackages() {
        String packages = packageService.getAllPackages();
