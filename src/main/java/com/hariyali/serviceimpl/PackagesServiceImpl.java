@@ -198,9 +198,13 @@ public class PackagesServiceImpl implements PackagesService {
 
 
 	@Override
-    public List<Map<String, Object>> getAllPackages() {
-        return packageDao.getAllPackages();
-    }
+	public String getAllPackages() {
+		String packages = packageRepository.getAllPackages();
+		if(!packages.isEmpty())
+			return packages;
+		else
+			throw new CustomExceptionNodataFound("No packages added in database");
+	}
 	
 	
 	@Override

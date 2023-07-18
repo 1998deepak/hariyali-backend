@@ -188,21 +188,19 @@ public class PackagedaoImpl implements PackageDao {
 
 	@Override
 	public List<Map<String, Object>> getAllPackages() {
-		List<Object[]> packages = packageRepo.getAllPackages();
-		List<Map<String, Object>> response = new ArrayList<>();
-		for (Object[] obj : packages) {
-			Map<String, Object> packageData = new HashMap<>();
-			packageData.put("packageId", obj[0]);
-			packageData.put("packageName", obj[1]);
-			packageData.put("packageDescription", obj[2]);
-			packageData.put("bouquetPrice", obj[3]);
-			packageData.put("maintenanceCost", obj[4]);
-			packageData.put("startDate", obj[6]);
-			packageData.put("endDate", obj[7]);
-
-			response.add(packageData);
-		}
-		return response;
+		/*
+		 * List<Object[]> packages = packageRepo.getAllPackages(); List<Map<String,
+		 * Object>> response = new ArrayList<>(); for (Object[] obj : packages) {
+		 * Map<String, Object> packageData = new HashMap<>();
+		 * packageData.put("packageId", obj[0]); packageData.put("packageName", obj[1]);
+		 * packageData.put("packageDescription", obj[2]);
+		 * packageData.put("bouquetPrice", obj[3]); packageData.put("maintenanceCost",
+		 * obj[4]); packageData.put("startDate", obj[6]); packageData.put("endDate",
+		 * obj[7]);
+		 * 
+		 * response.add(packageData); }
+		 */
+		return null;
 	}
 
 }

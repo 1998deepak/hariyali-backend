@@ -22,7 +22,7 @@ public interface PackagesService {
 
 	public ApiResponse<PackagesRequest> deletePackageById(int packageId);
 
-	 public List<Map<String, Object>> getAllPackages();
+	 public String getAllPackages();
 	 
 	 public ApiResponse<String> setActivePackagetoInactive(Date endDate);
 

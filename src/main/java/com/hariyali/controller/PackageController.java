@@ -42,9 +42,9 @@ public class PackageController {
 
 
 	@GetMapping("/getAllPackages")
-	 public ApiResponse<List<Map<String, Object>>> getAllPackages() {
-       List<Map<String, Object>> packages = packageService.getAllPackages();
-       ApiResponse<List<Map<String, Object>>> response = new ApiResponse<>();
+	 public ApiResponse<String> getAllPackages() {
+       String packages = packageService.getAllPackages();
+       ApiResponse<String> response = new ApiResponse<>();
        response.setData(packages);
        response.setStatus(EnumConstants.SUCCESS);
        response.setStatusCode(HttpStatus.OK.value());
