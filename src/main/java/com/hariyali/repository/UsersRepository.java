@@ -1,5 +1,6 @@
 package com.hariyali.repository;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -108,8 +109,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "			 where users.donorId IS NOT NULL AND users.is_deleted=false", nativeQuery = true)
 	Object getAllUsersWithDonarID();
 
-	@Query(value="SELECT \r\n"
-			+ "			 			     JSON_ARRAYAGG(\r\n"
+	@Query(value = "SELECT \r\n" + "			 			     JSON_ARRAYAGG(\r\n"
 			+ "			 			         JSON_OBJECT(\r\n"
 			+ "			 			             'userId', users.user_id,\r\n"
 			+ "			 			             'firstName', users.first_name,\r\n"
@@ -133,12 +133,10 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "			 			                     FROM tbl_donation d\r\n"
 			+ "			 			                     INNER JOIN tbl_payment_info p ON d.donation_id = p.donationId\r\n"
 			+ "			 			                     WHERE d.userId = users.user_id\r\n"
-			+ "			 			                 )\r\n"
-			+ "			 			             )\r\n"
-			+ "			 			         )\r\n"
-			+ "			 			     ) AS 'Result'\r\n"
+			+ "			 			                 )\r\n" + "			 			             )\r\n"
+			+ "			 			         )\r\n" + "			 			     ) AS 'Result'\r\n"
 			+ "			 			 FROM tbl_user_master AS users\r\n"
-			+ "			 			 WHERE users.webId IS NOT NULL AND users.is_deleted = false AND users.is_approved=false;",nativeQuery = true)
+			+ "			 			 WHERE users.webId IS NOT NULL AND users.is_deleted = false AND users.is_approved=false;", nativeQuery = true)
 	Object getAllUsersWithWebId();
 
 	@Query(value = "SELECT\r\n" + "			     JSON_ARRAYAGG(\r\n" + "			         JSON_OBJECT(\r\n"
@@ -197,9 +195,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "	             ) AS Result\r\n" + "	          FROM tbl_user_master AS users\r\n"
 			+ "	          WHERE users.emailId = ? AND users.is_deleted=false\r\n", nativeQuery = true)
 	Object getUserPersonalDetailsByEmail(String email);
-	
-	
-	
+
 	@Query(value = "SELECT   	            JSON_OBJECT(\r\n"
 			+ "			 	                 'userId', users.user_id,  	                 'firstName', users.first_name,\r\n"
 			+ "			 	                 'lastName', users.last_name,\r\n"
@@ -225,11 +221,24 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "			 	          WHERE users.donorId =? AND users.is_deleted=false", nativeQuery = true)
 	Object getUserPersonalDetailsByDonorId(String donorId);
 
-
 	@Query(value = "SELECT * from tbl_user_master where webId=?", nativeQuery = true)
 	Users getUserByWebId(int webId);
 
-	
 	@Query(value = "SELECT * from tbl_user_master where pan_card=?1", nativeQuery = true)
 	Users getUserByPancard(String pancard);
+
+	@Query(value = "SELECT \r\n"
+			+ "    tum.user_id AS user,\r\n"
+			+ "    td.donation_id AS donation,\r\n"
+			+ "    tup.package_id AS packages,\r\n"
+			+ "    tum.emailId AS userName,\r\n"
+			+ "    tup.package_name AS packageName, \r\n"
+			+ "    tup.amount as amount\r\n"
+			+ "FROM\r\n"
+			+ "    tbl_user_master tum\r\n"
+			+ "        INNER JOIN\r\n"
+			+ "    tbl_donation td ON tum.user_id = td.userId\r\n"
+			+ "        INNER JOIN\r\n"
+			+ "    tbl_user_packages tup ON tup.donationId = td.donation_id", nativeQuery = true)
+	List<Map<String, Object>> getUserPlantExportExcel();
 }
