@@ -19,7 +19,7 @@ public interface PackagesRepository extends JpaRepository<Packages, Integer> {
 	@Query(value = "SELECT JSON_ARRAYAGG(JSON_OBJECT(\r\n"
 			+ "	'package_name',p.package_name,\r\n"
 			+ "    'bouquet_price',p.bouquet_price\r\n"
-			+ ")) as result from hariyalidbletest.tbl_packages as p WHERE p.active = true;", nativeQuery = true)
+			+ ")) as result from tbl_packages as p WHERE p.active = true;", nativeQuery = true)
 	public String getAllPackages();
 
 	@Query(value = "SELECT p.package_id,p.active,p.bouquet_price,p.maintenance_cost,p.package_description,p.package_name,\r\n"

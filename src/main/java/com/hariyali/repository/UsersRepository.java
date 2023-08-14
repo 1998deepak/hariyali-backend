@@ -241,4 +241,10 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "        INNER JOIN\r\n"
 			+ "    tbl_user_packages tup ON tup.donationId = td.donation_id", nativeQuery = true)
 	List<Map<String, Object>> getUserPlantExportExcel();
+	
+	@Query(value="select * from tbl_user_master as users left join tbl_donation as donation on users.user_id=donation.userId where donation.donation_id=?",nativeQuery=true)
+	public List<Users> getUserDataByDonationId(int donationId);
+	
+	@Query(value="Select * from tbl_user_master where emailId=?",nativeQuery = true)
+	Users findByEmailIdForDeletedUser(String email);
 }

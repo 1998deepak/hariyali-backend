@@ -1,11 +1,8 @@
 package com.hariyali.service;
-import java.util.List;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.LoginRequest;
+import com.hariyali.entity.Users;
 
 public interface JwtService {
 
@@ -16,6 +13,12 @@ public interface JwtService {
 	public ApiResponse<String> sendEmailPassword(String email);
 	
 	public ApiResponse<String> logout(LoginRequest request, String token);
+
+	ApiResponse<String> loginOtp(LoginRequest request);
+	
+	public ApiResponse<String> verifyOtp(String email, String otp);
+
+	public Users findUserByDonorIdOrEmailId(String email);
 
 	
 }

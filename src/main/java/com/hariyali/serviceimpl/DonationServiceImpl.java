@@ -1,21 +1,18 @@
 package com.hariyali.serviceimpl;
 
 import java.util.Date;
+import java.util.Optional;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -24,7 +21,7 @@ import com.hariyali.config.JwtHelper;
 import com.hariyali.dao.UserDao;
 import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.DonationDTO;
-import com.hariyali.dto.UsersDTO;
+import com.hariyali.dto.PackagesRequest;
 import com.hariyali.entity.Address;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.PaymentInfo;
@@ -168,7 +165,7 @@ public class DonationServiceImpl implements DonationService {
 					"User with " + userNode.get("emailId").asText() + " is not Registered");
 
 		Date newDate = new Date();
-		
+
 		String token = null;
 		String userName = null;
 		Users userToken = null;
@@ -263,7 +260,7 @@ public class DonationServiceImpl implements DonationService {
 
 										continue;
 									}
-									usersServiceImpl.saveUser(recipients, donarID, request, true,createdBy,userNode);
+									usersServiceImpl.saveUser(recipients, donarID, request, true, createdBy, userNode);
 								}
 							}
 						}
@@ -280,6 +277,9 @@ public class DonationServiceImpl implements DonationService {
 
 	@Override
 	public Object updateUserDonations(JsonNode jsonNode, HttpServletRequest request) {
+		String subject = "Updated Plant Donation Details";
+		String body = "Dear User,\n We wanted to inform you that your plant donation details have been updated in our records.\\n\\n\""
+				+ "Best regards,\n" + "Hariyai Team";
 		JsonNode userNode = jsonNode.get("user");
 		ApiResponse<DonationDTO> response = new ApiResponse<>();
 		if (userNode == null) {
@@ -350,11 +350,15 @@ public class DonationServiceImpl implements DonationService {
 								addressRepository.save(address);
 							});
 						}
+
+						emailService.sendSimpleEmail(recipient.getEmailId(), subject, body);
 					});
+
 				}
 
 			});
 		}
+		emailService.sendSimpleEmail(user.getEmailId(), subject, body);
 		response.setStatus(EnumConstants.SUCCESS);
 		response.setStatusCode(HttpStatus.OK.value());
 		response.setMessage("Donation updated Successfully..!");
@@ -365,6 +369,44 @@ public class DonationServiceImpl implements DonationService {
 	public ApiResponse<Donation> getDonation(int donationId) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public ApiResponse<Object> getAllDonationDoneByUser(String email) {
+		ApiResponse<Object> response = new ApiResponse<>();
+
+		Optional<Users> userOptional = Optional.ofNullable(this.usersRepository.findByEmailId(email));
+
+		if (userOptional.isPresent()) {
+			Object result = donationRepository.getAllDonationDoneByUser(email);
+
+			response.setData(result);
+			response.setStatus(EnumConstants.SUCCESS);
+			response.setStatusCode(HttpStatus.OK.value());
+			response.setMessage("Data fetched successfully..!!");
+			return response;
+
+		} else {
+			throw new CustomException("Given Email Doesn't Exist.");
+		}
+	}
+
+	@Override
+	public ApiResponse<DonationDTO> searchDonationById(int donationId) {
+		ApiResponse<DonationDTO> response = new ApiResponse<>();
+		Donation result = donationRepository.findByDonationId(donationId);
+		response.setData(modelMapper.map(result, DonationDTO.class));
+		response.setStatusCode(HttpStatus.OK.value());
+		response.setStatus(EnumConstants.SUCCESS);
+		return response;
+
+	}
+
+	@Override
+	public Donation searchDonationById1(int donationId) {
+		Donation d=donationRepository.findById(donationId).get();
+		System.out.println(d.toString());
+		return d;
 	}
 
 }

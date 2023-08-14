@@ -3,24 +3,20 @@ package com.hariyali.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 
 
 @SuppressWarnings("deprecation")
@@ -68,15 +64,15 @@ public class JwtWebSecurityConfig   {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 	    http.csrf().disable()
 	        .authorizeRequests()
-	         .antMatchers("/api/v1/login", "/api/v1/resetPassword", "/api/v1/sendEmail", "/api/v1/logout",
+	         .antMatchers("/api/v1/login","/api/v1/loginOtp", "api/v1/verify-otp","/api/v1/loginViaOtp", "/api/v1/resetPassword", "/api/v1/sendEmail", "/api/v1/logout",
 	                         "/api/v1/sendEmailForDonorId", "/api/v1/activateuser", "/api/v1/TotalNoOfDonors",
 	                         "/api/v1/formData", "/api/v1/getAllPackages","/api/v1/userAddOnline").permitAll()
 	            .antMatchers("/api/v1/usersGetAll", "/api/v1/user-by-email/**", "/api/v1/package/**", "/api/v1/AddPackage",
 	                         "/api/v1/package-by-id/**", "/api/v1/GetAllReports", "/api/v1/uploadFileDocument",
 	                         "/api/v1/downloadFileDocument/**", "/api/v1/donorList", "/api/v1/leaderBoard", "/api/v1/map/**",
-	                         "/api/v1/AddMap", "/api/v1/deleteuser/**", "/api/v1/userAdd","/api/v1/updateDonation","/api/v1/inactivePackages/**")
+	                         "/api/v1/AddMap", "/api/v1/deleteuser/**", "/api/v1/userAdd","/api/v1/updateDonation","/api/v1/inactivePackages/**","/ai/v1/approvedDonation")
 	                .hasAnyAuthority("Admin")
-	            .antMatchers("/api/v1/updateUser/**","/api/v1/newDonation").hasAnyAuthority("User","Admin")
+	            .antMatchers("/api/v1/updateUser/**","/api/v1/newDonation","/api/v1/getUserPersonalDetailsbyEmailOrDonorId","/api/v1/getAllDonationByUser/").hasAnyAuthority("User","Admin")
 	            .and()
 	        .exceptionHandling()
 	            .authenticationEntryPoint(this.jwtAuthenticationEntryPoint)

@@ -4,8 +4,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.springframework.data.domain.Page;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -61,6 +59,9 @@ public interface UsersService {
 
 	
 	ApiResponse<String> forgetUserPassword(String formData, HttpSession session) throws JsonProcessingException;
+
+	public ApiResponse<UsersDTO> getUserPersonalDetailsbyEmailOrDonorId(String emailOrDonorId);
+
 
 
 }

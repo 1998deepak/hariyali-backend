@@ -15,8 +15,7 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 
 	public Donation findByDonationId(int donationId);
 
-	@Query(value="select    JSON_OBJECT(\r\n"
-			+ "						 			         'user', JSON_OBJECT(\r\n"
+	@Query(value = "select    JSON_OBJECT(\r\n" + "						 			         'user', JSON_OBJECT(\r\n"
 			+ "						                      'donorId', users.donorId,'emailId',users.emailId,\r\n"
 			+ "						 			         \r\n"
 			+ "						 			         'donations', (\r\n"
@@ -118,12 +117,11 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 			+ "						 			             FROM tbl_donation AS donations\r\n"
 			+ "						 			             JOIN tbl_user_master AS users ON users.user_id = donations.userId\r\n"
 			+ "						 			             WHERE donations.donation_id = ?1 AND donations.deleted = false\r\n"
-			+ "						 			         )\r\n"
-			+ "						 			     ) \r\n"
+			+ "						 			         )\r\n" + "						 			     ) \r\n"
 			+ "						 			     )AS Result\r\n"
 			+ "						 			 FROM tbl_donation AS donations\r\n"
 			+ "						 			 JOIN tbl_user_master AS users ON users.user_id = donations.userId\r\n"
-			+ "						 			 WHERE donations.donation_id = ?1 AND donations.deleted = false" ,nativeQuery=true)
+			+ "						 			 WHERE donations.donation_id = ?1 AND donations.deleted = false", nativeQuery = true)
 
 	Object getSpecificDonationById(int donationId);
 
@@ -142,8 +140,14 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 			+ "			 			   )  ) AND donation.userId = ?1  ORDER BY TIME(modified_date) DESC  LIMIT 1;", nativeQuery = true)
 	Donation getDonationLatestUpdateByUserId(int userId);
 
-	
-	
-	@Query(value="select * from tbl_donation where userId=?",nativeQuery=true)
+	@Query(value = "select * from tbl_donation where userId=?", nativeQuery = true)
 	List<Donation> getDonationDataByUserId(int userId);
+
+	@Query(value = "SELECT JSON_ARRAYAGG(JSON_OBJECT('donationId', d.donation_id,'donationMode',d.donation_mode,'donationType',d.donation_type,'paymentInfo', JSON_OBJECT(\r\n"
+			+ "'paymentInfoId', p.paymentInfo_id,'paymentDate', DATE(p.payment_date),'paymentStatus', p.payment_status,'amount',p.amount,\r\n"
+			+ "'donorId', u.donorId,'firstName', u.first_name,'lastName', u.last_name))) AS Result\r\n"
+			+ "FROM tbl_donation d INNER JOIN tbl_payment_info p ON d.donation_id = p.donationId\r\n"
+			+ "INNER JOIN tbl_user_master u ON u.user_id = d.userId WHERE u.emailId = ? AND u.is_deleted = false\r\n"
+			+ "ORDER BY p.payment_date DESC;", nativeQuery = true)
+	Object getAllDonationDoneByUser(String email);
 }
