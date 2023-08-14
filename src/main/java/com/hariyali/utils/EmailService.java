@@ -24,4 +24,15 @@ public class EmailService {
         System.out.println("Mail Sent...");
 
     }
+    
+    public void sendSimpleEmailToHariyaliTeam(String toEmail,String subject,String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(toEmail);
+        message.setTo(fromEmail);
+        message.setText(body);
+        message.setSubject(subject);
+        mailSender.send(message);
+        System.out.println("Mail Sent To Hariyali Team ...");
+
+    }
 }
