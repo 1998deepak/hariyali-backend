@@ -40,9 +40,6 @@ public class UsersController {
 	@Autowired
 	UsersRepository userRepository;
 
-	@Autowired
-	LoginRepository loginPasswordRepository;
-
 	// method to get user by email
 	@GetMapping("/getAlluser")
 	public ResponseEntity<ApiResponse<Object>> getAllusers() {

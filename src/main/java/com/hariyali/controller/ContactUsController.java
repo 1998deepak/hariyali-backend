@@ -35,17 +35,14 @@ public class ContactUsController {
 	
 	@PostMapping("/saveContact")
 	public ContactUs saveContact(@RequestBody ContactUs contactUs) {
-		ContactUs contact = contactUsServiceImpl.createContact(contactUs);
-		if(contact != null) {
-			ContactUs resulEntity = contactUsRepository.findByContactEmail(contact.getContactEmail());
-			if (resulEntity == null) {
-				throw new CustomExceptionNodataFound(
-						"User with " + contactUs.getContactEmail() + " is not Registered");
-			}else {
-				emailService.sendSimpleEmailToHariyaliTeam(contact.getContactEmail(), contact.getContactSubject(), contact.getMassage());
-			}
+		ContactUs resulEntity = contactUsRepository.findByContactEmail(contactUs.getContactEmail());
+		if (resulEntity == null) {
+			throw new CustomExceptionNodataFound(
+					"User with " + contactUs.getContactEmail() + " is not Registered");
 		}
-		return contact;
+			ContactUs contact = contactUsServiceImpl.createContact(contactUs);
+			emailService.sendSimpleEmailToHariyaliTeam(contact.getContactEmail(), contact.getContactSubject(), contact.getMassage());
+			return contact;
 	}
 
 
