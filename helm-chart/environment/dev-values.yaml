@@ -73,7 +73,7 @@ affinity: {}
 
 podEnv:
   - name: SPRING_DATASOURCE_URL
-    value: "jdbc:mysql://mgcmdmodsqdbmysql02-tlkw.mysql.dev.database.gcp.com:3306/hariyalibackendservices?allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Kolkata"
+    value: "jdbc:mysql://mgcmdmodsqdbmysql02-tlkw.mysql.dev.database.gcp.com:3306/hariyalidb?allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Kolkata"
   - name: SPRING_DATASOURCE_DRIVERCLASSNAME
     value: "com.mysql.jdbc.Driver"
   - name: SPRING_DATASOURCE_USERNAME
