@@ -22,7 +22,6 @@ import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.UsersDTO;
 import com.hariyali.entity.Users;
 import com.hariyali.exceptions.CustomException;
-import com.hariyali.repository.LoginRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.JwtService;
 import com.hariyali.service.UsersService;
