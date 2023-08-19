@@ -1,5 +1,7 @@
 package com.hariyali.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -186,5 +188,14 @@ public class UsersController {
 			@RequestParam String emailOrDonorId) {
 		return new ResponseEntity<>(usersService.getUserPersonalDetailsbyEmailOrDonorId(emailOrDonorId), HttpStatus.OK);
 	}
+	
+	@GetMapping("/getAllDonarId")
+    public ResponseEntity<List<String>> getAllDonarIds(){
+   	
+   	 List<String> donarId = usersService.getAllDonarId();
+   	
+   	 return ResponseEntity.ok(donarId);
+   	
+   }
 
 }
