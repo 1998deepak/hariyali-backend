@@ -21,5 +21,7 @@ public class ApiResponse<T> {
 
 	private T data;
 	private String message;
-
+	private String encRequest;
+	private String accessCode;
+	private String gatewayURL;
 }
