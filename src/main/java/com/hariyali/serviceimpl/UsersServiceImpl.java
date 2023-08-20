@@ -12,6 +12,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.hariyali.dto.DonationDTO;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -258,7 +259,10 @@ public class UsersServiceImpl implements UsersService {
 			throw new CustomExceptionNodataFound("No Donation Type is selected");
 
 		// save donation
-		donationServiceImpl.saveUserDonations(jsonNode, donarID, request);
+		ApiResponse<DonationDTO> apiResponse = donationServiceImpl.saveUserDonations(jsonNode, donarID, request);
+		response.setGatewayURL(apiResponse.getGatewayURL());
+		response.setEncRequest(apiResponse.getEncRequest());
+		response.setAccessCode(apiResponse.getAccessCode());
 		return response;
 
 	}

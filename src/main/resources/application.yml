@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/hariyalidbletest?allowPublicKeyRetrieval=true&useSSL=false
     username: root
-    password: 1234
+    password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
     #    show-sql: true
   main:
@@ -52,6 +52,9 @@ user:
 jwt:
    secret : boooooooooom!!!!
 #   Time in Hours
-   expireTime : 8   
+   expireTime : 8
+# change this url as deployed environment
+frontend:
+        redirect-url: http://localhost:3000/OnlineDonation?orderId=
    
    

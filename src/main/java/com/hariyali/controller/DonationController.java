@@ -2,6 +2,8 @@ package com.hariyali.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.hariyali.dto.PaymentInfoDTO;
+import com.hariyali.service.PaymentIntegrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class DonationController {
 
 	@Autowired
 	private DonationService donationService;
+
+	@Autowired
+	private PaymentIntegrationService integrationService;
 
 //	 method to add user new Donations
 	@PostMapping("/newDonation")
@@ -69,5 +74,16 @@ public class DonationController {
 	@GetMapping("/searchDonationById1/{donationId}")
 	public Donation searchDonationById1(@PathVariable int donationId){
 		return donationService.searchDonationById1(donationId);
+	}
+
+	/**
+	 * method to search payment information based on payment id
+	 *
+	 * @param paymentId
+	 * @return
+	 */
+	@GetMapping("/searchPaymentByPaymentId/{paymentId}")
+	public ApiResponse<PaymentInfoDTO> searchPaymentByPaymentId(@PathVariable int paymentId){
+		return integrationService.findPaymentInfoByPaymentInfoId(paymentId);
 	}
 }
