@@ -2,6 +2,7 @@ package com.hariyali.controller;
 
 import java.util.List;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -75,7 +76,7 @@ public class UsersController {
 	// method to add user package
 	@PostMapping("/userAddOffline")
 	public ResponseEntity<ApiResponse<UsersDTO>> addUserOffline(@RequestBody String formData,
-			HttpServletRequest request) throws JsonProcessingException {
+			HttpServletRequest request) throws JsonProcessingException, MessagingException {
 		ApiRequest response = new ApiRequest(formData);
 		return new ResponseEntity<>(usersService.saveUserAndDonationsOffline(response.getFormData(), request),
 				HttpStatus.OK);
@@ -173,7 +174,7 @@ public class UsersController {
 
 	@PostMapping("/approvedDonation")
 	public ResponseEntity<?> approvedOnlineDonationOfUser(@RequestBody String formData, HttpServletRequest request)
-			throws JsonProcessingException {
+			throws JsonProcessingException, MessagingException {
 		ApiRequest apiRequest = new ApiRequest(formData);
 		return new ResponseEntity<>(
 				this.usersService.approvedOnlineDonationOfUser(apiRequest.getFormData().toString(), request),

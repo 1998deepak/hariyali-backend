@@ -1,15 +1,14 @@
 package com.hariyali.serviceimpl;
 
-import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -42,6 +41,7 @@ import com.hariyali.dto.UsersDTO;
 import com.hariyali.entity.Address;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.PaymentInfo;
+import com.hariyali.entity.Receipt;
 import com.hariyali.entity.Recipient;
 import com.hariyali.entity.Roles;
 import com.hariyali.entity.UserPackages;
@@ -52,9 +52,11 @@ import com.hariyali.exceptions.CustomExceptionNodataFound;
 import com.hariyali.repository.AddressRepository;
 import com.hariyali.repository.DonationRepository;
 import com.hariyali.repository.PaymentInfoRepository;
+import com.hariyali.repository.ReceiptRepository;
 import com.hariyali.repository.RecipientRepository;
 import com.hariyali.repository.UserPackageRepository;
 import com.hariyali.repository.UsersRepository;
+import com.hariyali.service.ReceiptService;
 import com.hariyali.service.UsersService;
 import com.hariyali.utils.EmailService;
 
@@ -69,11 +71,16 @@ public class UsersServiceImpl implements UsersService {
 	private static final String OTP_CACHE_NAME = "otpCache";
 
 	@Autowired
+	ReceiptRepository receiptRepository;
+
+	@Autowired
 	private JwtHelper jwtHelper;
 
 	@Autowired
 	private UserDao userDao;
 
+	@Autowired
+	PaymentInfoRepository paymentIfoRepository;
 	@Autowired
 	private EmailService emailService;
 
@@ -107,12 +114,25 @@ public class UsersServiceImpl implements UsersService {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
+	@Autowired
+	ReceiptService receiptService;
+
 	private static final Logger logger = LoggerFactory.getLogger(UsersServiceImpl.class);
 
 	public String generateDonorId() {
-		Random rand = new Random();
-		long donorId = (long) (rand.nextDouble() * 1000000000000L);
-		return String.format("%012d", donorId);
+		String prefix = "100";
+		int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+		int lastTwoDigits = currentYear % 100;
+		String yearSuffix = String.format("%02d", lastTwoDigits);
+		Random random = new Random();
+		StringBuilder randomDigits1 = new StringBuilder();
+
+		for (int i = 0; i < 4; i++) {
+			randomDigits1.append(random.nextInt(10)); // Append a random digit (0-9)
+		}
+		String randomDigits = randomDigits1.toString();
+
+		return prefix + yearSuffix + randomDigits;
 	}
 
 	@Override
@@ -122,7 +142,7 @@ public class UsersServiceImpl implements UsersService {
 
 	@Override
 	public ApiResponse<UsersDTO> saveUserAndDonationsOffline(JsonNode jsonNode, HttpServletRequest request)
-			throws JsonProcessingException {
+			throws JsonProcessingException, MessagingException {
 
 		JsonNode userNode = jsonNode.get("user");
 		ApiResponse<UsersDTO> response = null;
@@ -156,14 +176,15 @@ public class UsersServiceImpl implements UsersService {
 
 			Users resulEntity = usersRepository.findByEmailId(userNode.get("emailId").asText());
 
-			String subject = "Reset password link";
-			String content = "Dear Sir/Madam,\n \t Below is Your donorId and password. " + "Donor Id : "
-					+ resulEntity.getDonorId() + "\n raw Password : " + EnumConstants.PASSWORD
-					+ "\n Please do reset your password."
-					+ "Click the link below to change your password :\n http://localhost:3000/resetPassword?token="
-					+ "\n \n Note: Link is valid for 1 hour.\n"
-					+ " Ignore this email if you do remember your password,or you have not made the request.";
-			emailService.sendSimpleEmail(resulEntity.getEmailId(), subject, content);
+			String subject = "Welcome To Hariyali";
+			String content = "Dear Sir/Madam,\n \tWelcome to Project Hariyali."+ "The Mahindra Foundation,would like to thank you for your donation to Project Hariyali. The main objective of the project is to do 5 Billion Tree Plantation from 2026 in several parts of the Nation. "
+					+ "The Tree Plantation is the main Agenda of the Project. "
+					+ "The HARIYALI is a Partnership between Mahindra and Mahindra and the Nandi Foundation. The Project will be jointly managed by M&M and Nandi Foundation. \r\n" + "Best wishes,\r\n"+
+					 "Below is your Donor Id : " + resulEntity.getDonorId() 
+					+ "Team Hariyali\r\n" + "\r\n" ;
+
+			Receipt receipt = receiptRepository.getUserReceipt(resulEntity.getUserId());
+			emailService.sendEmailWithAttachment(resulEntity.getEmailId(), subject, content, receipt.getReciept_Path());
 
 			return response;
 		} else {
@@ -738,7 +759,7 @@ public class UsersServiceImpl implements UsersService {
 
 	@Override
 	public ApiResponse<String> approvedOnlineDonationOfUser(String formData, HttpServletRequest request)
-			throws JsonProcessingException {
+			throws JsonProcessingException, MessagingException {
 		ApiResponse<String> result = new ApiResponse<>();
 		String token = request.getHeader("Authorization");
 		String userName = jwtHelper.getUsernameFromToken(token.substring(7));
@@ -766,8 +787,18 @@ public class UsersServiceImpl implements UsersService {
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Donation Approved By " + userName);
 			result.setStatusCode(HttpStatus.OK.value());
-			sendDonationApprovalMail(user.getEmailId());
-			sendDonationApprovalMail(recipientEmail.getEmailId());
+//			sendDonationApprovalMail(user.getEmailId());
+			String subject = "Welcome To Hariyali";
+			String content = "Dear Sir/Madam,\n Welcome to Project Hariyali"
+					+ "The Mahindra Foundation,would like to thank you for your donation to Project Hariyali. The main objective of the project is to do 5 Billion Tree Plantation from 2026 in several parts of the Nation. "
+					+ "The Tree Plantation is the main Agenda of the Project. "
+					+ "The HARIYALI is a Partnership between Mahindra and Mahindra and the Nandi Foundation. The Project will be jointly managed by M&M and Nandi Foundation. \r\n" + "Best wishes,\r\n"
+					+ "Team Hariyali\r\n" + "\r\n" ;
+
+			Receipt receipt = receiptRepository.getUserReceiptbyDonation(user.getUserId(),donation.get(0).getDonationId());
+			emailService.sendEmailWithAttachment(user.getEmailId(), subject, content,
+					receipt.getReciept_Path());
+//			sendDonationApprovalMail(recipientEmail.getEmailId());
 		} else {
 			throw new CustomExceptionNodataFound("Status should Only be Approved or Rejected");
 		}
@@ -871,6 +902,7 @@ public class UsersServiceImpl implements UsersService {
 							.getRecipientDataByDonationId(d.getDonationId());
 					for (Recipient recipient : recipients) {
 						recipientEmail = this.usersRepository.findByEmailId(recipient.getEmailId());
+						System.err.println("Recipient"+recipientEmail.toString());
 						recipientEmail.setDonorId(generateDonorId());
 						recipientEmail.setIsApproved(true);
 						recipientEmail.setIsDeleted(false);
@@ -878,9 +910,14 @@ public class UsersServiceImpl implements UsersService {
 						recipientEmail.setCreatedBy(userName);
 						recipientEmail.setModifiedBy(userName);
 						recipientEmail.setModifiedDate(new Date());
-						this.usersRepository.save(recipientEmail);
+						usersRepository.save(recipientEmail);
+						System.err.println("After save Recipient"+recipientEmail.toString());
 						System.out.println("new User:" + recipientEmail);
+						emailService.sendGiftingLetterEmail(recipientEmail.getEmailId(), user);
 					}
+
+					receiptService.generateReceipt(d);
+
 				} else if (d.getDonationType().equalsIgnoreCase("self-Donate")) {
 					List<Users> users = this.usersRepository.getUserDataByDonationId(d.getDonationId());
 					for (Users userdata : users) {
@@ -892,9 +929,11 @@ public class UsersServiceImpl implements UsersService {
 						recipientEmail.setCreatedBy(userName);
 						recipientEmail.setModifiedBy(userName);
 						recipientEmail.setModifiedDate(new Date());
-						this.usersRepository.save(recipientEmail);
+						usersRepository.save(recipientEmail);
 						System.out.println("new User:" + recipientEmail);
 					}
+					receiptService.generateReceipt(d);
+
 				} else {
 					throw new CustomExceptionNodataFound("Please select Dontation Type");
 				}

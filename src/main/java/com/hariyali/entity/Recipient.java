@@ -26,6 +26,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import lombok.ToString;
+
+@ToString
 @Entity
 @Table(name = "tbl_recipient")
 public class Recipient implements Serializable{

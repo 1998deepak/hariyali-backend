@@ -21,7 +21,7 @@ import com.hariyali.config.JwtHelper;
 import com.hariyali.dao.UserDao;
 import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.DonationDTO;
-import com.hariyali.dto.PackagesRequest;
+import com.hariyali.dto.PaymentInfoDTO;
 import com.hariyali.entity.Address;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.PaymentInfo;
@@ -37,6 +37,7 @@ import com.hariyali.repository.RecipientRepository;
 import com.hariyali.repository.UserPackageRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.DonationService;
+import com.hariyali.service.ReceiptService;
 import com.hariyali.utils.EmailService;
 
 @Service
@@ -76,6 +77,12 @@ public class DonationServiceImpl implements DonationService {
 	@Lazy
 	private UsersServiceImpl usersServiceImpl;
 
+	@Autowired
+	ReceiptService receiptService;
+
+	@Autowired
+	PaymentInfoRepository paymentIfoRepository;
+
 	@Override
 	public ApiResponse<Object> getDonationById(int donationId) {
 		ApiResponse<Object> response = new ApiResponse<>();
@@ -104,18 +111,6 @@ public class DonationServiceImpl implements DonationService {
 		if (userEmail == null) {
 			throw new CustomExceptionNodataFound("Given Email Id doesn't exists");
 		}
-//		if (userEmail.getPanCard() == null || (userEmail.getPanCard()).equals("")) {
-//			
-//				throw new CustomExceptionNodataFound("Please enter PAN card details");
-//			
-////			// Check if the PAN card is already linked to another account
-////			Users existingUserWithPAN = this.usersRepository.getUserByPancard(panCard);
-////			if (existingUserWithPAN != null) {
-////				throw new CustomException("PAN card is already linked to another account");
-////			}
-////			userEmail.setPanCard(panCard); 
-////			this.usersRepository.save(userEmail); 
-//		}
 
 		if (donationNode == null) {
 			throw new CustomException("Donation not found");
@@ -137,13 +132,161 @@ public class DonationServiceImpl implements DonationService {
 
 		if (donationMode.equalsIgnoreCase("offline")) {
 			// send email to user
-			response = saveDonation(jsonNode, usersServiceImpl.generateDonorId(), request);
+			response = saveDonationOffline(jsonNode, usersServiceImpl.generateDonorId(), request);
+			
 			return response;
 		} else if (donationMode.equalsIgnoreCase("online")) {
 			return saveDonation(jsonNode, donarID, request);
 		} else {
 			throw new CustomException("Invalid donation mode");
 		}
+	}
+
+	private ApiResponse<DonationDTO> saveDonationOffline(JsonNode jsonNode, String donarID,
+			HttpServletRequest request) {
+		ApiResponse<DonationDTO> response = new ApiResponse<>();
+		String donationId = null;
+		JsonNode userNode = jsonNode.get("user");
+		JsonNode donationNode = userNode.get("donations");
+		JsonNode donationString = jsonNode.at("/user/donations/0/recipient");
+		String donationMode = userNode.get("donations").get(0).get("donationMode").asText();
+		DonationDTO donationDTO = new DonationDTO();
+
+		if (donationNode == null) {
+			throw new CustomException("Donation not found");
+		}
+
+		Users resulEntity = usersRepository.findByEmailId(userNode.get("emailId").asText());
+
+		if (resulEntity == null)
+			throw new CustomExceptionNodataFound(
+					"User with " + userNode.get("emailId").asText() + " is not Registered");
+
+		Date newDate = new Date();
+
+		String token = null;
+		String userName = null;
+		Users userToken = null;
+		if (request != null) {
+			token = request.getHeader("Authorization");
+			userName = jwtHelper.getUsernameFromToken(token.substring(7));
+			userToken = this.usersRepository.findByEmailId(userName);
+		}
+
+		String createdBy = null;
+
+		// set created by based on donationMode
+		if (donationMode.equalsIgnoreCase("online")) {
+
+			createdBy = userNode.get("emailId").asText();
+
+		} else {
+			createdBy = userToken.getEmailId();
+		}
+
+		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
+		Users user = gson.fromJson(userNode.toString(), Users.class);
+
+		// set user to donation and save donation
+		if (user.getDonations() != null) {
+			for (Donation donation : user.getDonations()) {
+				donation.setCreatedDate(newDate);
+				donation.setModifiedDate(newDate);
+				donation.setCreatedBy(createdBy);
+				donation.setUsers(resulEntity);
+				donation.setModifiedBy(createdBy);
+				donationRepository.save(donation);
+				Donation resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
+				donationDTO.setDonationId(donation.getDonationId());
+				donationDTO.setCreatedDate(newDate);
+				donationDTO.setCreatedBy(createdBy);
+				donationDTO.setDonationEvent(donation.getDonationEvent());
+				donationDTO.setDonationMode(donation.getDonationMode());
+				donationDTO.setTotalAmount(donation.getTotalAmount());
+				// set paymentInfo donation wise
+				if (donation.getPaymentInfo() != null) {
+					for (PaymentInfo paymentInfo : donation.getPaymentInfo()) {
+						paymentInfo.setCreatedDate(newDate);
+						paymentInfo.setModifiedDate(newDate);
+						paymentInfo.setCreatedBy(createdBy);
+						paymentInfo.setModifiedBy(createdBy);
+						paymentInfo.setPaymentStatus(EnumConstants.PAYMENT_COMPLETED);
+						paymentInfo.setUserDonation(resultdonation);
+						paymentInfoRepository.save(paymentInfo);
+
+					}
+					donationDTO.setPaymentInfo(donation.getPaymentInfo());
+				}
+
+				// set donation to user package and save user package
+				if (donation.getUserPackage() != null) {
+					for (UserPackages userPackage : donation.getUserPackage()) {
+						userPackage.setCreatedDate(newDate);
+						userPackage.setModifiedDate(newDate);
+						userPackage.setCreatedBy(createdBy);
+						userPackage.setModifiedBy(createdBy);
+						userPackage.setUserDonation(resultdonation);
+						userPackageRepository.save(userPackage);
+					}
+					donationDTO.setUserPackage(donation.getUserPackage());
+				}
+
+				// set donation to recipient and save recipient
+				if (donation.getRecipient() != null) {
+					for (Recipient recipient : donation.getRecipient()) {
+						recipient.setCreatedDate(newDate);
+						recipient.setModifiedDate(newDate);
+						recipient.setCreatedBy(createdBy);
+						recipient.setModifiedBy(createdBy);
+						recipient.setUserDonation(resultdonation);
+						recipientRepository.save(recipient);
+
+						Recipient resultRecipient = recipientRepository
+								.getRecipientByDonationId(resultdonation.getDonationId());
+
+						// set recipient to address and save address
+						if (recipient.getAddress() != null) {
+							for (Address address : recipient.getAddress()) {
+								address.setCreatedDate(newDate);
+								address.setModifiedDate(newDate);
+								address.setCreatedBy(createdBy);
+								address.setModifiedBy(createdBy);
+								address.setRecipient(resultRecipient);
+								addressRepository.save(address);
+							}
+
+							if (donationString.isArray()) {
+								ArrayNode arrayNode = (ArrayNode) donationString;
+								for (JsonNode recipients : arrayNode) {
+									String recipientEmail = recipients.get("emailId").asText();
+
+									// Check if the email already exists
+									Users existingUser = usersRepository.findByEmailId(recipientEmail);
+									if (existingUser != null) {
+
+										continue;
+									}
+									usersServiceImpl.saveUser(recipients, donarID, request, true, createdBy, userNode);
+								}
+							}
+						}
+						emailService.sendGiftingLetterEmail(recipient.getEmailId(),resulEntity);
+					}
+					
+				}
+				donation.setRecipient(donation.getRecipient());			
+			}
+		}
+		String paymentStatus = paymentIfoRepository
+				.getPaymentStatusByDonationId(donationDTO.getDonationId());
+		if (paymentStatus.equalsIgnoreCase("Completed")) {
+			receiptService.createReceipt(donationDTO);
+		}
+		response.setStatus(EnumConstants.SUCCESS);
+		response.setStatusCode(HttpStatus.OK.value());
+		response.setMessage("Donation added Successfully..!");
+//		response.setData(donationDTO);
+		return response;
 	}
 
 	public ApiResponse<DonationDTO> saveDonation(JsonNode jsonNode, String donarID, HttpServletRequest request) {
@@ -404,7 +547,7 @@ public class DonationServiceImpl implements DonationService {
 
 	@Override
 	public Donation searchDonationById1(int donationId) {
-		Donation d=donationRepository.findById(donationId).get();
+		Donation d = donationRepository.findById(donationId).get();
 		System.out.println(d.toString());
 		return d;
 	}
