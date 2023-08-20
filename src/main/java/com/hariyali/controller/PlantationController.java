@@ -2,6 +2,7 @@ package com.hariyali.controller;
 
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.hariyali.entity.Plantation;
 import com.hariyali.service.PlantationService;
 
 
@@ -65,8 +67,19 @@ public class PlantationController {
 		} catch (Exception e) {
 			e.printStackTrace();
 
-		}
+		}	
 		return null;
 	}
+	
+	 @GetMapping("/plantations")
+	    public ResponseEntity<List<Plantation>> getPlantationsByDonationId(@RequestParam Long donationId) {
+		 if (donationId != null) {  
+		 List<Plantation> plantationDTOs = plantationService.getPlantationsByDonationId(donationId);
+	        return new ResponseEntity<>(plantationDTOs, HttpStatus.OK);
+		 }else {
+			 return ResponseEntity.badRequest().build();
+		 }
+	    }
+	
 
 }
