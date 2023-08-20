@@ -1,4 +1,5 @@
 package com.hariyali.service;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -62,6 +63,6 @@ public interface UsersService {
 
 	public ApiResponse<UsersDTO> getUserPersonalDetailsbyEmailOrDonorId(String emailOrDonorId);
 
-
+	public List<String> getAllDonarId();
 
 }

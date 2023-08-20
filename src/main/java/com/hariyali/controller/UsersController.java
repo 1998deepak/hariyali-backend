@@ -1,5 +1,7 @@
 package com.hariyali.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.hariyali.EnumConstants;
 import com.hariyali.dto.ApiRequest;
 import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.UsersDTO;
@@ -25,6 +28,7 @@ import com.hariyali.exceptions.CustomException;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.JwtService;
 import com.hariyali.service.UsersService;
+import com.hariyali.serviceimpl.OtpServiceImpl;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -38,6 +42,9 @@ public class UsersController {
 
 	@Autowired
 	UsersRepository userRepository;
+	
+	@Autowired
+	OtpServiceImpl otpService;
 
 	// method to get user by email
 	@GetMapping("/getAlluser")
@@ -187,4 +194,23 @@ public class UsersController {
 		return new ResponseEntity<>(usersService.getUserPersonalDetailsbyEmailOrDonorId(emailOrDonorId), HttpStatus.OK);
 	}
 
+	@GetMapping("/getAllDonarId")
+	public ResponseEntity<List<String>> getAllDonarIds() {
+		List<String> donarId = usersService.getAllDonarId();
+		return ResponseEntity.ok(donarId);
+	}
+
+	@PostMapping("/sendOtp")
+	public ResponseEntity<?> sendOtp(@RequestParam String email){
+		ApiResponse<?> result = new ApiResponse<>();
+		try {
+			otpService.sendOtpByEmail(email);
+			result.setStatus(EnumConstants.SUCCESS);
+			result.setMessage("Otp Send Successfully");
+			result.setStatusCode(HttpStatus.OK.value());
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>("Invalid Mail", HttpStatus.BAD_REQUEST);
+		}
+	}
 }

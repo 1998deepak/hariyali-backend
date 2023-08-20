@@ -1,11 +1,14 @@
 package com.hariyali.serviceimpl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -1017,6 +1020,12 @@ public class UsersServiceImpl implements UsersService {
 			response.setMessage("An error occurred while fetching user details.");
 		}
 		return response;
+	}
+
+	// get All donarId
+	@Override
+	public List<String> getAllDonarId() {
+		return usersRepository.getAllDonorId();
 	}
 
 }
