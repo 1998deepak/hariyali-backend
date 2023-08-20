@@ -2,6 +2,7 @@ package com.hariyali.service;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -18,7 +19,7 @@ public interface UsersService {
 
 	public ApiResponse<Map<String, Object>> getUsers(int pageNo, int pageSize);
 
-	public ApiResponse<UsersDTO> saveUserAndDonationsOffline(JsonNode jsonNode,HttpServletRequest request) throws JsonMappingException, JsonProcessingException;
+	public ApiResponse<UsersDTO> saveUserAndDonationsOffline(JsonNode jsonNode,HttpServletRequest request) throws JsonMappingException, JsonProcessingException, MessagingException;
 	
 	public ApiResponse<UsersDTO> deleteUserById(int userId) throws CustomException;
 
@@ -53,7 +54,7 @@ public interface UsersService {
 	ApiResponse<UsersDTO> getUserPersonalDetailsByDonorId(String donorId);
 
 	ApiResponse<String> approvedOnlineDonationOfUser(String formData, HttpServletRequest request)
-			throws JsonProcessingException;
+			throws JsonProcessingException, MessagingException;
 
 	ApiResponse<UsersDTO> saveUserAndDonationsOnline(JsonNode jsonNode, HttpServletRequest request)
 			throws JsonProcessingException;

@@ -5,6 +5,9 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.hariyali.entity.PaymentInfo;
+import com.hariyali.entity.Recipient;
+import com.hariyali.entity.UserPackages;
 
 import lombok.Data;
 
@@ -35,11 +38,11 @@ public class DonationDTO {
 
 	private String modifiedBy;
 	
-	private List<PaymentInfoDTO> paymentInfo;
+	private List<PaymentInfo> paymentInfo;
 
 	private UsersDTO users;
 
-	private List<RecipientDTO> recipient;
+	private List<Recipient> recipient;
 		
 	private MapDTO donationMap;
 		
@@ -47,6 +50,6 @@ public class DonationDTO {
 	
 	private Boolean isDeleted;
 	
-	private List<UserPackageDTO> userPackage;
+	private List<UserPackages> userPackage;
 
 }

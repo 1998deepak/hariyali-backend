@@ -37,7 +37,7 @@ public class OtpServiceImpl {
 		String otp = generateOtp();
 		otpModel.setOtpCode(otp);
 		otpModel.setDonarIdOrEmail(emailId);;
-		otpModel.setOtpExpiryTime(LocalDateTime.now().plusMinutes(1));
+		otpModel.setOtpExpiryTime(LocalDateTime.now().plusMinutes(10));
 		otpModel.setUsers(user);
 		otpRepository.save(otpModel);
 		sendEmail(emailId, "Your OTP for login: " + otp);
