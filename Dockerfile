@@ -1,6 +1,10 @@
+#javabuild11
+FROM maven:3.6.1-jdk-11-slim AS javabuild
+COPY . .
+RUN mvn clean
+RUN mvn -e -B -DskipTests package
 #gcsfuse
 FROM golang:1.17.8-bullseye AS gcsfuse
-
 ENV GOPATH /go
 RUN go install github.com/googlecloudplatform/gcsfuse@v0.40.0
 
@@ -19,6 +23,6 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 WORKDIR /app
 
-COPY target/*.jar /app/hariyali.jar
+COPY --from=javabuild target/*.jar /app/hariyali.jar
 
 ENTRYPOINT ["java", "-jar", "/app/hariyali.jar"]
