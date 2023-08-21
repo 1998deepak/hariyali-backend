@@ -286,7 +286,9 @@ public class UsersServiceImpl implements UsersService {
 			userToken = this.usersRepository.findByEmailId(userName);
 		}
 
-		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
+		Gson gson = new GsonBuilder()
+	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
+	            .create();
 
 		Users user = gson.fromJson(userNode.toString(), Users.class);
 
@@ -506,7 +508,10 @@ public class UsersServiceImpl implements UsersService {
 		Object user = usersRepository.getUserPersonalDetailsByDonorId(donorId);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with donor Id " + donorId);
-		Gson gson = new Gson();
+		//Gson gson = new Gson();
+		Gson gson = new GsonBuilder()
+	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
+	            .create();
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
 
