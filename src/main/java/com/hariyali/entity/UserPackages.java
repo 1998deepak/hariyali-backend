@@ -2,6 +2,7 @@ package com.hariyali.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -71,6 +73,10 @@ public class UserPackages implements Serializable{
 	@JoinColumn(name = "donationId",referencedColumnName = "donation_id")
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "donationId")
 	private Donation userDonation;
+	
+	@JsonIgnore
+	@OneToMany(mappedBy="userPackages")
+	private List<Plantation> plantation;
 
 	public int getPackageId() {
 		return packageId;

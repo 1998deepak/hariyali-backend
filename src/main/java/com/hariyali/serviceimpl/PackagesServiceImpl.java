@@ -35,16 +35,15 @@ public class PackagesServiceImpl implements PackagesService {
 
 	@Autowired
 	private JwtHelper jwtHelper;
-	
+
 	@Autowired
 	private PackageDao packageDao;
 
 	@Autowired
 	private PackagesRepository packageRepository;
-	
+
 	@Autowired
 	private ModelMapper modelMapper;
-
 
 	@Autowired
 	private UsersRepository usersRepository;
@@ -54,14 +53,12 @@ public class PackagesServiceImpl implements PackagesService {
 	public ApiResponse<PackagesRequest> getByPackageId(String packageId) {
 		ApiResponse<PackagesRequest> result = new ApiResponse<>();
 
-		if(packageId==null)
-		{
+		if (packageId == null) {
 			throw new CustomExceptionNodataFound("Package Id Should be Required");
 		}
-		Packages p=this.packageRepository.findByPackageId(Integer.parseInt(packageId));
-		
-		if(p==null)
-		{
+		Packages p = this.packageRepository.findByPackageId(Integer.parseInt(packageId));
+
+		if (p == null) {
 			throw new CustomExceptionNodataFound("Package with Given Package Id Doesn't Exists");
 		}
 		Packages pkg = this.packageRepository.findPackageById(Integer.parseInt(packageId));
@@ -77,8 +74,6 @@ public class PackagesServiceImpl implements PackagesService {
 
 	}
 
-	
-	
 	// Get Package By Title
 	@Override
 	public ApiResponse<PackagesRequest> getByPackageTitle(String packageTitle) {
@@ -103,13 +98,11 @@ public class PackagesServiceImpl implements PackagesService {
 		ApiResponse<PackagesRequest> result = new ApiResponse<>();
 
 		String token = request.getHeader("Authorization");
-		
+
 		String userName = jwtHelper.getUsernameFromToken(token.substring(7));
 
-		
-		Users userToken= this.usersRepository.findByEmailId(userName);
-		
-		
+		Users userToken = this.usersRepository.findByEmailId(userName);
+
 		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
 		JsonNode packageNode = jsonNode.get("package");
 
@@ -120,31 +113,27 @@ public class PackagesServiceImpl implements PackagesService {
 		Packages pkg = gson.fromJson(packageNode.toString(), Packages.class);
 		Date newDate = new Date();
 
-		
-		
 		// set created and updated date
 		pkg.setCreatedDate(newDate);
 		pkg.setModifiedDate(newDate);
-		
+
 		// set created by and modifiedBy
 		pkg.setCreatedBy(userToken.getEmailId());
 		pkg.setModifiedBy(userToken.getEmailId());
 
-		
-		//set status for package
+		// set status for package
 		pkg.setActive(true);
-		
+
 		this.packageRepository.save(pkg);
 
-
 		if (pkg != null) {
-			
+
 			result.setMessage("Package Saved Successfully..");
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setStatusCode(HttpStatus.OK.value());
 
 		}
-	
+
 		return result;
 
 	}
@@ -196,27 +185,27 @@ public class PackagesServiceImpl implements PackagesService {
 
 	}
 
-
 	@Override
-    public List<Map<String, Object>> getAllPackages() {
-        return packageDao.getAllPackages();
-    }
-	
-	
-	@Override
-	public ApiResponse<String> setActivePackagetoInactive(Date endDate) {
-		ApiResponse<String> result=new ApiResponse<>();
-		
-        List<Packages> inactivePackages = this.packageRepository.findByEndDateBeforeAndActive(endDate, false);
-        inactivePackages.forEach(packages -> packages.setActive(true));
-        List<Packages> savedPackages=packageRepository.saveAll(inactivePackages);
-        
-        if(savedPackages!=null)
-        {
-        	result.setStatus("Package deActivated");
-        	result.setStatusCode(HttpStatus.OK.value());
-        }
-        return result;
-    }
+	public String getAllPackages() {
+		String packages = packageRepository.getAllPackages();
+		if (!packages.isEmpty())
+			return packages;
+		else
+			throw new CustomExceptionNodataFound("No packages added in database");
 	}
 
+	@Override
+	public ApiResponse<String> setActivePackagetoInactive(Date endDate) {
+		ApiResponse<String> result = new ApiResponse<>();
+
+		List<Packages> inactivePackages = this.packageRepository.findByEndDateBeforeAndActive(endDate, false);
+		inactivePackages.forEach(packages -> packages.setActive(true));
+		List<Packages> savedPackages = packageRepository.saveAll(inactivePackages);
+
+		if (savedPackages != null) {
+			result.setStatus("Package deActivated");
+			result.setStatusCode(HttpStatus.OK.value());
+		}
+		return result;
+	}
+}

@@ -16,12 +16,11 @@ import com.hariyali.entity.UserPackages;
 @Repository
 public interface PackagesRepository extends JpaRepository<Packages, Integer> {
 
-	@Query(value = "SELECT p.package_id,p.package_name,p.package_description,p.bouquet_price,p.maintenance_cost,p.active,\r\n"
-			+ "			  DATE_FORMAT(p.start_date, '%Y-%m-%d') as startDate,\r\n"
-			+ "			 DATE_FORMAT(p.end_date, '%Y-%m-%d') as endDate\r\n"
-			+ "			  FROM tbl_packages p \r\n"
-			+ "			 where p.deleted=false AND p.active=true;", nativeQuery = true)
-	public List<Object[]> getAllPackages();
+	@Query(value = "SELECT JSON_ARRAYAGG(JSON_OBJECT(\r\n"
+			+ "	'package_name',p.package_name,\r\n"
+			+ "    'bouquet_price',p.bouquet_price\r\n"
+			+ ")) as result from tbl_packages as p WHERE p.active = true;", nativeQuery = true)
+	public String getAllPackages();
 
 	@Query(value = "SELECT p.package_id,p.active,p.bouquet_price,p.maintenance_cost,p.package_description,p.package_name,\r\n"
 			+ " DATE_FORMAT(p.start_date, '%Y-%m-%d') as startDate,\r\n"
