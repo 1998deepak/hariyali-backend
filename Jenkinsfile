@@ -1,8 +1,4 @@
 @Library(['mm-dsl'])_
-mm_java_build
-{
-    AGENT                   = ""
-}
 mm_docker_build
 {
     REGISTRY_NAME           = "modernization-dev-832770"
