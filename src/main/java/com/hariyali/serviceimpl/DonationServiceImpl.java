@@ -276,15 +276,15 @@ public class DonationServiceImpl implements DonationService {
 				donation.setRecipient(donation.getRecipient());			
 			}
 		}
+		Donation donation = donationRepository.getById(donationDTO.getDonationId());
 		String paymentStatus = paymentIfoRepository
 				.getPaymentStatusByDonationId(donationDTO.getDonationId());
 		if (paymentStatus.equalsIgnoreCase("Completed")) {
-			receiptService.createReceipt(donationDTO);
+			receiptService.generateReceipt(donation);
 		}
 		response.setStatus(EnumConstants.SUCCESS);
 		response.setStatusCode(HttpStatus.OK.value());
 		response.setMessage("Donation added Successfully..!");
-//		response.setData(donationDTO);
 		return response;
 	}
 

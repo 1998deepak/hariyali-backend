@@ -178,11 +178,12 @@ public class UsersServiceImpl implements UsersService {
 			Users resulEntity = usersRepository.findByEmailId(userNode.get("emailId").asText());
 
 			String subject = "Welcome To Hariyali";
-			String content = "Dear Sir/Madam,\n \tWelcome to Project Hariyali."+ "The Mahindra Foundation,would like to thank you for your donation to Project Hariyali. The main objective of the project is to do 5 Billion Tree Plantation from 2026 in several parts of the Nation. "
+			String content = "Dear Sir/Madam,\n \tWelcome to Project Hariyali."
+					+ "The Mahindra Foundation,would like to thank you for your donation to Project Hariyali. The main objective of the project is to do 5 Billion Tree Plantation from 2026 in several parts of the Nation. "
 					+ "The Tree Plantation is the main Agenda of the Project. "
-					+ "The HARIYALI is a Partnership between Mahindra and Mahindra and the Nandi Foundation. The Project will be jointly managed by M&M and Nandi Foundation. \r\n" + "Best wishes,\r\n"+
-					 "Below is your Donor Id : " + resulEntity.getDonorId() 
-					+ "Team Hariyali\r\n" + "\r\n" ;
+					+ "The HARIYALI is a Partnership between Mahindra and Mahindra and the Nandi Foundation. The Project will be jointly managed by M&M and Nandi Foundation. \r\n"
+					+ "Best wishes,\r\n" + "Below is your Donor Id : " + resulEntity.getDonorId() + "Team Hariyali\r\n"
+					+ "\r\n";
 
 			Receipt receipt = receiptRepository.getUserReceipt(resulEntity.getUserId());
 			emailService.sendEmailWithAttachment(resulEntity.getEmailId(), subject, content, receipt.getReciept_Path());
@@ -796,12 +797,12 @@ public class UsersServiceImpl implements UsersService {
 			String content = "Dear Sir/Madam,\n Welcome to Project Hariyali"
 					+ "The Mahindra Foundation,would like to thank you for your donation to Project Hariyali. The main objective of the project is to do 5 Billion Tree Plantation from 2026 in several parts of the Nation. "
 					+ "The Tree Plantation is the main Agenda of the Project. "
-					+ "The HARIYALI is a Partnership between Mahindra and Mahindra and the Nandi Foundation. The Project will be jointly managed by M&M and Nandi Foundation. \r\n" + "Best wishes,\r\n"
-					+ "Team Hariyali\r\n" + "\r\n" ;
+					+ "The HARIYALI is a Partnership between Mahindra and Mahindra and the Nandi Foundation. The Project will be jointly managed by M&M and Nandi Foundation. \r\n"
+					+ "Best wishes,\r\n" + "Team Hariyali\r\n" + "\r\n";
 
-			Receipt receipt = receiptRepository.getUserReceiptbyDonation(user.getUserId(),donation.get(0).getDonationId());
-			emailService.sendEmailWithAttachment(user.getEmailId(), subject, content,
-					receipt.getReciept_Path());
+			Receipt receipt = receiptRepository.getUserReceiptbyDonation(user.getUserId(),
+					donation.get(0).getDonationId());
+			emailService.sendEmailWithAttachment(user.getEmailId(), subject, content, receipt.getReciept_Path());
 //			sendDonationApprovalMail(recipientEmail.getEmailId());
 		} else {
 			throw new CustomExceptionNodataFound("Status should Only be Approved or Rejected");
@@ -906,7 +907,7 @@ public class UsersServiceImpl implements UsersService {
 							.getRecipientDataByDonationId(d.getDonationId());
 					for (Recipient recipient : recipients) {
 						recipientEmail = this.usersRepository.findByEmailId(recipient.getEmailId());
-						System.err.println("Recipient"+recipientEmail.toString());
+						System.err.println("Recipient" + recipientEmail.toString());
 						recipientEmail.setDonorId(generateDonorId());
 						recipientEmail.setIsApproved(true);
 						recipientEmail.setIsDeleted(false);
@@ -915,12 +916,10 @@ public class UsersServiceImpl implements UsersService {
 						recipientEmail.setModifiedBy(userName);
 						recipientEmail.setModifiedDate(new Date());
 						usersRepository.save(recipientEmail);
-						System.err.println("After save Recipient"+recipientEmail.toString());
+						System.err.println("After save Recipient" + recipientEmail.toString());
 						System.out.println("new User:" + recipientEmail);
-						emailService.sendGiftingLetterEmail(recipientEmail.getEmailId(), user);
-					}
 
-					receiptService.generateReceipt(d);
+					}
 
 				} else if (d.getDonationType().equalsIgnoreCase("self-Donate")) {
 					List<Users> users = this.usersRepository.getUserDataByDonationId(d.getDonationId());
@@ -936,10 +935,19 @@ public class UsersServiceImpl implements UsersService {
 						usersRepository.save(recipientEmail);
 						System.out.println("new User:" + recipientEmail);
 					}
-					receiptService.generateReceipt(d);
-
 				} else {
 					throw new CustomExceptionNodataFound("Please select Dontation Type");
+				}
+				try {
+					String paymentStatus = d.getPaymentInfo().get(0).getPaymentStatus();
+					if (paymentStatus.equalsIgnoreCase("Completed")) {
+						receiptService.generateReceipt(d);
+						emailService.sendGiftingLetterEmail(recipientEmail.getEmailId(), user);
+					} else {
+						throw new CustomException("Your payment status is" + paymentStatus);
+					}
+				} catch (Exception e) {
+					throw new CustomException("Payment not perform.");
 				}
 			}
 		}
