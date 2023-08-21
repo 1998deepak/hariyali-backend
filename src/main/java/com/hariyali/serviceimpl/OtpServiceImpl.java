@@ -64,4 +64,9 @@ public class OtpServiceImpl {
 	public OtpModel findByOtp(String otp) {
 		return otpRepository.findByOtp(otp);
 	}
+
+	public OtpModel getOtpByEmail(String donarIdOrEmail) {
+		// TODO Auto-generated method stub
+		return otpRepository.getOtpByEmail(donarIdOrEmail);
+	}
 }
