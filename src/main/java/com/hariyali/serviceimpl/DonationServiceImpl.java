@@ -328,7 +328,9 @@ public class DonationServiceImpl implements DonationService {
 			createdBy = userToken.getEmailId();
 		}
 
-		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
+		Gson gson = new GsonBuilder()
+	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
+	            .create();
 		Users user = gson.fromJson(userNode.toString(), Users.class);
 		Double totalAmount = 0.0;
 		Integer donationId = 0;

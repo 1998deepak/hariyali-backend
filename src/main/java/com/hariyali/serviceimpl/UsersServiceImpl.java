@@ -285,7 +285,9 @@ public class UsersServiceImpl implements UsersService {
 			userToken = this.usersRepository.findByEmailId(userName);
 		}
 
-		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
+		Gson gson = new GsonBuilder()
+	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
+	            .create();
 
 		Users user = gson.fromJson(userNode.toString(), Users.class);
 
