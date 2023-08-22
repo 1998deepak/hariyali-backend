@@ -505,7 +505,10 @@ public class UsersServiceImpl implements UsersService {
 		Object user = usersRepository.getUserPersonalDetailsByDonorId(donorId);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with donor Id " + donorId);
-		Gson gson = new Gson();
+		// Gson gson = new Gson();
+		Gson gson = new GsonBuilder()
+	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
+	            .create();
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
 
