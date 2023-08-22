@@ -183,7 +183,10 @@ public class DonationServiceImpl implements DonationService {
 			createdBy = userToken.getEmailId();
 		}
 
-		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
+
+		Gson gson = new GsonBuilder()
+	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
+	            .create();
 		Users user = gson.fromJson(userNode.toString(), Users.class);
 
 		// set user to donation and save donation
@@ -471,7 +474,10 @@ public class DonationServiceImpl implements DonationService {
 		String token = request.getHeader("Authorization");
 		String userName = jwtHelper.getUsernameFromToken(token.substring(7));
 
-		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
+
+		Gson gson = new GsonBuilder()
+	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
+	            .create();
 		Users user = gson.fromJson(userNode.toString(), Users.class);
 
 		Users userToken = usersRepository.findByEmailId(userName);
