@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +51,9 @@ public class ReceiptServiceImpl implements ReceiptService {
 	@Autowired
 	UsersRepository userRepository;
 
+	@Value("${receipt.receiptPath}")
+	String receiptPath;
+
 	private String getReceiptNumber() {
 		String prefix = "R100";
 		int currentYear = Calendar.getInstance().get(Calendar.YEAR);
@@ -85,16 +89,17 @@ public class ReceiptServiceImpl implements ReceiptService {
 
 	public String generateReceipt(Donation donation) {
 		String receiptNo = getReceiptNumber();
-		List<Users> users = userRepository.getUserDataByDonationId(donation.getDonationId());
-		String receiptPath = EnumConstants.filePath;
-		File directory = new File(receiptPath);
+		Users users = userRepository.getUserByDonationId(donation.getDonationId());
+		String userFolder = receiptPath + "\\" + users.getDonorId() + "_" + users.getFirstName() + "_"
+				+ users.getLastName()+ "\\";
+		File directory = new File(userFolder);
 		if (!directory.exists()) {
 			directory.mkdirs();
 		}
-		String name = users.get(0).getFirstName() + " " + users.get(0).getLastName();
-		String pancard = users.get(0).getPanCard();
+		String name = users.getFirstName() + " " + users.getLastName();
+		String pancard = users.getPanCard();
 		String receiptFilename = "Receipt_" + receiptNo + ".pdf";
-		String fullPath = receiptPath + receiptFilename;
+		String fullPath = userFolder + receiptFilename;
 		LocalDate today = LocalDate.now();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 		String formattedDate = today.format(formatter);
@@ -155,7 +160,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 			donorDetails.add(nameChunk);
 			donorDetails.add(new Chunk(name + " (PAN – " + pancard + ")*", boldFont));
 			donorDetails.add(" the sum of Rupees " + amountInWords
-					+ " only through our Website Dt. 02.08.2023 towards your donation.");
+					+ " only through our Website Dt. "+formattedDate+" towards your donation.");
 			document.add(donorDetails);
 			document.add(new Paragraph("\n"));
 			document.add(new Paragraph("\n"));

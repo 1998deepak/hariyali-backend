@@ -56,7 +56,7 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Integer>{
 			+ "FROM tbl_user_master u\r\n"
 			+ "JOIN tbl_donation d ON u.user_id = d.userId\r\n"
 			+ "JOIN tbl_reciept r ON d.donation_id = r.donation_id\r\n"
-			+ "WHERE u.user_id = ? and d.donation_id =? Limit 1",nativeQuery = true)
+			+ "WHERE u.user_id = ? and d.donation_id =?",nativeQuery = true)
 	Receipt getUserReceiptbyDonation(int userID,int donationId);
 
 }

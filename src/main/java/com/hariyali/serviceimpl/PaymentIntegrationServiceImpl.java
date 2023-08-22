@@ -1,28 +1,31 @@
 package com.hariyali.serviceimpl;
 
-import com.ccavenue.security.AesCryptUtil;
-import com.hariyali.dao.paymentGateway.PaymentGatewayConfigurationDao;
-import com.hariyali.dto.ApiResponse;
-import com.hariyali.dto.PaymentInfoDTO;
-import com.hariyali.entity.Donation;
-import com.hariyali.entity.PaymentInfo;
-import com.hariyali.entity.paymentGateway.PaymentGatewayConfiguration;
-import com.hariyali.exceptions.CustomException;
-import com.hariyali.repository.DonationRepository;
-import com.hariyali.repository.PaymentInfoRepository;
-import com.hariyali.service.PaymentIntegrationService;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import static java.util.Objects.isNull;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.isNull;
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.ccavenue.security.AesCryptUtil;
+import com.hariyali.dao.paymentGateway.PaymentGatewayConfigurationDao;
+import com.hariyali.dto.ApiResponse;
+import com.hariyali.dto.PaymentInfoDTO;
+import com.hariyali.entity.Donation;
+import com.hariyali.entity.PaymentInfo;
+import com.hariyali.entity.Users;
+import com.hariyali.entity.paymentGateway.PaymentGatewayConfiguration;
+import com.hariyali.exceptions.CustomException;
+import com.hariyali.repository.DonationRepository;
+import com.hariyali.repository.PaymentInfoRepository;
+import com.hariyali.repository.UsersRepository;
+import com.hariyali.service.PaymentIntegrationService;
 
 /**
  * Implementation class for PaymentIntegrationService interface
@@ -42,6 +45,12 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 
     @Autowired
     private PaymentInfoRepository paymentInfoRepository;
+    
+    @Autowired
+    UsersRepository userRepository;
+    
+    @Autowired
+    UsersServiceImpl userService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -78,7 +87,8 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
         paymentInfo.setCardName(ofNullable(response.get("card_name")).orElse(""));
         paymentInfo.setCurrency(ofNullable(response.get("currency")).orElse(""));
         paymentInfo = paymentInfoRepository.save(paymentInfo);
-
+        Users user=userRepository.getUserByDonationId(donation.getDonationId());
+        user.setWebId(userService.generateWebId());
         ApiResponse<Integer> apiResponse = new ApiResponse<>();
         apiResponse.setData(paymentInfo.getPaymentInfoId());
         return apiResponse;

@@ -31,12 +31,10 @@ public interface EnumConstants {
 	
 	public static final String receiptNumber = "txn_23"+donor;
 	
-	public static final String filePath = "C:\\Workspace\\DonationReceipt\\";
-	
-	public static final String GIFTING_MSG_BODY = "Welcome to the Hariyali family!\r\n" + "\r\n"
+	public static final String GIFTING_MSG_BODY = "Dear %s\r\n,Welcome to the Hariyali family!\r\n" + "\r\n"
 			+ "\tOn this happy occasion, your well-wisher, %s has gifted you a Hariyali sponsorship.  The main objective of the project is to do 5 Billion Tree Plantation from 2026 in several parts of the Nation."
 			+ "The Tree Plantation is the main Agenda of the Project." + "\r\n" + "Best wishes,\r\n"
-			+ "Team Hariyali\r\n" + "\r\n" + "\r\n";
+			+ "Team Hariyali\r\n" ;
 	public static final String GIFTING_MSG_SUBJECT = "Someone wanted you to have this special gift";
 	
 	

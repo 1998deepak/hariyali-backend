@@ -351,17 +351,17 @@ public class DonationServiceImpl implements DonationService {
 				Donation resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
 
 				// set paymentInfo donation wise
-				if (donation.getPaymentInfo() != null) {
-					for (PaymentInfo paymentInfo : donation.getPaymentInfo()) {
-						paymentInfo.setCreatedDate(newDate);
-						paymentInfo.setModifiedDate(newDate);
-						paymentInfo.setCreatedBy(createdBy);
-						paymentInfo.setModifiedBy(createdBy);
-						paymentInfo.setPaymentStatus(EnumConstants.PAYMENT_COMPLETED);
-						paymentInfo.setUserDonation(resultdonation);
-						paymentInfoRepository.save(paymentInfo);
-					}
-				}
+//				if (donation.getPaymentInfo() != null) {
+//					for (PaymentInfo paymentInfo : donation.getPaymentInfo()) {
+//						paymentInfo.setCreatedDate(newDate);
+//						paymentInfo.setModifiedDate(newDate);
+//						paymentInfo.setCreatedBy(createdBy);
+//						paymentInfo.setModifiedBy(createdBy);
+//						paymentInfo.setPaymentStatus(EnumConstants.PAYMENT_COMPLETED);
+//						paymentInfo.setUserDonation(resultdonation);
+//						paymentInfoRepository.save(paymentInfo);
+//					}
+//				}
 
 				// set donation to user package and save user package
 				if (donation.getUserPackage() != null) {

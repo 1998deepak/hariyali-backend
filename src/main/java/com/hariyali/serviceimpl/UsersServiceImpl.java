@@ -135,6 +135,22 @@ public class UsersServiceImpl implements UsersService {
 
 		return prefix + yearSuffix + randomDigits;
 	}
+	
+	public String generateWebId() {
+		String prefix = "WEBID_100";
+		int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+		int lastTwoDigits = currentYear % 100;
+		String yearSuffix = String.format("%02d", lastTwoDigits);
+		Random random = new Random();
+		StringBuilder randomDigits1 = new StringBuilder();
+
+		for (int i = 0; i < 4; i++) {
+			randomDigits1.append(random.nextInt(10)); // Append a random digit (0-9)
+		}
+		String randomDigits = randomDigits1.toString();
+
+		return prefix + yearSuffix + randomDigits;
+	}
 
 	@Override
 	public Users findByDonorId(String donorId) {
@@ -182,7 +198,7 @@ public class UsersServiceImpl implements UsersService {
 					+ "The Mahindra Foundation,would like to thank you for your donation to Project Hariyali. The main objective of the project is to do 5 Billion Tree Plantation from 2026 in several parts of the Nation. "
 					+ "The Tree Plantation is the main Agenda of the Project. "
 					+ "The HARIYALI is a Partnership between Mahindra and Mahindra and the Nandi Foundation. The Project will be jointly managed by M&M and Nandi Foundation. \r\n"
-					+ "Best wishes,\r\n" + "Below is your Donor Id : " + resulEntity.getDonorId() + "Team Hariyali\r\n"
+					+ "Below is your Donor Id : " + resulEntity.getDonorId() + "\nBest wishes,\nTeam Hariyali\r\n"
 					+ "\r\n";
 
 			Receipt receipt = receiptRepository.getUserReceipt(resulEntity.getUserId());
@@ -286,9 +302,7 @@ public class UsersServiceImpl implements UsersService {
 			userToken = this.usersRepository.findByEmailId(userName);
 		}
 
-		Gson gson = new GsonBuilder()
-	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
-	            .create();
+		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
 
 		Users user = gson.fromJson(userNode.toString(), Users.class);
 
@@ -509,9 +523,7 @@ public class UsersServiceImpl implements UsersService {
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with donor Id " + donorId);
 		// Gson gson = new Gson();
-		Gson gson = new GsonBuilder()
-	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
-	            .create();
+		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
 
@@ -860,47 +872,11 @@ public class UsersServiceImpl implements UsersService {
 		{
 			String subject = "Reject Donation";
 			String content = "Dear User,\n\n" + "dear " + user.getEmailId() + "\n"
-					+ "Donation made by you has rejected \n" + "Best regards,\n" + "Hariyali Team";
+					+ "Donation made by you has been rejected. \n" + "Best regards,\n" + "Hariyali Team";
 
 			emailService.sendSimpleEmail(user.getEmailId(), subject, content);
 		}
 	}
-
-	// donation approved
-//	private Users handleDonationApproval(Users user, List<Donation> donation, String userName) {
-//		Users recipientEmail = null;
-//
-//		if (donation != null) {
-//			for (Donation d : donation) {
-//				int donationId = d.getDonationId();
-//				List<Recipient> recipients = this.recipientRepository.getRecipientDataByDonationId(donationId);
-//
-//				for (Recipient recipient : recipients) {
-//					recipientEmail = this.usersRepository.findByEmailId(recipient.getEmailId());
-//					recipientEmail.setDonorId(generateDonorId());
-//				}
-//			}
-//		}
-//
-//		user.setIsApproved(true);
-//		user.setIsDeleted(false);
-//		recipientEmail.setIsDeleted(false);
-//		user.setDonorId(recipientEmail.getDonorId());
-//
-//		user.setCreatedBy(userName);
-//		user.setModifiedBy(userName);
-//		user.setModifiedDate(new Date());
-//		System.out.println("new User:" + user.toString());
-//		this.usersRepository.save(user);
-//
-//		recipientEmail.setCreatedBy(userName);
-//		recipientEmail.setModifiedBy(userName);
-//		recipientEmail.setModifiedDate(new Date());
-//		this.usersRepository.save(recipientEmail);
-//		System.out.println("new User:" + recipientEmail.toString());
-//
-//		return recipientEmail;
-//	}
 
 	private Users handleDonationApproval(Users user, List<Donation> donations, String userName) {
 		Users recipientEmail = null;
@@ -949,7 +925,7 @@ public class UsersServiceImpl implements UsersService {
 						receiptService.generateReceipt(d);
 						emailService.sendGiftingLetterEmail(recipientEmail.getEmailId(), user);
 					} else {
-						throw new CustomException("Your payment status is" + paymentStatus);
+						sendRejectDonationEmails(user.getEmailId());
 					}
 				} catch (Exception e) {
 					throw new CustomException("Payment not perform.");
