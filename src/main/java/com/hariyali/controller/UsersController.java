@@ -24,8 +24,11 @@ import com.hariyali.EnumConstants;
 import com.hariyali.dto.ApiRequest;
 import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.UsersDTO;
+import com.hariyali.entity.OtpModel;
 import com.hariyali.entity.Users;
 import com.hariyali.exceptions.CustomException;
+import com.hariyali.exceptions.CustomExceptionNodataFound;
+import com.hariyali.repository.OtpRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.JwtService;
 import com.hariyali.service.UsersService;
@@ -46,6 +49,9 @@ public class UsersController {
 	
 	@Autowired
 	OtpServiceImpl otpService;
+	
+	@Autowired
+	OtpRepository otpRepository;
 
 	// method to get user by email
 	@GetMapping("/getAlluser")
@@ -122,21 +128,21 @@ public class UsersController {
 		return new ResponseEntity<>(usersService.getUserPersonalDetailsByDonorId(donorId), HttpStatus.OK);
 	}
 
-	@PostMapping("/verify")
-	public ResponseEntity<?> verifyOtp(@RequestParam String donorId, @RequestParam String otp) {
-		Users user = usersService.findByDonorId(donorId);
-		if (user == null) {
-			return ResponseEntity.badRequest().body("Invalid donor ID");
-		}
-		// Get OTP from cache and compare with input OTP
-		String cachedOtp = usersService.getOtp(donorId);
-		if (cachedOtp == null || !cachedOtp.equals(otp)) {
-			return ResponseEntity.badRequest().body("Invalid OTP");
-		}
-		// OTP is valid, clear it from cache
-		usersService.saveOtp(donorId, null);
-		return ResponseEntity.ok("OTP verified successfully");
-	}
+//	@PostMapping("/verify")
+//	public ResponseEntity<?> verifyOtp(@RequestParam String donorId, @RequestParam String otp) {
+//		Users user = usersService.findByDonorId(donorId);
+//		if (user == null) {
+//			return ResponseEntity.badRequest().body("Invalid donor ID");
+//		}
+//		// Get OTP from cache and compare with input OTP
+//		String cachedOtp = usersService.getOtp(donorId);
+//		if (cachedOtp == null || !cachedOtp.equals(otp)) {
+//			return ResponseEntity.badRequest().body("Invalid OTP");
+//		}
+//		// OTP is valid, clear it from cache
+//		usersService.saveOtp(donorId, null);
+//		return ResponseEntity.ok("OTP verified successfully");
+//	}
 
 	@PostMapping("/forgetPassword")
 	public ResponseEntity<?> forgetPassword(@RequestBody String formData, HttpSession session)
@@ -146,15 +152,15 @@ public class UsersController {
 				HttpStatus.OK);
 	}
 
-	@PostMapping("/verifyOtp")
-	public ResponseEntity<ApiResponse<String>> verifyOtp(@RequestBody String formData, HttpSession session,
-			HttpServletRequest request) throws JsonProcessingException {
-		System.out.println("formData = " + formData);
-
-		ApiRequest apiRequest = new ApiRequest(formData);
-		return new ResponseEntity<>(usersService.verifyOtp(apiRequest.getFormData().toString(), session, request),
-				HttpStatus.OK);
-	}
+//	@PostMapping("/verifyOtp")
+//	public ResponseEntity<ApiResponse<String>> verifyOtp(@RequestBody String formData, HttpSession session,
+//			HttpServletRequest request) throws JsonProcessingException {
+//		System.out.println("formData = " + formData);
+//
+//		ApiRequest apiRequest = new ApiRequest(formData);
+//		return new ResponseEntity<>(usersService.verifyOtp(apiRequest.getFormData().toString(), session, request),
+//				HttpStatus.OK);
+//	}
 
 	@PostMapping("/accountActivate")
 	public ResponseEntity<ApiResponse<String>> accountActivate(@RequestBody String formData, HttpSession session)
@@ -213,5 +219,29 @@ public class UsersController {
 		} catch (Exception e) {
 			return new ResponseEntity<>("Invalid Mail", HttpStatus.BAD_REQUEST);
 		}
+	}
+	
+	@PostMapping("/verifyOtp")
+	public ResponseEntity<?> verifyOtp(@RequestParam String donarIdOrEmail, @RequestParam String otp) {
+		ApiResponse<?> result = new ApiResponse<>();
+		if (otp == null || donarIdOrEmail == null) {
+			throw new CustomExceptionNodataFound("Please enter your Donar Id or Email  and OTP");
+		}
+		OtpModel otpModel = otpService.getOtpByEmail(donarIdOrEmail);
+		if (otpModel == null) {
+			throw new CustomExceptionNodataFound("Your OTP has been expired... Please resend OTP...");
+		}
+		if(otp.equals(otpModel.getOtpCode())) {
+			result.setStatus(EnumConstants.SUCCESS);
+			result.setMessage("Otp is Valid");
+			result.setStatusCode(HttpStatus.OK.value());
+		}
+		else {
+			return new ResponseEntity<>("Invalid OTP", HttpStatus.OK);
+		}
+		otpModel.setOtpCode(null);
+		otpModel.setOtpExpiryTime(null);
+		otpRepository.save(otpModel);
+		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 }

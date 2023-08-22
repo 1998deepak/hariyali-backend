@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/hariyalidbletest?allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mysql://localhost:3306/hariyalidb?allowPublicKeyRetrieval=true&useSSL=false
     username: root
-    password: root
+    password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
     #    show-sql: true
   main:
@@ -56,5 +56,6 @@ jwt:
 # change this url as deployed environment
 frontend:
         redirect-url: http://localhost:3000/OnlineDonation?orderId=
+project.basedir:         
    
    
