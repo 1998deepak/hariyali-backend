@@ -254,4 +254,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	
 	@Query(value="Select * from tbl_user_master where emailId=?",nativeQuery = true)
 	Users findByEmailIdForDeletedUser(String email);
+	
+	@Query(value ="SELECT r.donorId as donorId FROM tbl_user_master r WHERE r.donorId IS NOT NULL",nativeQuery = true)
+	List<String> getAllDonorId();
 }

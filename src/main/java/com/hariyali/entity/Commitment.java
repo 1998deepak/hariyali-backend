@@ -1,6 +1,8 @@
 package com.hariyali.entity;
 
+
 import java.time.LocalDate;
+import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,31 +20,24 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tbl_plantation")
-public class Plantation {
+@Table(name = "tbl_commitment")
+public class Commitment {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	private long userId;
-	private long donationId;
-	private long packageId;
-	private String username;
-	private String packageName;
-	private float amount;
-	private String plantName;
-	private long quantity;
 	
-	private LocalDate plantDate;
+	private LocalDate  startDate;
 	
-	private String plantLocation;
+	private LocalDate  endDate;
+	
+	private LocalDate  dateOFPlantation;
 	
 	@ManyToOne
-    @JoinColumn(name = "user_package_id") // Foreign key column in Plantation table
-    private UserPackages userPackages;
-	
-	@ManyToOne
-	@JoinColumn(name = "plantation_Id")
+	@JoinColumn(name = "plantationId")
 	private Plantation plantation;
 
+	
 }
+	
+	

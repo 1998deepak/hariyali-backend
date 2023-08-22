@@ -2,9 +2,9 @@ package com.hariyali.serviceimpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -23,8 +23,12 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hariyali.dto.UserPlantUploadExelDTO;
+import com.hariyali.entity.Commitment;
 import com.hariyali.entity.Plantation;
+import com.hariyali.entity.UserPackages;
+import com.hariyali.repository.CommitmentRepository;
 import com.hariyali.repository.PlantationRepository;
+import com.hariyali.repository.UserPackageRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.PlantationService;
 
@@ -38,20 +42,33 @@ public class PlantationServiceImpl implements PlantationService {
 	@Autowired
 	private PlantationRepository plantationRepository;
 
+	@Autowired
+	private UserPackageRepository userPackageRepository;
+
+	@Autowired
+	private CommitmentRepository commitmentRepository;
+	
+
 	@Override
 	public ByteArrayInputStream exportExcelUserPlant() {
 
 		List<UserPlantUploadExelDTO> userPlantUploadExelDTOs = mapper.convertValue(
 				usersRepository.getUserPlantExportExcel(), new TypeReference<List<UserPlantUploadExelDTO>>() {
 				});
+
 		Workbook workbook = new SXSSFWorkbook();
 		try {
+
 			Sheet sheet = workbook.createSheet("User Plant Report ");
+
 			CellStyle cellStyle1 = workbook.createCellStyle();
+
 			Row row = sheet.createRow(0);
 
 			CellStyle style = workbook.createCellStyle();
+
 			XSSFFont font = (XSSFFont) workbook.createFont();
+
 			font.setBold(true);
 			font.setFontHeight(12);
 			style.setFont(font);
@@ -105,7 +122,14 @@ public class PlantationServiceImpl implements PlantationService {
 			cell.setCellValue("Plant Location");
 			sheet.autoSizeColumn(9);
 			cell.setCellStyle(style);
+
+			cell = row.createCell(10);
+			cell.setCellValue("Start Date");
+			sheet.autoSizeColumn(10);
+			cell.setCellStyle(style);
+
 			int rowCount = 1;
+
 			for (UserPlantUploadExelDTO dto : userPlantUploadExelDTOs) {
 				Row rowdata = sheet.createRow(rowCount++);
 				rowdata.createCell(0).setCellValue(dto.getUser());
@@ -115,9 +139,11 @@ public class PlantationServiceImpl implements PlantationService {
 				rowdata.createCell(4).setCellValue(dto.getPackageName());
 				rowdata.createCell(5).setCellValue(dto.getAmount());
 			}
+
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			workbook.write(outputStream);
 			return new ByteArrayInputStream(outputStream.toByteArray());
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -136,7 +162,10 @@ public class PlantationServiceImpl implements PlantationService {
 			System.out.println("Last Row: " + worksheet.getLastRowNum());
 			int i = 1;
 
-			List<Plantation> plantations = new ArrayList<>();
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+
+			List<Commitment> commitments = new ArrayList<>();
+
 			while (i <= worksheet.getLastRowNum()) {
 				XSSFRow row = worksheet.getRow(i++);
 				long user = Integer.parseInt(String.valueOf(row.getCell(0).toString().trim()).split("\\.")[0]);
@@ -148,9 +177,14 @@ public class PlantationServiceImpl implements PlantationService {
 				String plantName = row.getCell(6).toString().trim();
 				long quantity = Integer.parseInt(String.valueOf(row.getCell(7).toString().trim()).split("\\.")[0]);
 				String plantDate = row.getCell(8).toString().trim();
-				SimpleDateFormat formatter2 = new SimpleDateFormat("dd-MMM-yyyy");
-				Date plantDate2 = formatter2.parse(plantDate);
-				String plantLocation = row.getCell(8).toString().trim();
+				LocalDate formattedPlantationDate = LocalDate.parse(plantDate, formatter);
+
+				String plantLocation = row.getCell(9).toString().trim();
+
+				String startDate = row.getCell(10).toString().trim();
+
+				UserPackages userPackages = userPackageRepository.getById((int) packages);
+
 				Plantation plantation = new Plantation();
 				plantation.setUserId(user);
 				plantation.setDonationId(donation);
@@ -159,12 +193,31 @@ public class PlantationServiceImpl implements PlantationService {
 				plantation.setAmount(amount);
 				plantation.setPackageName(packagesName);
 				plantation.setQuantity(quantity);
-				plantation.setPlantDate(plantDate2);
+				plantation.setPlantDate(formattedPlantationDate);
+				plantation.setUserPackages(userPackages);
 				plantation.setPlantName(plantName);
 				plantation.setPlantLocation(plantLocation);
-				plantations.add(plantation);
+
+				Plantation savedPlantationData = plantationRepository.save(plantation);
+
+				Plantation plantationId = plantationRepository.getById(savedPlantationData.getId());
+
+				LocalDate formattedStartDate = LocalDate.parse(startDate, formatter);
+
+				LocalDate endDate = formattedStartDate.plusYears(3);
+
+				// Set properties for Commitment
+				Commitment commitment = new Commitment();
+
+				commitment.setPlantation(plantationId);
+				commitment.setStartDate(formattedStartDate);
+				commitment.setEndDate(endDate);
+				commitment.setDateOFPlantation(formattedPlantationDate);
+
+				commitments.add(commitment);
+
 			}
-			plantationRepository.saveAll(plantations);
+			commitmentRepository.saveAll(commitments);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -172,4 +225,10 @@ public class PlantationServiceImpl implements PlantationService {
 		return "Success";
 	}
 
+	@Override
+	public List<Plantation> getPlantationsByDonationId(Long donationId) {
+		
+		return plantationRepository.getPlantationByDonationId(donationId);
+	}
 }
+

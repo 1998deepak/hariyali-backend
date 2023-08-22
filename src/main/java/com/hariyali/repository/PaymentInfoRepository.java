@@ -18,5 +18,8 @@ public interface PaymentInfoRepository extends JpaRepository<PaymentInfo, Intege
 	@Query(value="select * from tbl_payment_info where donationId=?",nativeQuery=true)
 	List<PaymentInfo> findPaymentByDonationId(int donationId);
 	
+	@Query(value="SELECT payment_status FROM tbl_payment_info where donationId=? Limit 1",nativeQuery = true)
+	String getPaymentStatusByDonationId(int donationId);
+	
 	
 }

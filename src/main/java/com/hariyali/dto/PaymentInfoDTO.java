@@ -4,6 +4,8 @@ import java.util.Date;
 
 import lombok.Data;
 
+import javax.persistence.Column;
+
 @Data
 public class PaymentInfoDTO {
 
@@ -34,4 +36,14 @@ public class PaymentInfoDTO {
 	private String remark;
 	
 	private Boolean isDeleted;
+
+	private String paymentTrackingId;
+
+	private String bankPaymentRefNo;
+
+	private String cardName;
+
+	private String currency;
+
+	private String paymentStatus;
 }
