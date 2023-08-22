@@ -9,7 +9,7 @@ ENV GOPATH /go
 RUN go install github.com/googlecloudplatform/gcsfuse@v0.40.0
 
 # main
-FROM tomcat:8.5.63-jdk8-openjdk-slim-buster
+FROM tomcat:8.5.92-jdk11-temurin-jammy
 
 COPY --from=gcsfuse /go/bin/gcsfuse /usr/local/bin
 RUN apt-get -y update && apt-get -y install ca-certificates fuse
