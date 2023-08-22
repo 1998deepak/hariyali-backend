@@ -11,7 +11,7 @@ import com.hariyali.dao.UserDao;
 import com.hariyali.dao.paymentGateway.PaymentGatewayConfigurationDao;
 import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.DonationDTO;
-import com.hariyali.dto.PaymentInfoDTO;
+
 import com.hariyali.entity.Address;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.PaymentInfo;
