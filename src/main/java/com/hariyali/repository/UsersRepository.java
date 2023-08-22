@@ -139,19 +139,26 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "			 			 WHERE users.webId IS NOT NULL AND users.is_deleted = false AND users.is_approved=false;", nativeQuery = true)
 	Object getAllUsersWithWebId();
 
-	@Query(value = "SELECT\r\n" + "			     JSON_ARRAYAGG(\r\n" + "			         JSON_OBJECT(\r\n"
-			+ "			             'donationId', d.donation_id,\r\n" + "			             'paymentInfo',\r\n"
-			+ "			                 JSON_OBJECT(\r\n"
-			+ "			                     'paymentInfoId', p.paymentInfo_id,\r\n"
-			+ "			                     'paymentDate', DATE(p.payment_date),\r\n"
-			+ "			                     'paymentStatus', p.payment_status\r\n" + "			                 ),\r\n"
-			+ "			             'donorId', u.donorId,\r\n" + "			             'firstName', u.first_name,\r\n"
-			+ "			             'lastName', u.last_name\r\n" + "			         )\r\n"
-			+ "			     ) AS 'Result'\r\n" + "			 FROM\r\n" + "			     tbl_donation d\r\n"
-			+ "			 INNER JOIN\r\n" + "			     tbl_payment_info p ON d.donation_id=p.donationId\r\n"
-			+ "			 INNER JOIN\r\n" + "			     tbl_user_master u ON u.user_id = d.userId\r\n"
-			+ "			 WHERE\r\n" + "			   u.emailId = ? AND u.is_deleted=false\r\n"
-			+ "			 ORDER BY p.payment_date DESC", nativeQuery = true)
+	@Query(value = "SELECT JSON_ARRAYAGG( " +
+	        "JSON_OBJECT( " +
+	        "'donationId', d.donation_id, " +
+	        "'donationType', d.donation_type, " + // Add this line for donation type
+	        "'paymentInfo', JSON_OBJECT( " +
+	        "'paymentInfoId', p.paymentInfo_id, " +
+	        "'paymentDate', DATE(p.payment_date), " +
+	        "'paymentStatus', p.payment_status " +
+	        "), " +
+	        "'donorId', u.donorId, " +
+	        "'firstName', u.first_name, " +
+	        "'lastName', u.last_name " +
+	        ") " +
+	        ") AS 'Result' " +
+	        "FROM tbl_donation d " +
+	        "INNER JOIN tbl_payment_info p ON d.donation_id=p.donationId " +
+	        "INNER JOIN tbl_user_master u ON u.user_id = d.userId " +
+	        "WHERE u.emailId = ?1 AND u.is_deleted=false " +
+	        "ORDER BY p.payment_date DESC", nativeQuery = true)
+	
 	Object getAllDonationOfSpecificUser(String email);
 
 	Users findByUserId(Integer userId);
