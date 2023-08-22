@@ -80,6 +80,8 @@ public class DonationServiceImpl implements DonationService {
 
 	@Autowired
 	PaymentInfoRepository paymentIfoRepository;
+	
+	@Autowired
 	private PaymentGatewayConfigurationDao gatewayConfigurationDao;
 
 	@Override
