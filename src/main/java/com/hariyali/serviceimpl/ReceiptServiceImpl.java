@@ -1,15 +1,20 @@
 package com.hariyali.serviceimpl;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Random;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +55,9 @@ public class ReceiptServiceImpl implements ReceiptService {
 	@Autowired
 	UsersRepository userRepository;
 
+	@Value("${receipt.receiptPath}")
+	String receiptPath;
+
 	private String getReceiptNumber() {
 		String prefix = "R100";
 		int currentYear = Calendar.getInstance().get(Calendar.YEAR);
@@ -85,16 +93,17 @@ public class ReceiptServiceImpl implements ReceiptService {
 
 	public String generateReceipt(Donation donation) {
 		String receiptNo = getReceiptNumber();
-		List<Users> users = userRepository.getUserDataByDonationId(donation.getDonationId());
-		String receiptPath = EnumConstants.filePath;
-		File directory = new File(receiptPath);
+		Users users = userRepository.getUserByDonationId(donation.getDonationId());
+		String userFolder = receiptPath + "\\" + users.getDonorId() + "_" + users.getFirstName() + "_"
+				+ users.getLastName()+ "\\";
+		File directory = new File(userFolder);
 		if (!directory.exists()) {
 			directory.mkdirs();
 		}
-		String name = users.get(0).getFirstName() + " " + users.get(0).getLastName();
-		String pancard = users.get(0).getPanCard();
+		String name = users.getFirstName() + " " + users.getLastName();
+		String pancard = users.getPanCard();
 		String receiptFilename = "Receipt_" + receiptNo + ".pdf";
-		String fullPath = receiptPath + receiptFilename;
+		String fullPath = userFolder + receiptFilename;
 		LocalDate today = LocalDate.now();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 		String formattedDate = today.format(formatter);
@@ -155,7 +164,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 			donorDetails.add(nameChunk);
 			donorDetails.add(new Chunk(name + " (PAN – " + pancard + ")*", boldFont));
 			donorDetails.add(" the sum of Rupees " + amountInWords
-					+ " only through our Website Dt. 02.08.2023 towards your donation.");
+					+ " only through our Website Dt. "+formattedDate+" towards your donation.");
 			document.add(donorDetails);
 			document.add(new Paragraph("\n"));
 			document.add(new Paragraph("\n"));
@@ -219,5 +228,35 @@ public class ReceiptServiceImpl implements ReceiptService {
 
 		return fullPath;
 
+	}
+	
+	@Override
+	public void downloadReceipt(String recieptNumber, HttpServletResponse response)
+			throws IOException {
+		Receipt receipt = receiptRepository.getByRecieptNumber(recieptNumber);
+
+		if (receipt == null || receipt.getReciept_Path() == null) {
+			// Handle case where receipt is not found or path is not available
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
+		String filePath = receipt.getReciept_Path(); // Get the actual file path from the receipt
+		System.out.println("filePath" + filePath);
+		File file = new File(filePath);
+		if (!file.exists()) {
+			// Handle case where file is not found
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
+		// Set response headers
+		response.setContentType("application/octet-stream");
+		response.setHeader("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
+
+		// Stream the file content to response output stream
+		try (FileInputStream inputStream = new FileInputStream(file)) {
+			IOUtils.copy(inputStream, response.getOutputStream());
+		}
 	}
 }
