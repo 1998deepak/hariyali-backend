@@ -59,4 +59,5 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Integer>{
 			+ "WHERE u.user_id = ? and d.donation_id =?",nativeQuery = true)
 	Receipt getUserReceiptbyDonation(int userID,int donationId);
 
+	Receipt getByRecieptNumber(String recieptNumber);
 }

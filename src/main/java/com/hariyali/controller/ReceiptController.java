@@ -1,6 +1,6 @@
 package com.hariyali.controller;
 
-import java.util.Optional;
+import java.io.IOException;
 
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletResponse;
@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,8 +23,6 @@ import com.hariyali.dto.ApiResponse;
 import com.hariyali.entity.Receipt;
 import com.hariyali.repository.ReceiptRepository;
 import com.hariyali.service.ReceiptService;
-import com.itextpdf.io.IOException;
-import com.itextpdf.text.DocumentException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -78,5 +77,10 @@ public class ReceiptController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Error sending email: " + e.getMessage());
 		}
+	}
+	
+	@GetMapping("/receipt/download/{recieptNumber}")
+	public void downloadReceipt(@PathVariable String recieptNumber, HttpServletResponse response) throws IOException {
+		receiptService.downloadReceipt(recieptNumber, response);
 	}
 }

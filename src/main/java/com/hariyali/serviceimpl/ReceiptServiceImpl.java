@@ -1,14 +1,18 @@
 package com.hariyali.serviceimpl;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Random;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -224,5 +228,35 @@ public class ReceiptServiceImpl implements ReceiptService {
 
 		return fullPath;
 
+	}
+	
+	@Override
+	public void downloadReceipt(String recieptNumber, HttpServletResponse response)
+			throws IOException {
+		Receipt receipt = receiptRepository.getByRecieptNumber(recieptNumber);
+
+		if (receipt == null || receipt.getReciept_Path() == null) {
+			// Handle case where receipt is not found or path is not available
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
+		String filePath = receipt.getReciept_Path(); // Get the actual file path from the receipt
+		System.out.println("filePath" + filePath);
+		File file = new File(filePath);
+		if (!file.exists()) {
+			// Handle case where file is not found
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
+		// Set response headers
+		response.setContentType("application/octet-stream");
+		response.setHeader("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
+
+		// Stream the file content to response output stream
+		try (FileInputStream inputStream = new FileInputStream(file)) {
+			IOUtils.copy(inputStream, response.getOutputStream());
+		}
 	}
 }

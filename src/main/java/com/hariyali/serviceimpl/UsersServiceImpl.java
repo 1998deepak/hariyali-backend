@@ -12,7 +12,6 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import com.hariyali.dto.DonationDTO;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +37,7 @@ import com.hariyali.config.CustomUserDetailService;
 import com.hariyali.config.JwtHelper;
 import com.hariyali.dao.UserDao;
 import com.hariyali.dto.ApiResponse;
+import com.hariyali.dto.DonationDTO;
 import com.hariyali.dto.UsersDTO;
 import com.hariyali.entity.Address;
 import com.hariyali.entity.Donation;
@@ -135,7 +135,7 @@ public class UsersServiceImpl implements UsersService {
 
 		return prefix + yearSuffix + randomDigits;
 	}
-	
+
 	public String generateWebId() {
 		String prefix = "WEBID_100";
 		int currentYear = Calendar.getInstance().get(Calendar.YEAR);
@@ -193,16 +193,9 @@ public class UsersServiceImpl implements UsersService {
 
 			Users resulEntity = usersRepository.findByEmailId(userNode.get("emailId").asText());
 
-			String subject = "Welcome To Hariyali";
-			String content = "Dear Sir/Madam,\n \tWelcome to Project Hariyali."
-					+ "The Mahindra Foundation,would like to thank you for your donation to Project Hariyali. The main objective of the project is to do 5 Billion Tree Plantation from 2026 in several parts of the Nation. "
-					+ "The Tree Plantation is the main Agenda of the Project. "
-					+ "The HARIYALI is a Partnership between Mahindra and Mahindra and the Nandi Foundation. The Project will be jointly managed by M&M and Nandi Foundation. \r\n"
-					+ "Below is your Donor Id : " + resulEntity.getDonorId() + "\nBest wishes,\nTeam Hariyali\r\n"
-					+ "\r\n";
-
 			Receipt receipt = receiptRepository.getUserReceipt(resulEntity.getUserId());
-			emailService.sendEmailWithAttachment(resulEntity.getEmailId(), subject, content, receipt.getReciept_Path());
+			emailService.sendEmailWithAttachment(resulEntity.getEmailId(), EnumConstants.subject, EnumConstants.content,
+					receipt.getReciept_Path(), resulEntity);
 
 			return response;
 		} else {
@@ -809,18 +802,10 @@ public class UsersServiceImpl implements UsersService {
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Donation Approved By " + userName);
 			result.setStatusCode(HttpStatus.OK.value());
-//			sendDonationApprovalMail(user.getEmailId());
-			String subject = "Welcome To Hariyali";
-			String content = "Dear Sir/Madam,\n Welcome to Project Hariyali"
-					+ "The Mahindra Foundation,would like to thank you for your donation to Project Hariyali. The main objective of the project is to do 5 Billion Tree Plantation from 2026 in several parts of the Nation. "
-					+ "The Tree Plantation is the main Agenda of the Project. "
-					+ "The HARIYALI is a Partnership between Mahindra and Mahindra and the Nandi Foundation. The Project will be jointly managed by M&M and Nandi Foundation. \r\n"
-					+ "Best wishes,\r\n" + "Team Hariyali\r\n" + "\r\n";
-
 			Receipt receipt = receiptRepository.getUserReceiptbyDonation(user.getUserId(),
 					donation.get(0).getDonationId());
-			emailService.sendEmailWithAttachment(user.getEmailId(), subject, content, receipt.getReciept_Path());
-//			sendDonationApprovalMail(recipientEmail.getEmailId());
+			emailService.sendEmailWithAttachment(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
+					receipt.getReciept_Path(), recipientEmail);
 		} else {
 			throw new CustomExceptionNodataFound("Status should Only be Approved or Rejected");
 		}
