@@ -94,3 +94,7 @@ sync:
   secrets:
     project_id: "modernization-dev-832770"
     secrets: ["mgcmdmodsqdbmysql02-tlkw-password"]
+
+cloudStorage:
+  - bucket: bkt-modernization-dev-hariyali
+    mountPath: /DonationReceipt
