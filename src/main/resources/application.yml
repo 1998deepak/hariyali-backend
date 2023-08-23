@@ -57,5 +57,7 @@ jwt:
 frontend:
         # redirect-url: http://localhost:3000/OnlineDonation?orderId=
         redirect-url: https://hariyali-dev.m-devsecops.com/OnlineDonation?orderId=
+receipt:
+        receiptPath: ${project.basedir}/src/main/resources/DonationReceipt        
    
    
