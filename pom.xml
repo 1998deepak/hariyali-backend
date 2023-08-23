@@ -134,7 +134,7 @@
 			<artifactId>ccavenue</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/ccavenue-1.0.jar</systemPath>
+            <systemPath>${basedir}/src/main/resources/ccavenue-1.0.jar</systemPath>
 		</dependency>
 
 	</dependencies>
