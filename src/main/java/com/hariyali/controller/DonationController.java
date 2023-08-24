@@ -79,11 +79,11 @@ public class DonationController {
 	/**
 	 * method to search payment information based on payment id
 	 *
-	 * @param paymentId
+	 * @param orderId
 	 * @return
 	 */
-	@GetMapping("/searchPaymentByPaymentId/{paymentId}")
-	public ApiResponse<PaymentInfoDTO> searchPaymentByPaymentId(@PathVariable int paymentId){
-		return integrationService.findPaymentInfoByPaymentInfoId(paymentId);
+	@GetMapping("/searchPaymentByPaymentId/{orderId}")
+	public ApiResponse<PaymentInfoDTO> searchPaymentByPaymentId(@PathVariable String orderId){
+		return integrationService.findPaymentInfoByOrderId(orderId);
 	}
 }

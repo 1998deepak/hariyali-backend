@@ -69,7 +69,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 	ReceiptRepository receiptRepository;
 
 	@Override
-	public ApiResponse<Integer> confirmPayment(String encryptedResponse) {
+	public ApiResponse<String> confirmPayment(String encryptedResponse) {
 		// get payment gateway configuration for CCAVENUE
 		PaymentGatewayConfiguration gatewayConfiguration = gatewayConfigurationDao.findByGatewayName("CCAVENUE");
 
@@ -81,7 +81,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 				.collect(Collectors.toMap(s -> s.split("=")[0], s -> s.split("=")[1]));
 
 		Donation donation = donationRepository
-				.findByDonationId(Integer.parseInt(ofNullable(response.get("order_id")).orElse("0")));
+				.findByOrderId(ofNullable(response.get("order_id")).orElse("0"));
 		if (isNull(donation))
 			throw new CustomException("Invalid order id received");
 		PaymentInfo paymentInfo = new PaymentInfo();
@@ -100,6 +100,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 		paymentInfo.setBankPaymentRefNo(ofNullable(response.get("bank_ref_no")).orElse(""));
 		paymentInfo.setCardName(ofNullable(response.get("card_name")).orElse(""));
 		paymentInfo.setCurrency(ofNullable(response.get("currency")).orElse(""));
+		paymentInfo.setOrderId(donation.getOrderId());
 		paymentInfo = paymentInfoRepository.save(paymentInfo);
 		Users user = userRepository.getUserByDonationId(donation.getDonationId());
 		if (user.getWebId() == null) {
@@ -115,15 +116,15 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 				throw new CustomException(e.getMessage());
 			}
 		}
-		ApiResponse<Integer> apiResponse = new ApiResponse<>();
-		apiResponse.setData(paymentInfo.getPaymentInfoId());
+		ApiResponse<String> apiResponse = new ApiResponse<>();
+		apiResponse.setData(paymentInfo.getOrderId());
 		return apiResponse;
 	}
 
 	@Override
-	public ApiResponse<PaymentInfoDTO> findPaymentInfoByPaymentInfoId(Integer paymentInfoId) {
+	public ApiResponse<PaymentInfoDTO> findPaymentInfoByOrderId(String orderId) {
 		ApiResponse<PaymentInfoDTO> response = new ApiResponse<>();
-		PaymentInfo info = paymentInfoRepository.findByPaymentInfoId(paymentInfoId);
+		PaymentInfo info = paymentInfoRepository.findByOrderId(orderId);
 		PaymentInfoDTO dto = new PaymentInfoDTO();
 		dto.setBankPaymentRefNo(info.getBankPaymentRefNo());
 		dto.setPaymentStatus(info.getPaymentStatus());

@@ -150,4 +150,6 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 			+ "INNER JOIN tbl_user_master u ON u.user_id = d.userId WHERE u.emailId = ? AND u.is_deleted = false\r\n"
 			+ "ORDER BY p.payment_date DESC;", nativeQuery = true)
 	Object getAllDonationDoneByUser(String email);
+
+	public Donation findByOrderId(String orderId);
 }

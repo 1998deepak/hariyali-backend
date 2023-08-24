@@ -33,6 +33,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
 
@@ -80,6 +81,8 @@ public class DonationServiceImpl implements DonationService {
 
 	@Autowired
 	PaymentInfoRepository paymentIfoRepository;
+
+	@Autowired
 	private PaymentGatewayConfigurationDao gatewayConfigurationDao;
 
 	@Override
@@ -336,7 +339,7 @@ public class DonationServiceImpl implements DonationService {
 	            .create();
 		Users user = gson.fromJson(userNode.toString(), Users.class);
 		Double totalAmount = 0.0;
-		Integer donationId = 0;
+		Long orderId = Calendar.getInstance().getTimeInMillis();
 		// set user to donation and save donation
 		if (user.getDonations() != null) {
 			for (Donation donation : user.getDonations()) {
@@ -345,9 +348,9 @@ public class DonationServiceImpl implements DonationService {
 				donation.setCreatedBy(createdBy);
 				donation.setUsers(resulEntity);
 				donation.setModifiedBy(createdBy);
+				donation.setOrderId(orderId.toString());
 				totalAmount = donation.getTotalAmount();
 				donation = donationRepository.save(donation);
-				donationId = donation.getDonationId();
 				Donation resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
 
 				// set paymentInfo donation wise
@@ -426,7 +429,7 @@ public class DonationServiceImpl implements DonationService {
 
 			String queryString = "";
 			queryString += "merchant_id=" + gatewayConfiguration.getMerchantId();
-			queryString += "&order_id=" + donationId;
+			queryString += "&order_id=" + orderId;
 			queryString += "&currency=INR";
 			queryString += "&amount=" + totalAmount;
 			queryString += "&redirect_url=" + gatewayConfiguration.getRedirectURL();
