@@ -12,7 +12,7 @@ import com.hariyali.dto.PaymentInfoDTO;
  */
 public interface PaymentIntegrationService {
 
-    ApiResponse<Integer> confirmPayment(String encryptedResponse);
+    ApiResponse<String> confirmPayment(String encryptedResponse);
 
-    ApiResponse<PaymentInfoDTO> findPaymentInfoByPaymentInfoId(Integer paymentInfoId);
+    ApiResponse<PaymentInfoDTO> findPaymentInfoByOrderId(String orderId);
 }

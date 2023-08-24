@@ -57,5 +57,6 @@ jwt:
 frontend:
         redirect-url: http://localhost:3000/OnlineDonation?orderId=
 project.basedir:         
-   
+receipt:
+        receiptPath: C:\\Workspace\\DonationReceipt  
    

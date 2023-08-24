@@ -87,4 +87,7 @@ public class PaymentInfo implements Serializable {
 	@Column(name = "currency")
 	private String currency;
 
+	@Column(name = "order_id")
+	private String orderId;
+
 }

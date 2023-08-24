@@ -88,6 +88,9 @@ public class Donation implements Serializable {
 	@Column(name = "deleted")
 	private Boolean isDeleted = Boolean.FALSE;
 
+	@Column(name = "order_id")
+	private String orderId;
+
 	public int getDonationId() {
 		return donationId;
 	}
@@ -218,5 +221,13 @@ public class Donation implements Serializable {
 
 	public void setPaymentInfo(List<PaymentInfo> paymentInfo) {
 		this.paymentInfo = paymentInfo;
+	}
+
+	public String getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
 	}
 }
