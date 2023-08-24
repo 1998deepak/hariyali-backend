@@ -34,7 +34,7 @@ public class Commitment {
 	private LocalDate  dateOFPlantation;
 	
 	@ManyToOne
-	@JoinColumn(name = "plantationId")
+	@JoinColumn(name = "plantation_Id")
 	private Plantation plantation;
 
 	

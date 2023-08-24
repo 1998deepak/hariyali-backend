@@ -14,5 +14,9 @@ public class UserPlantUploadExelDTO {
 	private float amount;
 	private String userName;
 	private String packageName;
+	private long donarId;
+	private long recipientId;
+	private String firstName;
+	private String donationType;
 	
 }

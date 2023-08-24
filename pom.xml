@@ -130,6 +130,11 @@
 			<type>pom</type>
 		</dependency>
 		<dependency>
+			<groupId>com.github.vladimir-bukhtoyarov</groupId>
+			<artifactId>bucket4j-core</artifactId>
+			<version>4.10.0</version>
+		</dependency>
+		<dependency>
 			<groupId>com.ccavenue</groupId>
 			<artifactId>ccavenue</artifactId>
 			<version>1.0</version>

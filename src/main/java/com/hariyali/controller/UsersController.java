@@ -6,6 +6,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.hariyali.exceptions.TooManyRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -243,5 +244,13 @@ public class UsersController {
 		otpModel.setOtpExpiryTime(null);
 		otpRepository.save(otpModel);
 		return new ResponseEntity<>(result, HttpStatus.OK);
+	}
+
+	@GetMapping("/tooManyRequest")
+	public ResponseEntity<ApiResponse> tooManyRequest() {
+		ApiResponse response = new ApiResponse();
+		response.setStatus(HttpStatus.TOO_MANY_REQUESTS.name());
+		response.setMessage("Too many request, number request per minutes exceeds");
+		return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
 	}
 }

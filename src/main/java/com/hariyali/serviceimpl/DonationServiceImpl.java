@@ -1,5 +1,20 @@
 package com.hariyali.serviceimpl;
 
+import static java.util.Optional.ofNullable;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
+import com.ccavenue.security.AesCryptUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -11,33 +26,24 @@ import com.hariyali.dao.UserDao;
 import com.hariyali.dao.paymentGateway.PaymentGatewayConfigurationDao;
 import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.DonationDTO;
-import com.hariyali.dto.PaymentInfoDTO;
 import com.hariyali.entity.Address;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.PaymentInfo;
 import com.hariyali.entity.Recipient;
 import com.hariyali.entity.UserPackages;
 import com.hariyali.entity.Users;
-import com.hariyali.entity.*;
 import com.hariyali.entity.paymentGateway.PaymentGatewayConfiguration;
 import com.hariyali.exceptions.CustomException;
 import com.hariyali.exceptions.CustomExceptionNodataFound;
-import com.hariyali.repository.*;
+import com.hariyali.repository.AddressRepository;
+import com.hariyali.repository.DonationRepository;
+import com.hariyali.repository.PaymentInfoRepository;
+import com.hariyali.repository.RecipientRepository;
+import com.hariyali.repository.UserPackageRepository;
+import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.DonationService;
 import com.hariyali.service.ReceiptService;
 import com.hariyali.utils.EmailService;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.Optional;
-
-import static java.util.Optional.ofNullable;
-import com.ccavenue.security.AesCryptUtil;
 @Service
 public class DonationServiceImpl implements DonationService {
 
@@ -295,7 +301,7 @@ public class DonationServiceImpl implements DonationService {
 
 	public ApiResponse<DonationDTO> saveDonation(JsonNode jsonNode, String donarID, HttpServletRequest request) {
 		ApiResponse<DonationDTO> response = new ApiResponse<>();
-
+		
 		JsonNode userNode = jsonNode.get("user");
 		JsonNode donationNode = userNode.get("donations");
 		JsonNode donationString = jsonNode.at("/user/donations/0/recipient");
@@ -338,7 +344,7 @@ public class DonationServiceImpl implements DonationService {
 	            .create();
 		Users user = gson.fromJson(userNode.toString(), Users.class);
 		Double totalAmount = 0.0;
-		Integer donationId = 0;
+		Long orderId = Calendar.getInstance().getTimeInMillis();
 		// set user to donation and save donation
 		if (user.getDonations() != null) {
 			for (Donation donation : user.getDonations()) {
@@ -347,9 +353,10 @@ public class DonationServiceImpl implements DonationService {
 				donation.setCreatedBy(createdBy);
 				donation.setUsers(resulEntity);
 				donation.setModifiedBy(createdBy);
+				donation.setOrderId(orderId.toString());
 				totalAmount = donation.getTotalAmount();
 				donation = donationRepository.save(donation);
-				donationId = donation.getDonationId();
+				//donationId = donation.getDonationId();
 				Donation resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
 
 				// set paymentInfo donation wise
@@ -425,24 +432,27 @@ public class DonationServiceImpl implements DonationService {
 		if ("online".equalsIgnoreCase(donationMode)) {
 			// get payment gateway configuration for CCAVENUE
 			PaymentGatewayConfiguration gatewayConfiguration = gatewayConfigurationDao.findByGatewayName("CCAVENUE");
-
+			
+			
+			Users userPay = gson.fromJson(usersRepository.getUserByEmail(user.getEmailId()).toString(), Users.class);
+			
 			String queryString = "";
 			queryString += "merchant_id=" + gatewayConfiguration.getMerchantId();
-			queryString += "&order_id=" + donationId;
+			queryString += "&order_id=" + orderId;
 			queryString += "&currency=INR";
 			queryString += "&amount=" + totalAmount;
 			queryString += "&redirect_url=" + gatewayConfiguration.getRedirectURL();
 			queryString += "&cancel_url=" + gatewayConfiguration.getRedirectURL();
 			queryString += "&language=EN";
-			queryString += "&billing_name=" + user.getFirstName() + " " + user.getLastName();
-			Address address = ofNullable(user.getAddress()).stream().filter(addresses -> !addresses.isEmpty()).findFirst().get().get(0);
+			queryString += "&billing_name=" + userPay.getFirstName() + " " + userPay.getLastName();
+			Address address = ofNullable(userPay.getAddress()).stream().filter(addresses -> !addresses.isEmpty()).findFirst().get().get(0);
 			queryString += "&billing_address=" + address.getStreet1() + " " + address.getStreet2() + " "+ address.getStreet3();
 			queryString += "&billing_city=" + address.getCity();
 			queryString += "&billing_state=" + address.getState();
 			queryString += "&billing_zip=" + address.getPostalCode();
 			queryString += "&billing_country=" + address.getCountry();
-			queryString += "&billing_tel=" + user.getMobileNo();
-			queryString += "&billing_email=" + user.getEmailId();
+			queryString += "&billing_tel=" + userPay.getMobileNo();
+			queryString += "&billing_email=" + userPay.getEmailId();
 			AesCryptUtil aesUtil=new AesCryptUtil (gatewayConfiguration.getAccessKey());
 			String encRequest=aesUtil.encrypt(queryString);
 			response.setAccessCode(gatewayConfiguration.getAccessCode());
