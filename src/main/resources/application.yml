@@ -67,3 +67,6 @@ request:
         rate:
             limit: 500
             noOfMinute: 1
+# change this path as per environment
+log:
+    path: c:/log

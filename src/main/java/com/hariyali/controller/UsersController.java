@@ -247,7 +247,10 @@ public class UsersController {
 	}
 
 	@GetMapping("/tooManyRequest")
-	public ResponseEntity<Object> tooManyRequest() {
-		return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body("Too many request, number request per minutes exceeds");//.build();
+	public ResponseEntity<ApiResponse> tooManyRequest() {
+		ApiResponse response = new ApiResponse();
+		response.setStatus(HttpStatus.TOO_MANY_REQUESTS.name());
+		response.setMessage("Too many request, number request per minutes exceeds");
+		return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
 	}
 }
