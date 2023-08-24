@@ -432,13 +432,41 @@ public class UsersServiceImpl implements UsersService {
 		Object user = usersRepository.getUserByEmail(email);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
-		Gson gson = new Gson();
+		//Gson gson = new Gson();
+		Gson gson = new GsonBuilder()
+	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
+	            .create();
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
 			if (entity.getDonorId() != null && entity.getWebId() == null) {
 				throw new CustomExceptionDataAlreadyExists(
 						"Donar with " + entity.getEmailId() + " is already Resigterd");
 			}
+			response.setData(modelMapper.map(entity, UsersDTO.class));
+			response.setStatus(EnumConstants.SUCCESS);
+			response.setStatusCode(HttpStatus.OK.value());
+			response.setMessage("User found Successfully");
+		} else
+			throw new CustomExceptionNodataFound("No user found with emailId " + email);
+		return response;
+	}
+	
+	@Override
+	public ApiResponse<UsersDTO> getExistingUserByEmail(String email) {
+		ApiResponse<UsersDTO> response = new ApiResponse<>();
+		Object user = usersRepository.getUserByEmail(email);
+		if (user == null)
+			throw new CustomExceptionNodataFound("No user found with emailId " + email);
+		//Gson gson = new Gson();
+		Gson gson = new GsonBuilder()
+	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
+	            .create();
+		Users entity = gson.fromJson(user.toString(), Users.class);
+		if (entity.getEmailId() != null) {
+//			if (entity.getDonorId() != null && entity.getWebId() == null) {
+//				throw new CustomExceptionDataAlreadyExists(
+//						"Donar with " + entity.getEmailId() + " is already Resigterd");
+//			}
 			response.setData(modelMapper.map(entity, UsersDTO.class));
 			response.setStatus(EnumConstants.SUCCESS);
 			response.setStatusCode(HttpStatus.OK.value());

@@ -80,6 +80,8 @@ public class DonationServiceImpl implements DonationService {
 
 	@Autowired
 	PaymentInfoRepository paymentIfoRepository;
+	
+	@Autowired
 	private PaymentGatewayConfigurationDao gatewayConfigurationDao;
 
 	@Override
@@ -293,7 +295,7 @@ public class DonationServiceImpl implements DonationService {
 
 	public ApiResponse<DonationDTO> saveDonation(JsonNode jsonNode, String donarID, HttpServletRequest request) {
 		ApiResponse<DonationDTO> response = new ApiResponse<>();
-
+		
 		JsonNode userNode = jsonNode.get("user");
 		JsonNode donationNode = userNode.get("donations");
 		JsonNode donationString = jsonNode.at("/user/donations/0/recipient");
@@ -423,7 +425,10 @@ public class DonationServiceImpl implements DonationService {
 		if ("online".equalsIgnoreCase(donationMode)) {
 			// get payment gateway configuration for CCAVENUE
 			PaymentGatewayConfiguration gatewayConfiguration = gatewayConfigurationDao.findByGatewayName("CCAVENUE");
-
+			
+			
+			Users userPay = gson.fromJson(usersRepository.getUserByEmail(user.getEmailId()).toString(), Users.class);
+			
 			String queryString = "";
 			queryString += "merchant_id=" + gatewayConfiguration.getMerchantId();
 			queryString += "&order_id=" + donationId;
@@ -432,15 +437,15 @@ public class DonationServiceImpl implements DonationService {
 			queryString += "&redirect_url=" + gatewayConfiguration.getRedirectURL();
 			queryString += "&cancel_url=" + gatewayConfiguration.getRedirectURL();
 			queryString += "&language=EN";
-			queryString += "&billing_name=" + user.getFirstName() + " " + user.getLastName();
-			Address address = ofNullable(user.getAddress()).stream().filter(addresses -> !addresses.isEmpty()).findFirst().get().get(0);
+			queryString += "&billing_name=" + userPay.getFirstName() + " " + userPay.getLastName();
+			Address address = ofNullable(userPay.getAddress()).stream().filter(addresses -> !addresses.isEmpty()).findFirst().get().get(0);
 			queryString += "&billing_address=" + address.getStreet1() + " " + address.getStreet2() + " "+ address.getStreet3();
 			queryString += "&billing_city=" + address.getCity();
 			queryString += "&billing_state=" + address.getState();
 			queryString += "&billing_zip=" + address.getPostalCode();
 			queryString += "&billing_country=" + address.getCountry();
-			queryString += "&billing_tel=" + user.getMobileNo();
-			queryString += "&billing_email=" + user.getEmailId();
+			queryString += "&billing_tel=" + userPay.getMobileNo();
+			queryString += "&billing_email=" + userPay.getEmailId();
 			AesCryptUtil aesUtil=new AesCryptUtil (gatewayConfiguration.getAccessKey());
 			String encRequest=aesUtil.encrypt(queryString);
 			response.setAccessCode(gatewayConfiguration.getAccessCode());
