@@ -8,8 +8,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.hariyali.entity.Plantation;
 
 public interface PlantationService {
-	
-	public ByteArrayInputStream exportExcelUserPlant();
+
+	public ByteArrayInputStream exportExcelUserPlant(String donationType,String packageName);
 
 	public String uploadPlantationExcel(XSSFWorkbook workbook);
 	

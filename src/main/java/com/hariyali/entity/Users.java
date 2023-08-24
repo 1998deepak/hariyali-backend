@@ -118,6 +118,17 @@ public class Users implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "role_id")
 	private Roles userRole;
+	
+	@Column(name = "planted")
+	private Boolean isPlanted = Boolean.FALSE;
+
+	public Boolean getIsPlanted() {
+		return isPlanted;
+	}
+
+	public void setIsPlanted(Boolean isPlanted) {
+		this.isPlanted = isPlanted;
+	}
 
 	public int getUserId() {
 		return userId;

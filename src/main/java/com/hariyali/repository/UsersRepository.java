@@ -234,20 +234,33 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	@Query(value = "SELECT * from tbl_user_master where pan_card=?1", nativeQuery = true)
 	Users getUserByPancard(String pancard);
 
-	@Query(value = "SELECT \r\n"
+	@Query(value = "select \r\n"
 			+ "    tum.user_id AS user,\r\n"
 			+ "    td.donation_id AS donation,\r\n"
 			+ "    tup.package_id AS packages,\r\n"
 			+ "    tum.emailId AS userName,\r\n"
 			+ "    tup.package_name AS packageName, \r\n"
-			+ "    tup.amount as amount\r\n"
+			+ "    tup.amount AS amount,\r\n"
+			+ "    td.donation_type AS donationType,\r\n"
+			+ "    tum.donorId AS donarId,\r\n"
+			+ "     CASE\r\n"
+			+ "        WHEN td.donation_type = 'Gift-Donate' THEN recpt.recipient_id\r\n"
+			+ "        ELSE NULL\r\n"
+			+ "    END AS recipientId,\r\n"
+			+ "    CASE\r\n"
+			+ "        WHEN td.donation_type = 'Gift-Donate' THEN recpt.first_name\r\n"
+			+ "        ELSE NULL\r\n"
+			+ "    END AS firstName\r\n"
 			+ "FROM\r\n"
 			+ "    tbl_user_master tum\r\n"
-			+ "        INNER JOIN\r\n"
+			+ "INNER JOIN\r\n"
 			+ "    tbl_donation td ON tum.user_id = td.userId\r\n"
-			+ "        INNER JOIN\r\n"
-			+ "    tbl_user_packages tup ON tup.donationId = td.donation_id", nativeQuery = true)
-	List<Map<String, Object>> getUserPlantExportExcel();
+			+ "INNER JOIN\r\n"
+			+ "    tbl_user_packages tup ON tup.donationId = td.donation_id\r\n"
+			+ "    LEFT JOIN\r\n"
+			+ "    tbl_recipient recpt ON recpt.donationId = td.donation_id AND td.donation_type = 'Gift-Donate'\r\n"
+			+ "    where   td.donation_type = ?1 AND tup.package_name = ?2 AND tum.planted=false", nativeQuery = true)
+	List<Map<String, Object>> getUserPlantExportExcel(String donationType,String packageName);
 	
 	@Query(value="select * from tbl_user_master as users left join tbl_donation as donation on users.user_id=donation.userId where donation.donation_id=?",nativeQuery=true)
 	public List<Users> getUserDataByDonationId(int donationId);

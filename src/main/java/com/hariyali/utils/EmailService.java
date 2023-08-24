@@ -74,4 +74,33 @@ public class EmailService {
 		System.out.println("Mail Sent...");
 	}
 	
+
+//	public void sendPlantationEmail(String toEmail, String subject, String body) {
+//		
+//		SimpleMailMessage message = new SimpleMailMessage();
+//		
+//		message.setFrom(fromEmail);
+//		message.setTo(toEmail);
+//		message.setSubject(subject);
+//		
+//		mailSender.send(message);
+//		
+//		System.err.println("Mail send successfully");
+//		
+//	}
+	
+	public void sendPlantationEmail(String toEmail, String subject, String bodyMessage) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(bodyMessage, true); // Set to true for HTML content if needed
+
+            mailSender.send(mimeMessage);
+        } catch (Exception e) {
+            // Handle any exceptions here
+            e.printStackTrace();
+        }
+    }
 }
