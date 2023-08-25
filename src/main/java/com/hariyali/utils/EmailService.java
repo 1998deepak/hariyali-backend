@@ -80,7 +80,7 @@ public class EmailService {
 				+ "The Mahindra Foundation,would like to thank you for your donation to Project Hariyali. The main objective of the project is to do 5 Billion Tree Plantation from 2026 in several parts of the Nation. "
 				+ "The Tree Plantation is the main Agenda of the Project. "
 				+ "The HARIYALI is a Partnership between Mahindra and Mahindra and the Nandi Foundation. The Project will be jointly managed by M&M and Nandi Foundation. \r\n"
-				+ "Below is your Web Id : %s."
+				+ "Below is your Web Id :"+user.getWebId()
 				+"\rWait For Admin Approval.\\r\\n"
 				+ "\nBest wishes,\nTeam Hariyali\r\n"
 				+ "\r\n";
