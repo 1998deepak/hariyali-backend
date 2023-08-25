@@ -75,19 +75,26 @@ public class EmailService {
 	}
 	
 
-//	public void sendPlantationEmail(String toEmail, String subject, String body) {
-//		
-//		SimpleMailMessage message = new SimpleMailMessage();
-//		
-//		message.setFrom(fromEmail);
-//		message.setTo(toEmail);
-//		message.setSubject(subject);
-//		
-//		mailSender.send(message);
-//		
-//		System.err.println("Mail send successfully");
-//		
-//	}
+	public void sendWebIdEmail(String toEmail,Users user) {
+		String subject="Dear Sir/Madam,\n \tWelcome to Project Hariyali."
+				+ "The Mahindra Foundation,would like to thank you for your donation to Project Hariyali. The main objective of the project is to do 5 Billion Tree Plantation from 2026 in several parts of the Nation. "
+				+ "The Tree Plantation is the main Agenda of the Project. "
+				+ "The HARIYALI is a Partnership between Mahindra and Mahindra and the Nandi Foundation. The Project will be jointly managed by M&M and Nandi Foundation. \r\n"
+				+ "Below is your Web Id : %s."
+				+"\rWait For Admin Approval.\\r\\n"
+				+ "\nBest wishes,\nTeam Hariyali\r\n"
+				+ "\r\n";
+		SimpleMailMessage message = new SimpleMailMessage();
+		
+		message.setFrom(fromEmail);
+		message.setTo(toEmail);
+		message.setSubject(subject);
+		
+		mailSender.send(message);
+		
+		System.err.println("Mail send successfully");
+		
+	}
 	
 	public void sendPlantationEmail(String toEmail, String subject, String bodyMessage) {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
