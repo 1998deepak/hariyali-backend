@@ -11,13 +11,6 @@ import com.hariyali.dao.UserDao;
 import com.hariyali.dao.paymentGateway.PaymentGatewayConfigurationDao;
 import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.DonationDTO;
-
-import com.hariyali.entity.Address;
-import com.hariyali.entity.Donation;
-import com.hariyali.entity.PaymentInfo;
-import com.hariyali.entity.Recipient;
-import com.hariyali.entity.UserPackages;
-import com.hariyali.entity.Users;
 import com.hariyali.entity.*;
 import com.hariyali.entity.paymentGateway.PaymentGatewayConfiguration;
 import com.hariyali.exceptions.CustomException;
@@ -32,6 +25,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Calendar;
 import java.util.Date;
@@ -81,6 +75,9 @@ public class DonationServiceImpl implements DonationService {
 
 	@Autowired
 	PaymentInfoRepository paymentIfoRepository;
+	
+	@Autowired
+	ReceiptRepository receiptRepository;
 	
 	@Autowired
 	private PaymentGatewayConfigurationDao gatewayConfigurationDao;
@@ -135,7 +132,12 @@ public class DonationServiceImpl implements DonationService {
 		if (donationMode.equalsIgnoreCase("offline")) {
 			// send email to user
 			response = saveDonationOffline(jsonNode, usersServiceImpl.generateDonorId(), request);
-			
+			Receipt receipt = receiptRepository.getUserReceipt(userEmail.getUserId());
+			try {
+				emailService.sendReceiptWithAttachment(userEmail.getEmailId(),receipt.getReciept_Path());
+			} catch (MessagingException e) {
+				throw new CustomException("Issued to email send:"+e.getMessage());
+			}
 			return response;
 		} else if (donationMode.equalsIgnoreCase("online")) {
 			return saveDonation(jsonNode, donarID, request);

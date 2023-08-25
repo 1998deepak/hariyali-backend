@@ -68,6 +68,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 	@Autowired
 	ReceiptRepository receiptRepository;
 
+
 	@Override
 	public ApiResponse<String> confirmPayment(String encryptedResponse) {
 		// get payment gateway configuration for CCAVENUE
@@ -105,6 +106,9 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 		Users user = userRepository.getUserByDonationId(donation.getDonationId());
 		if (user.getWebId() == null) {
 			user.setWebId(userService.generateWebId());
+			userRepository.save(user);
+			System.out.println("user"+user);
+			emailService.sendWebIdEmail(user.getEmailId(),user);
 		}
 		if (paymentInfo.getPaymentStatus().equalsIgnoreCase("Completed")) {
 			receiptService.generateReceipt(donation);
