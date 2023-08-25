@@ -43,12 +43,22 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Integer>{
 	@Query(value="SELECT * FROM tbl_reciept where donation_id=?", nativeQuery = true)
 	Receipt getReceiptByDonation(int receiptId);
 	
-	@Query(value="SELECT u.user_id,d.donation_id,r.recieptId,\r\n"
-			+ "r.reciept_Path,r.reciept_number\r\n"
-			+ "FROM tbl_user_master u\r\n"
-			+ "JOIN tbl_donation d ON u.user_id = d.userId\r\n"
-			+ "JOIN tbl_reciept r ON d.donation_id = r.donation_id\r\n"
-			+ "WHERE u.user_id = ?",nativeQuery = true)
+	@Query(value="WITH MaxReceipt AS (\r\n"
+			+ "    SELECT d.userId, MAX(r.recieptId) AS max_receiptId\r\n"
+			+ "    FROM tbl_donation d\r\n"
+			+ "    JOIN tbl_reciept r ON d.donation_id = r.donation_id\r\n"
+			+ "    WHERE d.userId = ?\r\n"
+			+ "    GROUP BY d.userId\r\n"
+			+ ")\r\n"
+			+ "SELECT u.user_id,\r\n"
+			+ "       d.donation_id,\r\n"
+			+ "       r.recieptId,\r\n"
+			+ "       r.reciept_Path,\r\n"
+			+ "       r.reciept_number\r\n"
+			+ "FROM MaxReceipt m\r\n"
+			+ "JOIN tbl_donation d ON m.userId = d.userId\r\n"
+			+ "JOIN tbl_reciept r ON d.donation_id = r.donation_id AND r.recieptId = m.max_receiptId\r\n"
+			+ "JOIN tbl_user_master u ON d.userId = u.user_id;",nativeQuery = true)
 	Receipt getUserReceipt(int userID);
 	
 	@Query(value="SELECT u.user_id,d.donation_id,r.recieptId,\r\n"
