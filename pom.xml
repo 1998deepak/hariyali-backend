@@ -130,18 +130,17 @@
 			<type>pom</type>
 		</dependency>
 		<dependency>
-			<groupId>com.github.vladimir-bukhtoyarov</groupId>
-			<artifactId>bucket4j-core</artifactId>
-			<version>4.10.0</version>
-		</dependency>
-		<dependency>
 			<groupId>com.ccavenue</groupId>
 			<artifactId>ccavenue</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-            <systemPath>${basedir}/src/main/resources/ccavenue-1.0.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/resources/ccavenue-1.0.jar</systemPath>
 		</dependency>
-
+		<dependency>
+			<groupId>com.github.vladimir-bukhtoyarov</groupId>
+			<artifactId>bucket4j-core</artifactId>
+			<version>7.6.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -159,7 +158,6 @@
 					</excludes>
 				</configuration>
 			</plugin>
-
 			<!-- JaCoCo plugin for code coverage -->
 			<plugin>
 				<groupId>org.jacoco</groupId>

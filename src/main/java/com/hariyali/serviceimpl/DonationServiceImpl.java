@@ -1,20 +1,5 @@
 package com.hariyali.serviceimpl;
 
-import static java.util.Optional.ofNullable;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-
-import com.ccavenue.security.AesCryptUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -26,24 +11,28 @@ import com.hariyali.dao.UserDao;
 import com.hariyali.dao.paymentGateway.PaymentGatewayConfigurationDao;
 import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.DonationDTO;
-import com.hariyali.entity.Address;
-import com.hariyali.entity.Donation;
-import com.hariyali.entity.PaymentInfo;
-import com.hariyali.entity.Recipient;
-import com.hariyali.entity.UserPackages;
-import com.hariyali.entity.Users;
+import com.hariyali.entity.*;
 import com.hariyali.entity.paymentGateway.PaymentGatewayConfiguration;
 import com.hariyali.exceptions.CustomException;
 import com.hariyali.exceptions.CustomExceptionNodataFound;
-import com.hariyali.repository.AddressRepository;
-import com.hariyali.repository.DonationRepository;
-import com.hariyali.repository.PaymentInfoRepository;
-import com.hariyali.repository.RecipientRepository;
-import com.hariyali.repository.UserPackageRepository;
-import com.hariyali.repository.UsersRepository;
+import com.hariyali.repository.*;
 import com.hariyali.service.DonationService;
 import com.hariyali.service.ReceiptService;
 import com.hariyali.utils.EmailService;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
+import com.ccavenue.security.AesCryptUtil;
 @Service
 public class DonationServiceImpl implements DonationService {
 
@@ -86,6 +75,9 @@ public class DonationServiceImpl implements DonationService {
 
 	@Autowired
 	PaymentInfoRepository paymentIfoRepository;
+	
+	@Autowired
+	ReceiptRepository receiptRepository;
 	
 	@Autowired
 	private PaymentGatewayConfigurationDao gatewayConfigurationDao;
@@ -140,7 +132,12 @@ public class DonationServiceImpl implements DonationService {
 		if (donationMode.equalsIgnoreCase("offline")) {
 			// send email to user
 			response = saveDonationOffline(jsonNode, usersServiceImpl.generateDonorId(), request);
-			
+			Receipt receipt = receiptRepository.getUserReceipt(userEmail.getUserId());
+			try {
+				emailService.sendReceiptWithAttachment(userEmail.getEmailId(),receipt.getReciept_Path());
+			} catch (MessagingException e) {
+				throw new CustomException("Issued to email send:"+e.getMessage());
+			}
 			return response;
 		} else if (donationMode.equalsIgnoreCase("online")) {
 			return saveDonation(jsonNode, donarID, request);
@@ -356,7 +353,6 @@ public class DonationServiceImpl implements DonationService {
 				donation.setOrderId(orderId.toString());
 				totalAmount = donation.getTotalAmount();
 				donation = donationRepository.save(donation);
-				//donationId = donation.getDonationId();
 				Donation resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
 
 				// set paymentInfo donation wise

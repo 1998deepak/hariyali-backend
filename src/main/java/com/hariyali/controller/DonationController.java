@@ -79,7 +79,7 @@ public class DonationController {
 	/**
 	 * method to search payment information based on payment id
 	 *
-	 * @param paymentId
+	 * @param orderId
 	 * @return
 	 */
 	@GetMapping("/searchPaymentByPaymentId/{orderId}")
