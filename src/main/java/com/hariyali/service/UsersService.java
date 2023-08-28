@@ -28,6 +28,8 @@ public interface UsersService {
 	public ApiResponse<UsersDTO> getUserByEmail(String email);
 
 	public ApiResponse<UsersDTO> getUserPersonalDetails(String email);
+	
+	public ApiResponse<UsersDTO> getExistingUserByEmail(String email);
 
 	public ApiResponse<Object> getAllUsersWithDonarID();
 	
