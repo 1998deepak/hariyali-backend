@@ -519,7 +519,6 @@ public class UsersServiceImpl implements UsersService {
 		Object user = usersRepository.getUserPersonalDetailsByEmail(email);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
-		//Gson gson = new Gson();
 		Gson gson = new GsonBuilder()
 	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
 	            .create();
@@ -563,7 +562,6 @@ public class UsersServiceImpl implements UsersService {
 		String userName = jwtHelper.getUsernameFromToken(token.substring(7));
 
 		Users tokenUserUpdate = this.usersRepository.findByEmailId(userName);
-		//Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
 		Gson gson = new GsonBuilder()
 	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
 	            .create();
