@@ -79,7 +79,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 
 		Map<String, String> response = Arrays.stream(of(decryptedResponse.split("&")).orElse(new String[] {}))
 				.filter(values -> !values.isEmpty())
-				.collect(Collectors.toMap(s -> s.split("=")[0], s -> s.split("=")[1]));
+				.collect(Collectors.toMap(s -> ofNullable(s.split("=")).filter(data-> data.length > 0).map(data -> data[0]).orElse(""), s -> ofNullable(s.split("=")).filter(data-> data.length > 1).map(data -> data[0]).orElse("")));
 
 		Donation donation = donationRepository
 				.findByOrderId(ofNullable(response.get("order_id")).orElse("0"));

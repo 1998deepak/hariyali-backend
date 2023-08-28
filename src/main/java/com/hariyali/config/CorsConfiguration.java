@@ -22,6 +22,7 @@ public class CorsConfiguration {
                         .allowedMethods(GET, POST, PUT, PATCH, DELETE)
                         .allowedHeaders("*")
                         .allowedOriginPatterns("*")
+                        .allowedOrigins("https://test.ccavenue.com", "https://hariyali-dev.m-devsecops.com", "https://secure.ccavenue.com")
                         .allowCredentials(true);
             }
         };
