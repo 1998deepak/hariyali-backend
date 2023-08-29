@@ -66,7 +66,7 @@ public class JwtWebSecurityConfig   {
 	        .authorizeRequests()
 	         .antMatchers("/api/v1/login","/api/v1/loginOtp", "api/v1/verify-otp","/api/v1/loginViaOtp", "/api/v1/resetPassword", "/api/v1/sendEmail", "/api/v1/logout",
 	                         "/api/v1/sendEmailForDonorId", "/api/v1/activateuser", "/api/v1/TotalNoOfDonors",
-	                         "/api/v1/formData", "/api/v1/getAllPackages","/api/v1/userAddOnline", "/page/paymentIntegration","/api/v1/sendOtp").permitAll()
+	                         "/api/v1/formData", "/api/v1/getAllPackages","/api/v1/userAddOnline", "/api/v1/paymentIntegration","/api/v1/sendOtp").permitAll()
 	            .antMatchers("/api/v1/usersGetAll", "/api/v1/user-by-email/**", "/api/v1/package/**", "/api/v1/AddPackage",
 	                         "/api/v1/package-by-id/**", "/api/v1/GetAllReports", "/api/v1/uploadFileDocument",
 	                         "/api/v1/downloadFileDocument/**", "/api/v1/donorList", "/api/v1/leaderBoard", "/api/v1/map/**",
@@ -84,6 +84,17 @@ public class JwtWebSecurityConfig   {
 
 	    http.authenticationProvider(authenticationProvider());
 
+//		http.headers().frameOptions().sameOrigin()
+//				.httpStrictTransportSecurity().disable()
+//				.cacheControl()
+//				.and().httpStrictTransportSecurity()
+//				.includeSubDomains(true)
+//				.maxAgeInSeconds(31536000)
+//				.and()
+//				.xssProtection()
+//				.block(true)
+//				.and()
+//				.contentSecurityPolicy("script-src 'self'");
 	    return http.build();
 	}
 
