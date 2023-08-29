@@ -22,6 +22,7 @@ import java.io.IOException;
  * @date 20/08/2023
  */
 @Controller
+@RequestMapping("/api/v1")
 public class PaymentIntegrationController {
 
 
