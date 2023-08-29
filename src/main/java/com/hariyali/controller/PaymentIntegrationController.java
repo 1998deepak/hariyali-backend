@@ -31,7 +31,7 @@ public class PaymentIntegrationController {
     @Autowired
     PaymentIntegrationService service;
 
-    @RequestMapping(value = "/page/paymentIntegration", method = RequestMethod.POST)
+    @RequestMapping(value = "/api/v1/paymentIntegration", method = RequestMethod.POST)
     public void paymentIntegration(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String encryptedResponse = request.getParameter("encResp");
         response.sendRedirect(frontendRedirectURL + service.confirmPayment(encryptedResponse).getData());
