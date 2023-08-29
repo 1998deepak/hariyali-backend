@@ -22,12 +22,7 @@ public class ApplicationConfig {
     @Bean
     public Bucket createBucket() {
         Bandwidth limit = Bandwidth.classic(noOfRequestAllowed, Refill.greedy(noOfRequestAllowed, Duration.ofMinutes(noOfMinute)));
-        
-		return Bucket4j.builder().addLimit(limit).build();
-
-//        return Bucket.builder()
-//                .addLimit(limit)
-//                .build();
+        return Bucket4j.builder().addLimit(limit).build();
     }
 
 }
