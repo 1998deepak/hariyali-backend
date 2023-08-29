@@ -227,6 +227,31 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "			 	             ) AS Result  	          FROM tbl_user_master AS users\r\n"
 			+ "			 	          WHERE users.donorId =? AND users.is_deleted=false", nativeQuery = true)
 	Object getUserPersonalDetailsByDonorId(String donorId);
+	
+	@Query(value = "SELECT   	            JSON_OBJECT(\r\n"
+			+ "			 	                 'userId', users.user_id,  	                 'firstName', users.first_name,\r\n"
+			+ "			 	                 'lastName', users.last_name,\r\n"
+			+ "			 	                 'mobileNo', users.mobile_number,\r\n"
+			+ "			 	                 'donorId', users.donorId,  	                 'emailId', users.emailId,\r\n"
+			+ "			 	                 'donarType', users.donor_type,\r\n"
+			+ "			 	                 'prefix', users.prefix,\r\n"
+			+ "			 	                 'organisation', users.organisation,\r\n"
+			+ "			 	                 'activityType', users.activity_type,\r\n"
+			+ "			                      'panCard',users.pan_card,  	                 'address', (\r\n"
+			+ "			 	                     SELECT JSON_ARRAYAGG(  	                         JSON_OBJECT(\r\n"
+			+ "			 	                             'addressId',address.address_id,\r\n"
+			+ "			 	                             'street1', address.street1,\r\n"
+			+ "			 	                             'street2', address.street2,\r\n"
+			+ "			 	                             'street3', address.street3,\r\n"
+			+ "			 	                             'country', address.country,\r\n"
+			+ "			 	                             'state', address.state,\r\n"
+			+ "			 	                             'city', address.city,\r\n"
+			+ "			 	                             'postalCode', address.postal_code  	                         )\r\n"
+			+ "			 	                     )  	                     FROM tbl_address AS address\r\n"
+			+ "			 	                     WHERE address.userId = users.user_id  	                 )\r\n"
+			+ "			 	             ) AS Result  	          FROM tbl_user_master AS users\r\n"
+			+ "			 	          WHERE users.emailId =? AND users.is_deleted=false", nativeQuery = true)
+	Object getExistingUserPersonalDetailsByEmailId(String emailId);
 
 	@Query(value = "SELECT * from tbl_user_master where webId=?", nativeQuery = true)
 	Users getUserByWebId(int webId);

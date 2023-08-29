@@ -190,13 +190,6 @@ public class UsersServiceImpl implements UsersService {
 
 			// send email to user
 			response = save(jsonNode, generateDonorId(), request);
-
-			Users resulEntity = usersRepository.findByEmailId(userNode.get("emailId").asText());
-
-			Receipt receipt = receiptRepository.getUserReceipt(resulEntity.getUserId());
-			emailService.sendEmailWithAttachment(resulEntity.getEmailId(), EnumConstants.subject, EnumConstants.content,
-					receipt.getReciept_Path(), resulEntity);
-
 			return response;
 		} else {
 			throw new CustomException("Invalid donation mode");
@@ -460,25 +453,19 @@ public class UsersServiceImpl implements UsersService {
 	
 	public ApiResponse<UsersDTO> getExistingUserByEmail(String email) {
 		ApiResponse<UsersDTO> response = new ApiResponse<>();
-		Object user = usersRepository.getUserByEmail(email);
+		Object user = usersRepository.getExistingUserPersonalDetailsByEmailId(email);
 		if (user == null)
-			throw new CustomExceptionNodataFound("No user found with emailId " + email);
-		//Gson gson = new Gson();
-		Gson gson = new GsonBuilder()
-	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
-	            .create();
+			throw new CustomExceptionNodataFound("No user found with Email Id " + email);
+		// Gson gson = new Gson();
+		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
-//			if (entity.getDonorId() != null && entity.getWebId() == null) {
-//				throw new CustomExceptionDataAlreadyExists(
-//						"Donar with " + entity.getEmailId() + " is already Resigterd");
-//			}
+
 			response.setData(modelMapper.map(entity, UsersDTO.class));
 			response.setStatus(EnumConstants.SUCCESS);
 			response.setStatusCode(HttpStatus.OK.value());
 			response.setMessage("User found Successfully");
-		} else
-			throw new CustomExceptionNodataFound("No user found with emailId " + email);
+		}
 		return response;
 	}
 
@@ -517,13 +504,14 @@ public class UsersServiceImpl implements UsersService {
 		}
 	}
 
+	
+	
 	@Override
 	public ApiResponse<UsersDTO> getUserPersonalDetails(String email) {
 		ApiResponse<UsersDTO> response = new ApiResponse<>();
 		Object user = usersRepository.getUserPersonalDetailsByEmail(email);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
-//		Gson gson = new Gson();
 		Gson gson = new GsonBuilder()
 	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
 	            .create();
@@ -567,7 +555,6 @@ public class UsersServiceImpl implements UsersService {
 		String userName = jwtHelper.getUsernameFromToken(token.substring(7));
 
 		Users tokenUserUpdate = this.usersRepository.findByEmailId(userName);
-//		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
 		Gson gson = new GsonBuilder()
 	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
 	            .create();
@@ -1046,7 +1033,10 @@ public class UsersServiceImpl implements UsersService {
 			}
 
 			if (user != null) {
-				Gson gson = new Gson();
+				//Gson gson = new Gson();
+				Gson gson = new GsonBuilder()
+			            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
+			            .create();
 				Users entity = gson.fromJson(user.toString(), Users.class);
 
 				if (entity.getEmailId() != null || entity.getDonorId() != null) {

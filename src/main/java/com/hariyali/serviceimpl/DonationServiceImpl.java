@@ -133,8 +133,15 @@ public class DonationServiceImpl implements DonationService {
 			// send email to user
 			response = saveDonationOffline(jsonNode, usersServiceImpl.generateDonorId(), request);
 			Receipt receipt = receiptRepository.getUserReceipt(userEmail.getUserId());
+			int donationCnt=donationRepository.donationCount(userEmail.getEmailId());
 			try {
+				if(donationCnt>1) {
 				emailService.sendReceiptWithAttachment(userEmail.getEmailId(),receipt.getReciept_Path());
+				}
+				else {
+					emailService.sendEmailWithAttachment(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content,
+							receipt.getReciept_Path(), userEmail);
+				}
 			} catch (MessagingException e) {
 				throw new CustomException("Issued to email send:"+e.getMessage());
 			}
