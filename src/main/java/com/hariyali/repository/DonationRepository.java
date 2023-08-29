@@ -152,4 +152,10 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 	Object getAllDonationDoneByUser(String email);
 
 	public Donation findByOrderId(String orderId);
+	
+	@Query(value = "SELECT COUNT(d.donation_id) AS donation_count\r\n"
+			+ "FROM tbl_user_master u\r\n"
+			+ "LEFT JOIN tbl_donation d ON u.user_id = d.userId\r\n"
+			+ "WHERE u.emailId = ?;",nativeQuery = true)
+	public int donationCount(String emailId);
 }

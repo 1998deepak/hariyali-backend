@@ -190,13 +190,6 @@ public class UsersServiceImpl implements UsersService {
 
 			// send email to user
 			response = save(jsonNode, generateDonorId(), request);
-
-			Users resulEntity = usersRepository.findByEmailId(userNode.get("emailId").asText());
-
-			Receipt receipt = receiptRepository.getUserReceipt(resulEntity.getUserId());
-			emailService.sendEmailWithAttachment(resulEntity.getEmailId(), EnumConstants.subject, EnumConstants.content,
-					receipt.getReciept_Path(), resulEntity);
-
 			return response;
 		} else {
 			throw new CustomException("Invalid donation mode");
