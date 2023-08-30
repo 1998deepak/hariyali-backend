@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -151,7 +152,8 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 			+ "ORDER BY p.payment_date DESC;", nativeQuery = true)
 	Object getAllDonationDoneByUser(String email);
 
-	public Donation findByOrderId(String orderId);
+	@Query(value = "SELECT * FROM tbl_donation Where order_id = :orderId", nativeQuery = true)
+	public Donation findByOrderId(@Param("orderId") String orderId);
 	
 	@Query(value = "SELECT COUNT(d.donation_id) AS donation_count\r\n"
 			+ "FROM tbl_user_master u\r\n"

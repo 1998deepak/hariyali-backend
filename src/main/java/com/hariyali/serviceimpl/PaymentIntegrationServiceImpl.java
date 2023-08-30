@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,7 @@ import com.hariyali.utils.EmailService;
  * @date 20/08/2023
  */
 @Service
+@Slf4j
 public class PaymentIntegrationServiceImpl implements PaymentIntegrationService {
 
 	@Autowired
@@ -75,14 +77,15 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 
 		AesCryptUtil aesUtil = new AesCryptUtil(gatewayConfiguration.getAccessKey());
 		String decryptedResponse = aesUtil.decrypt(encryptedResponse);
-
+		log.info("decryptedResponse :: "+ decryptedResponse);
 		Map<String, String> response = Arrays.stream(of(decryptedResponse.split("&")).orElse(new String[] {}))
 				.filter(values -> !values.isEmpty())
 				.collect(Collectors.toMap(
 						s -> ofNullable(s.split("=")).filter(data -> data.length > 0).map(data -> data[0]).orElse(""),
 						s -> ofNullable(s.split("=")).filter(data -> data.length > 1).map(data -> data[0]).orElse("")));
-
-		Donation donation = donationRepository.findByOrderId(ofNullable(response.get("order_id")).orElse("0"));
+		String orderId = ofNullable(response.get("order_id")).orElse("0");
+		log.info("Order id ::" +orderId);
+		Donation donation = donationRepository.findByOrderId(orderId);
 		if (isNull(donation))
 			throw new CustomException("Invalid order id received");
 		PaymentInfo paymentInfo = new PaymentInfo();
