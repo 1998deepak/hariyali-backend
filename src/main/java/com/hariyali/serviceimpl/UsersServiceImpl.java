@@ -432,10 +432,8 @@ public class UsersServiceImpl implements UsersService {
 		Object user = usersRepository.getUserByEmail(email);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
-		//Gson gson = new Gson();
-		Gson gson = new GsonBuilder()
-	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
-	            .create();
+		// Gson gson = new Gson();
+		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
 			if (entity.getDonorId() != null && entity.getWebId() == null) {
@@ -450,7 +448,7 @@ public class UsersServiceImpl implements UsersService {
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
 		return response;
 	}
-	
+
 	public ApiResponse<UsersDTO> getExistingUserByEmail(String email) {
 		ApiResponse<UsersDTO> response = new ApiResponse<>();
 		Object user = usersRepository.getExistingUserPersonalDetailsByEmailId(email);
@@ -504,17 +502,13 @@ public class UsersServiceImpl implements UsersService {
 		}
 	}
 
-	
-	
 	@Override
 	public ApiResponse<UsersDTO> getUserPersonalDetails(String email) {
 		ApiResponse<UsersDTO> response = new ApiResponse<>();
 		Object user = usersRepository.getUserPersonalDetailsByEmail(email);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
-		Gson gson = new GsonBuilder()
-	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
-	            .create();
+		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
 
@@ -555,9 +549,7 @@ public class UsersServiceImpl implements UsersService {
 		String userName = jwtHelper.getUsernameFromToken(token.substring(7));
 
 		Users tokenUserUpdate = this.usersRepository.findByEmailId(userName);
-		Gson gson = new GsonBuilder()
-	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
-	            .create();
+		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
 		JsonNode userNode = jsonNode.get("user");
 
 		if (userNode == null) {
@@ -822,10 +814,10 @@ public class UsersServiceImpl implements UsersService {
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Donation Approved By " + userName);
 			result.setStatusCode(HttpStatus.OK.value());
-			Receipt receipt = receiptRepository.getUserReceiptbyDonation(user.getUserId(),
-					donation.get(0).getDonationId());
-			emailService.sendEmailWithAttachment(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
-					receipt.getReciept_Path(), recipientEmail);
+//			Receipt receipt = receiptRepository.getUserReceiptbyDonation(user.getUserId(),
+//					donation.get(0).getDonationId());
+//			emailService.sendEmailWithAttachment(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
+//					receipt.getReciept_Path(), recipientEmail);
 		} else {
 			throw new CustomExceptionNodataFound("Status should Only be Approved or Rejected");
 		}
@@ -926,9 +918,15 @@ public class UsersServiceImpl implements UsersService {
 				}
 				try {
 					String paymentStatus = d.getPaymentInfo().get(0).getPaymentStatus();
-					if (paymentStatus.equalsIgnoreCase("Completed")) {
+					if (paymentStatus.equalsIgnoreCase("Success")) {
 						receiptService.generateReceipt(d);
-						emailService.sendGiftingLetterEmail(recipientEmail.getEmailId(), user);
+						Receipt receipt = receiptRepository.getUserReceipt(user.getUserId());
+
+						if (d.getDonationType().equals("gift-donate")) {
+							emailService.sendGiftingLetterEmail(recipientEmail.getEmailId(), user);
+						}
+						emailService.sendEmailWithAttachment(user.getEmailId(), EnumConstants.subject,
+								EnumConstants.content, receipt.getReciept_Path(), recipientEmail);
 					} else {
 						sendRejectDonationEmails(user.getEmailId());
 					}
@@ -1033,10 +1031,8 @@ public class UsersServiceImpl implements UsersService {
 			}
 
 			if (user != null) {
-				//Gson gson = new Gson();
-				Gson gson = new GsonBuilder()
-			            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
-			            .create();
+				// Gson gson = new Gson();
+				Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
 				Users entity = gson.fromJson(user.toString(), Users.class);
 
 				if (entity.getEmailId() != null || entity.getDonorId() != null) {
