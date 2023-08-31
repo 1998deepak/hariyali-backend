@@ -75,7 +75,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "                        SELECT JSON_ARRAYAGG(\r\n" + "                            JSON_OBJECT(\r\n"
 			+ "                                'paymentInfoId', paymentInfo.paymentInfo_id,\r\n"
 			+ "                                'paymentMode', paymentInfo.payment_mode,\r\n"
-			+ "                                'bankname', paymentInfo.bank_name,\r\n"
+			+ "                                'bankName', paymentInfo.bank_name,\r\n"
 			+ "                                'chqORddNo', paymentInfo.chq_OR_dd_no,\r\n"
 			+ "                                'chqORddDate', DATE_FORMAT(paymentInfo.chq_OR_dd_date, '%Y-%m-%d'),\r\n"
 			+ "                                'paymentDate', DATE(paymentInfo.payment_date),\r\n"
