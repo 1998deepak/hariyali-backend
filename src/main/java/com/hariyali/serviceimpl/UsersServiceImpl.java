@@ -918,7 +918,7 @@ public class UsersServiceImpl implements UsersService {
 				}
 				try {
 					String paymentStatus = d.getPaymentInfo().get(0).getPaymentStatus();
-					if (paymentStatus.equalsIgnoreCase("Success")) {
+					if (paymentStatus.equalsIgnoreCase("Success") || paymentStatus.equalsIgnoreCase("Completed")) {
 						receiptService.generateReceipt(d);
 						Receipt receipt = receiptRepository.getUserReceipt(user.getUserId());
 
