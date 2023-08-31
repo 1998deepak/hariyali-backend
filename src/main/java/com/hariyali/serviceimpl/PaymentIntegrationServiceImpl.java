@@ -82,7 +82,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 				.filter(values -> !values.isEmpty())
 				.collect(Collectors.toMap(
 						s -> ofNullable(s.split("=")).filter(data -> data.length > 0).map(data -> data[0]).orElse(""),
-						s -> ofNullable(s.split("=")).filter(data -> data.length > 1).map(data -> data[0]).orElse("")));
+						s -> ofNullable(s.split("=")).filter(data -> data.length > 1).map(data -> data[1]).orElse("")));
 		String orderId = ofNullable(response.get("order_id")).orElse("0");
 		log.info("Order id ::" +orderId);
 		Donation donation = donationRepository.findByOrderId(orderId);
