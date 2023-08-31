@@ -795,7 +795,7 @@ public class UsersServiceImpl implements UsersService {
 		String webId = jsonNode.get("webId").asText();
 		String status = jsonNode.get("status").asText();
 
-		Users user = this.usersRepository.getUserByWebId(Integer.parseInt(webId));
+		Users user = this.usersRepository.getUserByWebId(webId);
 		System.out.println("User:" + user.toString());
 		System.out.println("username:" + userName);
 		List<Donation> donation = this.donationRepository.getDonationDataByUserId(user.getUserId());
