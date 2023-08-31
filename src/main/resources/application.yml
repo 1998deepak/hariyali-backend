@@ -70,3 +70,5 @@ request:
 # change this path as per environment
 log:
     path: c:/log
+encryption:
+           key: emgut@kL9RQ%L#tt

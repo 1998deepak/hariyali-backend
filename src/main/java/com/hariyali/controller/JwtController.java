@@ -2,6 +2,7 @@ package com.hariyali.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.hariyali.utils.EncryptionDecryptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,9 @@ public class JwtController {
 
 	@Autowired
 	OtpRepository otpRepository;
+
+	@Autowired
+	private EncryptionDecryptionUtil encryptionDecryptionUtil;
 
 	@Value("${user.account.locktime}")
 	private Integer lockTime;
@@ -91,6 +95,8 @@ public class JwtController {
 		if (otp == null || donarIdOrEmail == null) {
 			throw new CustomExceptionNodataFound("Please enter your Donar Id or Email  and OTP");
 		}
+		donarIdOrEmail = encryptionDecryptionUtil.decrypt(donarIdOrEmail);
+		otp = encryptionDecryptionUtil.decrypt(otp);
 		OtpModel otpModel = otpService.findByOtp(otp);
 		if (otpModel == null) {
 			throw new CustomExceptionNodataFound("Your OTP has been expired... Please resend OTP...");

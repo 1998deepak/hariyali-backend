@@ -229,7 +229,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	Object getUserPersonalDetailsByDonorId(String donorId);
 
 	@Query(value = "SELECT * from tbl_user_master where webId=?", nativeQuery = true)
-	Users getUserByWebId(int webId);
+	Users getUserByWebId(String webId);
 
 	@Query(value = "SELECT * from tbl_user_master where pan_card=?1", nativeQuery = true)
 	Users getUserByPancard(String pancard);

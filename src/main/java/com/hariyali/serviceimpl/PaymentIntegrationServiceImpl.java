@@ -79,7 +79,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 
 		Map<String, String> response = Arrays.stream(of(decryptedResponse.split("&")).orElse(new String[] {}))
 				.filter(values -> !values.isEmpty())
-				.collect(Collectors.toMap(s -> ofNullable(s.split("=")).filter(data-> data.length > 0).map(data -> data[0]).orElse(""), s -> ofNullable(s.split("=")).filter(data-> data.length > 1).map(data -> data[0]).orElse("")));
+				.collect(Collectors.toMap(s -> ofNullable(s.split("=")).filter(data-> data.length > 0).map(data -> data[0]).orElse(""), s -> ofNullable(s.split("=")).filter(data-> data.length > 1).map(data -> data[1]).orElse("")));
 
 		Donation donation = donationRepository
 				.findByOrderId(ofNullable(response.get("order_id")).orElse("0"));
@@ -110,7 +110,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 			System.out.println("user"+user);
 			emailService.sendWebIdEmail(user.getEmailId(),user);
 		}
-		if (paymentInfo.getPaymentStatus().equalsIgnoreCase("Completed")) {
+		if ("Success".equalsIgnoreCase(paymentInfo.getPaymentStatus()) || "Completed".equalsIgnoreCase(paymentInfo.getPaymentStatus())) {
 			receiptService.generateReceipt(donation);
 			Receipt receipt = receiptRepository.getUserReceiptbyDonation(user.getUserId(), donation.getDonationId());
 			try {
