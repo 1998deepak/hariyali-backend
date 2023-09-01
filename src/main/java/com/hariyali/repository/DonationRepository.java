@@ -38,7 +38,7 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 			+ "						 			                             JSON_OBJECT(\r\n"
 			+ "						 											'packageId',packages.package_id,\r\n"
 			+ "						 			                                 'packageName', packages.package_name,\r\n"
-			+ "						                                              'NoOfBouquets', packages.no_of_bouquets,\r\n"
+			+ "						                                              'noOfBouquets', packages.no_of_bouquets,\r\n"
 			+ "						                                              'bouquetPrice',packages.bouquet_price,\r\n"
 			+ "						 			                                 'maintenanceCost', packages.maintenance_cost,\r\n"
 			+ "						                                              'createdDate',Date(packages.created_date),\r\n"
