@@ -30,7 +30,7 @@ public class PaymentInfo implements Serializable {
 	private String paymentMode;
 
 	@Column(name = "bank_name")
-	private String bankname;
+	private String bankName;
 
 	
 	@Column(name = "chq_OR_dd_no")

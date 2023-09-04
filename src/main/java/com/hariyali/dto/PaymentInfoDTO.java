@@ -13,7 +13,7 @@ public class PaymentInfoDTO {
 
 	private String paymentMode;
 
-	private String bankname;
+	private String bankName;
 
 	private String chqORddNo;
 
