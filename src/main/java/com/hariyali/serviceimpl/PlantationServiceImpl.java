@@ -71,15 +71,10 @@ public class PlantationServiceImpl implements PlantationService {
 	
 
 	@Override
-	public ByteArrayInputStream exportExcelUserPlant(String donationType,String packageName) {
+	public ByteArrayInputStream exportExcelUserPlant() {
 		
-		System.err.println(usersRepository.getUserPlantExportExcel(donationType,packageName).toString());
-
-		List<UserPlantUploadExelDTO> userPlantUploadExelDTOs = mapper.convertValue(
-				usersRepository.getUserPlantExportExcel(donationType,packageName), new TypeReference<List<UserPlantUploadExelDTO>>() {
-				});
-
 		Workbook workbook = new SXSSFWorkbook();
+		
 		try {
 
 			Sheet sheet = workbook.createSheet("User Plant Report ");
@@ -89,6 +84,7 @@ public class PlantationServiceImpl implements PlantationService {
 			Row row = sheet.createRow(0);
 
 			CellStyle style = workbook.createCellStyle();
+			
 
 			XSSFFont font = (XSSFFont) workbook.createFont();
 
@@ -97,141 +93,55 @@ public class PlantationServiceImpl implements PlantationService {
 			style.setFont(font);
 
 			Cell cell = row.createCell(0);
-			cell.setCellValue("User");
+			cell.setCellValue("State");
 			sheet.autoSizeColumn(0);
 			cell.setCellStyle(style);
 
 			cell = row.createCell(1);
-			cell.setCellValue("Donation");
+			cell.setCellValue("District");
 			sheet.autoSizeColumn(1);
 			cell.setCellStyle(style);
 
 			cell = row.createCell(2);
-			cell.setCellValue("Package");
+			cell.setCellValue("Village");
 			sheet.autoSizeColumn(2);
 			cell.setCellStyle(style);
 
 			cell = row.createCell(3);
-			cell.setCellValue("User name");
+			cell.setCellValue("Season");
 			sheet.autoSizeColumn(3);
 			cell.setCellStyle(style);
 
 			cell = row.createCell(4);
-			cell.setCellValue("Package name");
+			cell.setCellValue("Plot");
 			sheet.autoSizeColumn(4);
 			cell.setCellStyle(style);
 
 			cell = row.createCell(5);
-			cell.setCellValue("Donation amt");
+			cell.setCellValue("NoOfPlantsPlanted ");
 			sheet.autoSizeColumn(5);
 			cell.setCellStyle(style);
 
 			cell = row.createCell(6);
-			cell.setCellValue("Donar ID");
+			cell.setCellValue("Plantation Date");
 			sheet.autoSizeColumn(6);
 			cell.setCellStyle(style);
 
 			cell = row.createCell(7);
-			cell.setCellValue("Donation Type");
+			cell.setCellValue("Lattitude");
 			sheet.autoSizeColumn(7);
 			cell.setCellStyle(style);
 			
-			if(donationType.equals("Gift-Donate"))
-			{
-				cell = row.createCell(7);
-				cell.setCellValue("Donation Type");
-				sheet.autoSizeColumn(7);
-				cell.setCellStyle(style);
-				
-				cell = row.createCell(8);
-				cell.setCellValue("Recipient ID");
-				sheet.autoSizeColumn(8);
-				cell.setCellStyle(style);
-				
-				cell = row.createCell(9);
-				cell.setCellValue("Recipient Name");
-				sheet.autoSizeColumn(9);
-				cell.setCellStyle(style);
-				
-				cell = row.createCell(10);
-				cell.setCellValue("Plant Name");
-				sheet.autoSizeColumn(10);
-				cell.setCellStyle(style);
-
-				cell = row.createCell(11);
-				cell.setCellValue("Quantity");
-				sheet.autoSizeColumn(11);
-				cell.setCellStyle(style);
-				
-				cell = row.createCell(12);
-				cell.setCellValue("Plant Date");
-				sheet.autoSizeColumn(12);
-				cell.setCellStyle(style);
-
-				cell = row.createCell(13);
-				cell.setCellValue("Plant Location");
-				sheet.autoSizeColumn(13);
-				cell.setCellStyle(style);
-				
-				cell = row.createCell(14);
-				cell.setCellValue("Start Date");
-				sheet.autoSizeColumn(14);
-				cell.setCellStyle(style);
-				
-			}else {
-				cell = row.createCell(8);
-				cell.setCellValue("Plant Name");
-				sheet.autoSizeColumn(8);
-				cell.setCellStyle(style);
-
-				cell = row.createCell(9);
-				cell.setCellValue("Quantity");
-				sheet.autoSizeColumn(9);
-				cell.setCellStyle(style);
-				
-				
-				cell = row.createCell(10);
-				cell.setCellValue("Plant Date");
-				sheet.autoSizeColumn(10);
-				cell.setCellStyle(style);
-
-				cell = row.createCell(11);
-				cell.setCellValue("Plant Location");
-				sheet.autoSizeColumn(11);
-				cell.setCellStyle(style);
-				
-				cell = row.createCell(12);
-				cell.setCellValue("Start Date");
-				sheet.autoSizeColumn(12);
-				cell.setCellStyle(style);
-				
-			}
-
-			int rowCount = 1;
-
-			for (UserPlantUploadExelDTO dto : userPlantUploadExelDTOs) {
-				Row rowdata = sheet.createRow(rowCount++);
-				rowdata.createCell(0).setCellValue(dto.getUser());
-				rowdata.createCell(1).setCellValue(dto.getDonation());
-				rowdata.createCell(2).setCellValue(dto.getPackages());
-				rowdata.createCell(3).setCellValue(dto.getUserName());
-				rowdata.createCell(4).setCellValue(dto.getPackageName());
-				rowdata.createCell(5).setCellValue(dto.getAmount());
-				
-				 // Create a cell and format it as text for the donor ID
-			    Cell donorIdCell = rowdata.createCell(6);
-			    
-				rowdata.createCell(7).setCellValue(dto.getDonationType());
-
-			    // Prepend an apostrophe to force Excel to treat it as text
-			    donorIdCell.setCellValue("" + dto.getDonarId());				
-				if(donationType.equals("Gift-Donate"))
-				{
-					rowdata.createCell(8).setCellValue(dto.getRecipientId());
-					rowdata.createCell(9).setCellValue(dto.getFirstName());
-				}
-					
-			}
+			cell = row.createCell(8);
+			cell.setCellValue("Longitude");
+			sheet.autoSizeColumn(8);
+			cell.setCellStyle(style);
+			
+			cell = row.createCell(9);
+			cell.setCellValue("Status");
+			sheet.autoSizeColumn(9);
+			cell.setCellStyle(style);
+			
 			
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			workbook.write(outputStream);
@@ -243,7 +153,6 @@ public class PlantationServiceImpl implements PlantationService {
 		return null;
 
 	}
-
 	@Override
 	public String uploadPlantationExcel(XSSFWorkbook workbook) {
 	    int countRow = 0;
