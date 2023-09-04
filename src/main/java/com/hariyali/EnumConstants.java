@@ -31,19 +31,43 @@ public interface EnumConstants {
 
 	public static final String receiptNumber = "txn_23" + donor;
 
-	public static final String GIFTING_MSG_BODY = "Dear %s\r\n,Welcome to the Hariyali family!\r\n" + "\r\n"
-			+ "\tOn this happy occasion, your well-wisher, %s has gifted you a Hariyali sponsorship.  The main objective of the project is to do 5 Billion Tree Plantation from 2026 in several parts of the Nation."
-			+ "The Tree Plantation is the main Agenda of the Project." + "\r\n" + "Best wishes,\r\n"
-			+ "Team Hariyali\r\n";
+	public static final String GIFTING_MSG_BODY = "Dear Sponsor,\n" +
+            "\t\t Welcome to Project “Hariyali”.\n" +
+            "On the occasion of your %s, you have been gifted with Hariyali sponsorship to make your day special.\n" +
+            "The gift certificate is attached herewith.\n" +
+            " \tYou can login to your account on our website www.hariyali.org.in with your login details.\n" +
+            "Email ID : %s\n" +
+            "Password : %s\n" +
+            "\n" +
+            "Mahindra Foundation\n" +
+            "Sheetal Mehta\n" +
+            "Trustee & Executive Director\n" +
+            "K.C. Mahindra Education Trust,\n" +
+            "3rd Floor, Cecil Court,\n" +
+            "Near Regal Cinema,\n" +
+            "Mahakavi Bushan Marg,\n" +
+            "Mumbai 400001\n" +
+            "PS : Contact support@hariyali.org.in in case of any query.";
+
 	public static final String GIFTING_MSG_SUBJECT = "Someone wanted you to have this special gift";
 	
 	
 	String subject = "Welcome To Hariyali";
-	String content = "Dear Sir/Madam,\n \tWelcome to Project Hariyali."
-			+ "The Mahindra Foundation,would like to thank you for your donation to Project Hariyali. The main objective of the project is to do 5 Billion Tree Plantation from 2026 in several parts of the Nation. "
-			+ "The Tree Plantation is the main Agenda of the Project. "
-			+ "The HARIYALI is a Partnership between Mahindra and Mahindra and the Nandi Foundation. The Project will be jointly managed by M&M and Nandi Foundation. \r\n"
-			+ "This is your Donor Id : %s.\n Find below attachment of your donation."  + "\nBest wishes,\nTeam Hariyali\r\n"
-			+ "\r\n";
+	String content = "Dear Sponsor,\n\tWelcome to Project “Hariyali”.\n"
+            + "The Mahindra Foundation and Naandi Foundation would like to thank you for your donation.\n"
+            + "You can login to your account on our website www.hariyali.org.in with your login details.\n"
+            + "Email ID : %s\n"
+            + "Password : %s\n"
+            + "\tThanking you for your support to Project Hariyali.\n"
+            + "Mahindra Foundation\n"
+            + "Sheetal Mehta\n"
+            + "Trustee & Executive Director\n"
+            + "K.C. Mahindra Education Trust,\n"
+            + "3rd Floor, Cecil Court,\n"
+            + "Near Regal Cinema,\n"
+            + "Mahakavi Bushan Marg,\n"
+            + "Mumbai 400001\n"
+            + "PS : Contact support@hariyali.org.in in case of any query.";
+	
 
 }
