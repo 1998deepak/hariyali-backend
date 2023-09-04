@@ -922,9 +922,9 @@ public class UsersServiceImpl implements UsersService {
 					if (paymentStatus.equalsIgnoreCase("Success") || paymentStatus.equalsIgnoreCase("Completed")) {
 						receiptService.generateReceipt(d);
 						Receipt receipt = receiptRepository.getUserReceipt(user.getUserId());
-
+						Users recipientData = usersRepository.findByEmailId(recipientEmail.getEmailId());
 						if (d.getDonationType().equals("gift-donate")) {
-							emailService.sendGiftingLetterEmail(recipientEmail.getEmailId(), user);
+							emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
 							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content, user);
 							emailService.sendReceiptWithAttachment(user.getEmailId(),receipt);
 						}

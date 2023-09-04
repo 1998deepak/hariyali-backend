@@ -1,5 +1,8 @@
 package com.hariyali.utils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
@@ -76,13 +79,13 @@ public class EmailService {
 		System.out.println("Mail send");
 	}
 
-	public void sendGiftingLetterEmail(String toEmail, Users resulEntity) {
+	public void sendGiftingLetterEmail(Users recipientData,String donationEvent) {
 		String subject = EnumConstants.GIFTING_MSG_SUBJECT;
 		String body = EnumConstants.GIFTING_MSG_BODY;
-		String mailBody = String.format(body, toEmail, resulEntity.getFirstName());
+		String mailBody = String.format(body,donationEvent, recipientData.getEmailId(),recipientData.getPassword());
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setFrom(fromEmail);
-		message.setTo(toEmail);
+		message.setTo(recipientData.getEmailId());
 		message.setText(mailBody);
 		message.setSubject(subject);
 		mailSender.send(message);
@@ -124,9 +127,11 @@ public class EmailService {
 	}
 
 	public void sendReceiptWithAttachment(String to, Receipt receipt) throws MessagingException {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        String formattedDate = sdf.format(receipt.getRecieptDate());
 		String text = "Dear Sponsor,\n" +
-	            "We thank you for your sponsorship.\n" +
-	            "Rec.No:"+ receipt.getRecieptNumber() +"Date:"+ receipt.getRecieptDate()+"\n"+
+	            "\t\tWe thank you for your sponsorship.\n" +
+	            "Rec.No:"+ receipt.getRecieptNumber() +" Date:"+ formattedDate+"\n"+
 	            "Please find a PDF version of the receipt attached herewith.\n" +
 	            "Thanking you for your support to project Hariyali.\n" +
 	            "\n" +

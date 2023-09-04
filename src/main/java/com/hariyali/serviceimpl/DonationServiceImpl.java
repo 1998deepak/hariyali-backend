@@ -287,7 +287,8 @@ public class DonationServiceImpl implements DonationService {
 							}
 						}
 						Users recipientData = usersRepository.findByEmailId(recipient.getEmailId());
-						emailService.sendGiftingLetterEmail(recipient.getEmailId(),resulEntity);
+						System.out.println(donation.getDonationEvent());
+						emailService.sendGiftingLetterEmail(recipientData,donation.getDonationEvent());
 					}
 					
 				}
