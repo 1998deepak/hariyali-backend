@@ -7,7 +7,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Random;
 
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import com.hariyali.EnumConstants;
 import com.hariyali.dto.ApiResponse;
+import com.hariyali.dto.ReceiptDto;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.Receipt;
 import com.hariyali.entity.Users;
@@ -258,5 +261,28 @@ public class ReceiptServiceImpl implements ReceiptService {
 		try (FileInputStream inputStream = new FileInputStream(file)) {
 			IOUtils.copy(inputStream, response.getOutputStream());
 		}
+	}
+	
+	@Override
+	public List<ReceiptDto> getAllReceipt(String emailId) {
+		
+		List<Receipt> result = receiptRepository.getAllReciept(emailId);	
+		 List<ReceiptDto> receiptDTOList = new ArrayList<>();
+		 
+		  if (result != null) {
+			  for (Receipt receipt : result) {
+				  ReceiptDto receiptDTO = new ReceiptDto();
+	                receiptDTO.setReceiptId(receipt.getRecieptId());
+	                receiptDTO.setReciept_number(receipt.getRecieptNumber());
+	                receiptDTO.setRecieptDate(receipt.getRecieptDate());
+	                receiptDTO.setReciept_Path( receipt.getReciept_Path());
+	                receiptDTO.setDonation_id(receipt.getDonation().getDonationId());
+	                receiptDTOList.add(receiptDTO);
+			  }
+			  return receiptDTOList;
+		  }
+		  else {
+	            throw new CustomException("There is no user with the provided emailId");
+	        }
 	}
 }
