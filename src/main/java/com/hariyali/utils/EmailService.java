@@ -12,6 +12,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import com.hariyali.EnumConstants;
+import com.hariyali.entity.Receipt;
 import com.hariyali.entity.Users;
 import com.hariyali.repository.ReceiptRepository;
 
@@ -55,10 +56,24 @@ public class EmailService {
 		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
 		helper.setTo(to);
 		helper.setSubject(subject);
-		helper.setText(String.format(text, user.getDonorId()));
+		helper.setText(String.format(text, user.getEmailId(),user.getPassword()));
 		FileSystemResource file = new FileSystemResource(attachmentPath);
 		helper.addAttachment(file.getFilename(), file, "application/pdf");
 		mailSender.send(mimeMessage);
+		System.out.println("Mail send");
+	}
+	
+	public void sendWelcomeLetterMail(String to, String subject, String text,  Users user)
+			throws MessagingException {
+		MimeMessage mimeMessage = mailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+		helper.setTo(to);
+		helper.setSubject(subject);
+		helper.setText(String.format(text, user.getEmailId(),user.getPassword()));
+//		FileSystemResource file = new FileSystemResource(attachmentPath);
+//		helper.addAttachment(file.getFilename(), file, "application/pdf");
+		mailSender.send(mimeMessage);
+		System.out.println("Mail send");
 	}
 
 	public void sendGiftingLetterEmail(String toEmail, Users resulEntity) {
@@ -108,15 +123,22 @@ public class EmailService {
 		}
 	}
 
-	public void sendReceiptWithAttachment(String to, String attachmentPath) throws MessagingException {
-		String text = "Dear User,\r\n Thanks For plant donation, Below attachement is your donation receipt."
-				+ "\nBest wishes,\nTeam Hariyali\r\n" + "\r\n";
+	public void sendReceiptWithAttachment(String to, Receipt receipt) throws MessagingException {
+		String text = "Dear Sponsor,\n" +
+	            "We thank you for your sponsorship.\n" +
+	            "Rec.No:"+ receipt.getRecieptNumber() +"Date:"+ receipt.getRecieptDate()+"\n"+
+	            "Please find a PDF version of the receipt attached herewith.\n" +
+	            "Thanking you for your support to project Hariyali.\n" +
+	            "\n" +
+	            "Naandi Foundation\n" +
+	            "\tAddress : \n" +
+	            "PS : Contact 'support@hariyali.org.in' in case of any query.";
 		MimeMessage mimeMessage = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
 		helper.setTo(to);
 		helper.setSubject("Receipt For Your Donation");
 		helper.setText(text);
-		FileSystemResource file = new FileSystemResource(attachmentPath);
+		FileSystemResource file = new FileSystemResource(receipt.getReciept_Path());
 		helper.addAttachment(file.getFilename(), file, "application/pdf");
 		mailSender.send(mimeMessage);
 	}

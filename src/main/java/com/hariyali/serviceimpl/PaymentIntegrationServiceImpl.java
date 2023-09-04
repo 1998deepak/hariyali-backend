@@ -119,10 +119,12 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 			Receipt receipt = receiptRepository.getUserReceiptbyDonation(user.getUserId(), donation.getDonationId());
 			try {
 				if (donationCnt > 1) {
-					emailService.sendReceiptWithAttachment(user.getEmailId(),receipt.getReciept_Path());
+					emailService.sendReceiptWithAttachment(user.getEmailId(),receipt);
 				}else {
-					emailService.sendEmailWithAttachment(user.getEmailId(), EnumConstants.subject,
-							EnumConstants.content, receipt.getReciept_Path(), user);
+//					emailService.sendEmailWithAttachment(user.getEmailId(), EnumConstants.subject,
+//							EnumConstants.content, receipt.getReciept_Path(), user);
+					emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content, user);
+					emailService.sendReceiptWithAttachment(user.getEmailId(),receipt);
 				}
 			} catch (MessagingException e) {
 				throw new CustomException(e.getMessage());
