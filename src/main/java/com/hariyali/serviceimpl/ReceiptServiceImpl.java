@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
@@ -98,7 +100,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 		String receiptNo = getReceiptNumber();
 		Users users = userRepository.getUserByDonationId(donation.getDonationId());
 		String userFolder = receiptPath + "\\" + users.getDonorId() + "_" + users.getFirstName() + "_"
-				+ users.getLastName()+ "\\";
+				+ users.getLastName() + "\\";
 		File directory = new File(userFolder);
 		if (!directory.exists()) {
 			directory.mkdirs();
@@ -118,20 +120,31 @@ public class ReceiptServiceImpl implements ReceiptService {
 			Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
 			Font courierFontItalic = new Font(Font.FontFamily.COURIER, 20, Font.ITALIC);
 			document.open();
-			Paragraph p = new Paragraph("Hariyali", courierFontItalic);
-			p.setAlignment(Element.ALIGN_CENTER);
-			document.add(p);
-//			Paragraph title = new Paragraph("K.C. MAHINDRA EDUCATION TRUST", titleFont);
-//			title.setAlignment(Element.ALIGN_CENTER);
-//			document.add(title);
-//			document.add(new Paragraph("\n"));
-//			PdfPTable table = new PdfPTable(1);
-//			table.setWidthPercentage(60);
-//			PdfPCell cell = new PdfPCell(new Paragraph("Cecil Court, Mahakavi Bushan Marg, Mumbai, 400001."));
-//			cell.setBorder(Rectangle.BOX);
-//			cell.setPadding(10);
-//			table.addCell(cell);
-//			document.add(table);
+//			Paragraph p = new Paragraph("Hariyali", courierFontItalic);
+//			p.setAlignment(Element.ALIGN_CENTER);
+//			document.add(p);
+
+			Image logo = null;
+			try {
+				logo = Image.getInstance("src/main/resources/hariyalilogo.png");
+				logo.scaleToFit(100, 80); // Adjust the size as needed
+				logo.setAlignment(Element.ALIGN_CENTER);
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+
+			// Create a Paragraph to hold the logo
+			Paragraph logoParagraph = new Paragraph();
+			logoParagraph.setAlignment(Element.ALIGN_CENTER);
+			logoParagraph.add(logo);
+
+			// Add the logo to the document
+			document.add(logoParagraph);
 
 			PdfPTable receiptTable = new PdfPTable(3);
 			receiptTable.setWidthPercentage(100);
@@ -161,20 +174,20 @@ public class ReceiptServiceImpl implements ReceiptService {
 			String amountWords = Conversion.NumberToWord(roundUpAmount.toString());
 			String amountInWords = Conversion.formattedAmountInWords(amountWords);
 			System.err.println("amountInWords:" + amountInWords);
-			Font boldFont =new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
+			Font boldFont = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
 			Paragraph donorDetails = new Paragraph();
 			donorDetails.setAlignment(Element.ALIGN_LEFT);
-			Chunk nameChunk = new Chunk("Received with thanks from ",normal);
+			Chunk nameChunk = new Chunk("Received with thanks from ", normal);
 			donorDetails.add(nameChunk);
 			donorDetails.add(new Chunk(name.toUpperCase() + " (PAN – " + pancard + ")*", boldFont));
-			donorDetails.add(" the sum of Rupees " );
-			donorDetails.add(new Chunk(amountInWords,boldFont));
-			donorDetails.add(new Chunk( " only through our Website Dt. "+formattedDate+" towards your donation."));
+			donorDetails.add(" the sum of Rupees ");
+			donorDetails.add(new Chunk(amountInWords, boldFont));
+			donorDetails.add(new Chunk(" only through our Website Dt. " + formattedDate + " towards your donation."));
 			document.add(donorDetails);
 			document.add(new Paragraph("\n"));
 			document.add(new Paragraph("\n"));
 //			************
-			Chunk c1 = new Chunk("INR. "+donation.getTotalAmount(), boldFont);
+			Chunk c1 = new Chunk("INR. " + donation.getTotalAmount(), boldFont);
 			Paragraph lastPara1 = new Paragraph();
 			lastPara1.add(c1);
 			lastPara1.setAlignment(Element.ALIGN_LEFT);
@@ -191,7 +204,6 @@ public class ReceiptServiceImpl implements ReceiptService {
 			document.add(lastPara2);
 			document.add(lastPara3);
 
-			
 			// Add Amount Details
 //			PdfPTable receiptTable1 = new PdfPTable(2);
 //			receiptTable.setWidthPercentage(100);
@@ -227,12 +239,12 @@ public class ReceiptServiceImpl implements ReceiptService {
 			document.add(line);
 			Paragraph additionalText = new Paragraph(
 					"Income Tax Exemption U/S 80-G Granted Vide Certificate Number AAATK0315QF2021401 dated 28th May 2021 containing Approval Number AAATK0315QF20214 valid from 01st April 2021 to 31st March 2026. PAN - "
-							+ pancard);
+							+ pancard,normal);
 			additionalText.setAlignment(Element.ALIGN_LEFT);
 			document.add(additionalText);
 			Paragraph note = new Paragraph("*Note-\n"
 					+ "Kindly note that Naandi Foundation shall not be responsible for the verification of the donor's PAN details as well as for the denial of deduction u/s 80G of the Income Tax Act, 1961 for furnishing an incorrect PAN.",
-					receiptFont);
+					boldFont);
 			note.setAlignment(Element.ALIGN_LEFT);
 			document.add(note);
 			document.close();
@@ -253,10 +265,9 @@ public class ReceiptServiceImpl implements ReceiptService {
 		return fullPath;
 
 	}
-	
+
 	@Override
-	public void downloadReceipt(String recieptNumber, HttpServletResponse response)
-			throws IOException {
+	public void downloadReceipt(String recieptNumber, HttpServletResponse response) throws IOException {
 		Receipt receipt = receiptRepository.getByRecieptNumber(recieptNumber);
 
 		if (receipt == null || receipt.getReciept_Path() == null) {
@@ -283,27 +294,26 @@ public class ReceiptServiceImpl implements ReceiptService {
 			IOUtils.copy(inputStream, response.getOutputStream());
 		}
 	}
-	
+
 	@Override
 	public List<ReceiptDto> getAllReceipt(String emailId) {
-		
-		List<Receipt> result = receiptRepository.getAllReciept(emailId);	
-		 List<ReceiptDto> receiptDTOList = new ArrayList<>();
-		 
-		  if (result != null) {
-			  for (Receipt receipt : result) {
-				  ReceiptDto receiptDTO = new ReceiptDto();
-	                receiptDTO.setReceiptId(receipt.getRecieptId());
-	                receiptDTO.setReciept_number(receipt.getRecieptNumber());
-	                receiptDTO.setRecieptDate(receipt.getRecieptDate());
-	                receiptDTO.setReciept_Path( receipt.getReciept_Path());
-	                receiptDTO.setDonation_id(receipt.getDonation().getDonationId());
-	                receiptDTOList.add(receiptDTO);
-			  }
-			  return receiptDTOList;
-		  }
-		  else {
-	            throw new CustomException("There is no user with the provided emailId");
-	        }
+
+		List<Receipt> result = receiptRepository.getAllReciept(emailId);
+		List<ReceiptDto> receiptDTOList = new ArrayList<>();
+
+		if (result != null) {
+			for (Receipt receipt : result) {
+				ReceiptDto receiptDTO = new ReceiptDto();
+				receiptDTO.setReceiptId(receipt.getRecieptId());
+				receiptDTO.setReciept_number(receipt.getRecieptNumber());
+				receiptDTO.setRecieptDate(receipt.getRecieptDate());
+				receiptDTO.setReciept_Path(receipt.getReciept_Path());
+				receiptDTO.setDonation_id(receipt.getDonation().getDonationId());
+				receiptDTOList.add(receiptDTO);
+			}
+			return receiptDTOList;
+		} else {
+			throw new CustomException("There is no user with the provided emailId");
+		}
 	}
 }
