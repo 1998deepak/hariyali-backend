@@ -83,6 +83,10 @@ public class UsersDTO {
 	private Roles userRole;
 
 	private String activityType;
+	
+	private String citizenship ;
+	
+	private String country ;
 
 	
 	

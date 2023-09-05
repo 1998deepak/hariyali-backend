@@ -918,15 +918,21 @@ public class UsersServiceImpl implements UsersService {
 				}
 				try {
 					String paymentStatus = d.getPaymentInfo().get(0).getPaymentStatus();
+					logger.info("paymentStatus:"+paymentStatus);
 					if (paymentStatus.equalsIgnoreCase("Success") || paymentStatus.equalsIgnoreCase("Completed")) {
 						receiptService.generateReceipt(d);
 						Receipt receipt = receiptRepository.getUserReceipt(user.getUserId());
-
+						Users recipientData = usersRepository.findByEmailId(recipientEmail.getEmailId());
 						if (d.getDonationType().equals("gift-donate")) {
-							emailService.sendGiftingLetterEmail(recipientEmail.getEmailId(), user);
+							emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
+							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content, user);
+							emailService.sendReceiptWithAttachment(user.getEmailId(),receipt);
 						}
-						emailService.sendEmailWithAttachment(user.getEmailId(), EnumConstants.subject,
-								EnumConstants.content, receipt.getReciept_Path(), recipientEmail);
+//						emailService.sendEmailWithAttachment(user.getEmailId(), EnumConstants.subject,
+//								EnumConstants.content, receipt.getReciept_Path(), recipientEmail);
+						emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content, user);
+						emailService.sendReceiptWithAttachment(user.getEmailId(),receipt);
+						
 					} else {
 						sendRejectDonationEmails(user.getEmailId());
 					}

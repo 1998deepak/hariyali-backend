@@ -39,12 +39,11 @@ public class PlantationController {
 	@Autowired
 	private PlantationRepository plantationRepository;
 
-	@GetMapping("/excelExportUserPlant/{donationType}/{packageName}")
-	public void exportExcelUserPlant(HttpServletResponse response,@PathVariable String donationType,@PathVariable String packageName) {
+	@GetMapping("/excelExportUserPlant")
+	public void exportExcelUserPlant(HttpServletResponse response) {
 		
-		System.err.println(donationType);
 		try {
-			ByteArrayInputStream byteArrayInputStream = plantationService.exportExcelUserPlant(donationType,packageName);
+			ByteArrayInputStream byteArrayInputStream = plantationService.exportExcelUserPlant();
 			response.setContentType("application/octet-stream");
 			response.setHeader("Content-Disposition", "attachment; filename= User Plant Report.xlsx");
 			IOUtils.copy(byteArrayInputStream, response.getOutputStream());

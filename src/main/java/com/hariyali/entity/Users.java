@@ -121,6 +121,12 @@ public class Users implements Serializable {
 	
 	@Column(name = "planted")
 	private Boolean isPlanted = Boolean.FALSE;
+	
+	@Column(name = "citizenship")
+	private String citizenship ;
+	
+	@Column(name = "country")
+	private String country ;
 
 	public Boolean getIsPlanted() {
 		return isPlanted;
@@ -348,6 +354,22 @@ public class Users implements Serializable {
 
 	public void setIsApproved(Boolean isApproved) {
 		this.isApproved = isApproved;
+	}
+
+	public String getCitizenship() {
+		return citizenship;
+	}
+
+	public void setCitizenship(String citizenship) {
+		this.citizenship = citizenship;
+	}
+
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
 	}
 
 	

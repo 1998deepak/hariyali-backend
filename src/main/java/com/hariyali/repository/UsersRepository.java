@@ -99,6 +99,8 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "                                            'donorId',users.donorId,\r\n"
 			+ "                                            'organisation',users.organisation,\r\n"
 			+ "                                            'status',users.status,\r\n"
+			+ "												 'citizenship', users.citizenship,\r\n"
+			+ "                                               'country',users.country,\r\n"
 			+ "											'paymentDate',(select  date(MAX(payment_date)) \r\n"
 			+ "			 										from tbl_donation d\r\n"
 			+ "			 										inner join\r\n"

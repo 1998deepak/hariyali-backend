@@ -9,7 +9,7 @@ import com.hariyali.entity.Plantation;
 
 public interface PlantationService {
 
-	public ByteArrayInputStream exportExcelUserPlant(String donationType,String packageName);
+	public ByteArrayInputStream exportExcelUserPlant();
 
 	public String uploadPlantationExcel(XSSFWorkbook workbook);
 	

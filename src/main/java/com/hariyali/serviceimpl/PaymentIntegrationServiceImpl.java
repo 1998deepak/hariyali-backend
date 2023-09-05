@@ -82,7 +82,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 				.filter(values -> !values.isEmpty())
 				.collect(Collectors.toMap(
 						s -> ofNullable(s.split("=")).filter(data -> data.length > 0).map(data -> data[0]).orElse(""),
-						s -> ofNullable(s.split("=")).filter(data -> data.length > 1).map(data -> data[1]).orElse("")));
+						s -> ofNullable(s.split("=")).filter(data -> data.length > 1).map(data -> data[0]).orElse("")));
 		String orderId = ofNullable(response.get("order_id")).orElse("0");
 		log.info("Order id ::" +orderId);
 		Donation donation = donationRepository.findByOrderId(orderId);
@@ -119,10 +119,12 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 			Receipt receipt = receiptRepository.getUserReceiptbyDonation(user.getUserId(), donation.getDonationId());
 			try {
 				if (donationCnt > 1) {
-					emailService.sendReceiptWithAttachment(user.getEmailId(),receipt.getReciept_Path());
+					emailService.sendReceiptWithAttachment(user.getEmailId(),receipt);
 				}else {
-					emailService.sendEmailWithAttachment(user.getEmailId(), EnumConstants.subject,
-							EnumConstants.content, receipt.getReciept_Path(), user);
+//					emailService.sendEmailWithAttachment(user.getEmailId(), EnumConstants.subject,
+//							EnumConstants.content, receipt.getReciept_Path(), user);
+					emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content, user);
+					emailService.sendReceiptWithAttachment(user.getEmailId(),receipt);
 				}
 			} catch (MessagingException e) {
 				throw new CustomException(e.getMessage());

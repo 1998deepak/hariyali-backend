@@ -136,11 +136,13 @@ public class DonationServiceImpl implements DonationService {
 			int donationCnt=donationRepository.donationCount(userEmail.getEmailId());
 			try {
 				if(donationCnt>1) {
-				emailService.sendReceiptWithAttachment(userEmail.getEmailId(),receipt.getReciept_Path());
+				emailService.sendReceiptWithAttachment(userEmail.getEmailId(),receipt);
 				}
 				else {
-					emailService.sendEmailWithAttachment(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content,
-							receipt.getReciept_Path(), userEmail);
+//					emailService.sendEmailWithAttachment(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content,
+//							receipt.getReciept_Path(), userEmail);
+					emailService.sendWelcomeLetterMail(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content, userEmail);
+					emailService.sendReceiptWithAttachment(userEmail.getEmailId(),receipt);
 				}
 			} catch (MessagingException e) {
 				throw new CustomException("Issued to email send:"+e.getMessage());
@@ -284,7 +286,9 @@ public class DonationServiceImpl implements DonationService {
 								}
 							}
 						}
-						emailService.sendGiftingLetterEmail(recipient.getEmailId(),resulEntity);
+						Users recipientData = usersRepository.findByEmailId(recipient.getEmailId());
+						System.out.println(donation.getDonationEvent());
+						emailService.sendGiftingLetterEmail(recipientData,donation.getDonationEvent());
 					}
 					
 				}

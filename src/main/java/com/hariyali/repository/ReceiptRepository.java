@@ -1,12 +1,11 @@
 package com.hariyali.repository;
 
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.hariyali.dto.ReceiptDto;
 import com.hariyali.entity.Receipt;
 
 @Repository
@@ -70,4 +69,8 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Integer>{
 	Receipt getUserReceiptbyDonation(int userID,int donationId);
 
 	Receipt getByRecieptNumber(String recieptNumber);
+	
+	@Query(value ="select recp.recieptId,recp.reciept_date,recp.reciept_number,recp.reciept_Path,recp.donation_id From tbl_reciept as recp,tbl_donation as donation,tbl_user_master as u\r\n"
+			+ "			where recp.donation_id = donation.donation_id AND donation.userId = u.user_id AND u.emailId = ?",nativeQuery = true)
+	List<Receipt>  getAllReciept(String emailId);
 }
