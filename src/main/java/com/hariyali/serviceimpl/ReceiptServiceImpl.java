@@ -113,6 +113,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 		Document document = new Document(PageSize.A4);
 		PdfWriter writer;
 		try {
+			Font normal = new Font(Font.FontFamily.HELVETICA, 10);
 			writer = PdfWriter.getInstance(document, new FileOutputStream(fullPath));
 			Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
 			Font courierFontItalic = new Font(Font.FontFamily.COURIER, 20, Font.ITALIC);
@@ -120,17 +121,17 @@ public class ReceiptServiceImpl implements ReceiptService {
 			Paragraph p = new Paragraph("Hariyali", courierFontItalic);
 			p.setAlignment(Element.ALIGN_CENTER);
 			document.add(p);
-			Paragraph title = new Paragraph("K.C. MAHINDRA EDUCATION TRUST", titleFont);
-			title.setAlignment(Element.ALIGN_CENTER);
-			document.add(title);
-			document.add(new Paragraph("\n"));
-			PdfPTable table = new PdfPTable(1);
-			table.setWidthPercentage(60);
-			PdfPCell cell = new PdfPCell(new Paragraph("Cecil Court, Mahakavi Bushan Marg, Mumbai, 400001."));
-			cell.setBorder(Rectangle.BOX);
-			cell.setPadding(10);
-			table.addCell(cell);
-			document.add(table);
+//			Paragraph title = new Paragraph("K.C. MAHINDRA EDUCATION TRUST", titleFont);
+//			title.setAlignment(Element.ALIGN_CENTER);
+//			document.add(title);
+//			document.add(new Paragraph("\n"));
+//			PdfPTable table = new PdfPTable(1);
+//			table.setWidthPercentage(60);
+//			PdfPCell cell = new PdfPCell(new Paragraph("Cecil Court, Mahakavi Bushan Marg, Mumbai, 400001."));
+//			cell.setBorder(Rectangle.BOX);
+//			cell.setPadding(10);
+//			table.addCell(cell);
+//			document.add(table);
 
 			PdfPTable receiptTable = new PdfPTable(3);
 			receiptTable.setWidthPercentage(100);
@@ -160,40 +161,60 @@ public class ReceiptServiceImpl implements ReceiptService {
 			String amountWords = Conversion.NumberToWord(roundUpAmount.toString());
 			String amountInWords = Conversion.formattedAmountInWords(amountWords);
 			System.err.println("amountInWords:" + amountInWords);
-			Font boldFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
+			Font boldFont =new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
 			Paragraph donorDetails = new Paragraph();
 			donorDetails.setAlignment(Element.ALIGN_LEFT);
-			Chunk nameChunk = new Chunk("Received with thanks from ");
+			Chunk nameChunk = new Chunk("Received with thanks from ",normal);
 			donorDetails.add(nameChunk);
-			donorDetails.add(new Chunk(name + " (PAN – " + pancard + ")*", boldFont));
-			donorDetails.add(" the sum of Rupees " + amountInWords
-					+ " only through our Website Dt. "+formattedDate+" towards your donation.");
+			donorDetails.add(new Chunk(name.toUpperCase() + " (PAN – " + pancard + ")*", boldFont));
+			donorDetails.add(" the sum of Rupees " );
+			donorDetails.add(new Chunk(amountInWords,boldFont));
+			donorDetails.add(new Chunk( " only through our Website Dt. "+formattedDate+" towards your donation."));
 			document.add(donorDetails);
 			document.add(new Paragraph("\n"));
 			document.add(new Paragraph("\n"));
+//			************
+			Chunk c1 = new Chunk("INR. "+donation.getTotalAmount(), boldFont);
+			Paragraph lastPara1 = new Paragraph();
+			lastPara1.add(c1);
+			lastPara1.setAlignment(Element.ALIGN_LEFT);
+			Paragraph lastPara2 = new Paragraph("Naandi Foundation", boldFont);
+			lastPara2.setAlignment(Element.ALIGN_RIGHT);
+			lastPara2.setSpacingAfter(50f);
+			Chunk c2 = new Chunk("(Authorized Signatory)", normal);
+			Paragraph lastPara3 = new Paragraph();
+			lastPara3.add(c2);
+			lastPara3.setAlignment(Element.ALIGN_RIGHT);
+			lastPara3.setSpacingAfter(25f);
+			lastPara3.setSpacingBefore(10f);
+			document.add(lastPara1);
+			document.add(lastPara2);
+			document.add(lastPara3);
 
+			
 			// Add Amount Details
-			PdfPTable receiptTable1 = new PdfPTable(2);
-			receiptTable.setWidthPercentage(100);
-
-			PdfPCell amount = new PdfPCell(new Paragraph("INR." + donation.getTotalAmount(), receiptFont));
-			amount.setBorder(Rectangle.NO_BORDER);
-			amount.setHorizontalAlignment(Element.ALIGN_LEFT);
-			amount.setVerticalAlignment(Element.ALIGN_TOP);
-			receiptTable1.addCell(amount);
-
-			PdfPCell sign = new PdfPCell(new Paragraph("For K.C. MAHINDRA EDUCATION TRUST", receiptFont));
-			sign.setBorder(Rectangle.NO_BORDER);
-			sign.setHorizontalAlignment(Element.ALIGN_RIGHT);
-			receiptTable1.addCell(sign);
-			document.add(receiptTable1);
-			document.add(new Paragraph("\n"));
-			document.add(new Paragraph("\n"));
-			document.add(new Paragraph("\n"));
-			Paragraph signParagraph = new Paragraph("(Authorized Signatory)",
-					FontFactory.getFont(FontFactory.HELVETICA_BOLD));
-			signParagraph.setAlignment(Element.ALIGN_RIGHT);
-			document.add(signParagraph);
+//			PdfPTable receiptTable1 = new PdfPTable(2);
+//			receiptTable.setWidthPercentage(100);
+//
+//			PdfPCell amount = new PdfPCell(new Paragraph("INR." + donation.getTotalAmount(), receiptFont));
+//			amount.setBorder(Rectangle.NO_BORDER);
+//			amount.setHorizontalAlignment(Element.ALIGN_LEFT);
+//			amount.setVerticalAlignment(Element.ALIGN_TOP);
+//			receiptTable1.addCell(amount);
+//
+//			PdfPCell sign = new PdfPCell(new Paragraph("Naandi Foudation", receiptFont));
+//			sign.setBorder(Rectangle.NO_BORDER);
+////			sign.setSpacingAfter(50f);
+//			sign.setHorizontalAlignment(Element.ALIGN_RIGHT);
+//			receiptTable1.addCell(sign);
+//			document.add(receiptTable1);
+//			document.add(new Paragraph("\n"));
+//			document.add(new Paragraph("\n"));
+//			document.add(new Paragraph("\n"));
+//			Paragraph signParagraph = new Paragraph("(Authorized Signatory)",
+//					FontFactory.getFont(FontFactory.HELVETICA_BOLD));
+//			signParagraph.setAlignment(Element.ALIGN_RIGHT);
+//			document.add(signParagraph);
 
 //		Image signatureImage = Image.getInstance(getClass().getResource("C:/Users/HP/Pictures/I_R_multi_1610868885987.jpg"));
 //		signatureImage.scaleToFit(100, 100); // Adjust size as needed
@@ -210,7 +231,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 			additionalText.setAlignment(Element.ALIGN_LEFT);
 			document.add(additionalText);
 			Paragraph note = new Paragraph("*Note-\n"
-					+ "Kindly note that K.C. Mahindra Education Trust shall not be responsible for the verification of the donor's PAN details as well as for the denial of deduction u/s 80G of the Income Tax Act, 1961 for furnishing an incorrect PAN.",
+					+ "Kindly note that Naandi Foundation shall not be responsible for the verification of the donor's PAN details as well as for the denial of deduction u/s 80G of the Income Tax Act, 1961 for furnishing an incorrect PAN.",
 					receiptFont);
 			note.setAlignment(Element.ALIGN_LEFT);
 			document.add(note);
