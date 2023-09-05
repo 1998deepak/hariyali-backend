@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserPlantUploadExelDTO {
+public class UserPlantationAndDonationDTO {
 	private long user;
 	private long donation;
 	private long packages;
@@ -18,5 +18,6 @@ public class UserPlantUploadExelDTO {
 	private long recipientId;
 	private String firstName;
 	private String donationType;
-	
+	private long noOfBuckets;
+
 }

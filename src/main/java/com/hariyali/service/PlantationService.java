@@ -12,6 +12,6 @@ public interface PlantationService {
 	public ByteArrayInputStream exportExcelUserPlant();
 
 	public String uploadPlantationExcel(XSSFWorkbook workbook);
-	
-	 public List<Plantation> getPlantationsByDonationId(Long donationId);
+
+	public List<Plantation> getPlantationsByDonationId(Long donationId);
 }

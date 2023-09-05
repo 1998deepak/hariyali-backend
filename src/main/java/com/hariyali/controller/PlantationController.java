@@ -26,7 +26,6 @@ import com.hariyali.entity.Plantation;
 import com.hariyali.repository.PlantationRepository;
 import com.hariyali.service.PlantationService;
 
-
 @RestController
 @RequestMapping("/api/v1")
 public class PlantationController {
@@ -35,13 +34,13 @@ public class PlantationController {
 
 	@Autowired
 	private PlantationService plantationService;
-	
+
 	@Autowired
 	private PlantationRepository plantationRepository;
 
 	@GetMapping("/excelExportUserPlant")
 	public void exportExcelUserPlant(HttpServletResponse response) {
-		
+
 		try {
 			ByteArrayInputStream byteArrayInputStream = plantationService.exportExcelUserPlant();
 			response.setContentType("application/octet-stream");
@@ -53,7 +52,7 @@ public class PlantationController {
 	}
 
 	@PostMapping("/uploadPlantationExcel")
-	public ResponseEntity<?> uploadPlantationExcel(@RequestParam("file") MultipartFile excelfile) {
+	public ResponseEntity<?> uploadPlantationExcel(@RequestParam("file") MultipartFile excelfile ) {
 		try {
 			String uploadRPTRows = "Failed";
 			Map<Object, Object> map = new HashMap<>();
@@ -73,19 +72,18 @@ public class PlantationController {
 		} catch (Exception e) {
 			e.printStackTrace();
 
-		}	
+		}
 		return null;
 	}
-	
-	 @GetMapping("/plantations")
-	    public ResponseEntity<List<Plantation>> getPlantationsByDonationId(@RequestParam Long donationId) {
-		 if (donationId != null) {  
-		 List<Plantation> plantationDTOs = plantationService.getPlantationsByDonationId(donationId);
-	        return new ResponseEntity<>(plantationDTOs, HttpStatus.OK);
-		 }else {
-			 return ResponseEntity.badRequest().build();
-		 }
-	    }
-	
+
+	@GetMapping("/plantations")
+	public ResponseEntity<List<Plantation>> getPlantationsByDonationId(@RequestParam Long donationId) {
+		if (donationId != null) {
+			List<Plantation> plantationDTOs = plantationService.getPlantationsByDonationId(donationId);
+			return new ResponseEntity<>(plantationDTOs, HttpStatus.OK);
+		} else {
+			return ResponseEntity.badRequest().build();
+		}
+	}
 
 }

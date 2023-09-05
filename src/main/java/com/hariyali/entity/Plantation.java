@@ -1,6 +1,6 @@
 package com.hariyali.entity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -28,25 +28,13 @@ public class Plantation {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	private long userId;
-	private long donationId;
-	private long packageId;
-	private String username;
-	private String packageName;
-	private float amount;
-	private String plantName;
-	private long quantity;
-	
-	private LocalDate plantDate;
-	
-	private String plantLocation;
+	private String season;
+	private LocalDateTime plantationDate;
+	private Integer finacialYear;
+	private Long noOfplantsPlanted;
 	
 	@ManyToOne
     @JoinColumn(name = "user_package_id") // Foreign key column in Plantation table
     private UserPackages userPackages;
-	
-	@JsonIgnore
-	@OneToMany(mappedBy="plantation")
-	private List<Commitment> commitment;
 
 }
