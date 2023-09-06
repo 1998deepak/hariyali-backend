@@ -352,6 +352,7 @@ public class PlantationServiceImpl implements PlantationService {
 						.collect(Collectors.summingLong(UserPlantationAndDonationDTO::getNoOfBuckets));
 				List<Plantation> plantations = new ArrayList<>();
 				if (noOfPlantsPlanted.equals(sum)) {
+					
 					for (UserPlantationAndDonationDTO plantationAndDonationDTO : userPlantationAndDonationDTO) {
 						Plantation plantation = new Plantation();
 						plantation.setSeason("MONSOON");
@@ -363,11 +364,12 @@ public class PlantationServiceImpl implements PlantationService {
 						plantation.setFinacialYear(LocalDate.now().getYear());
 						userPackageRepository.update(plantationAndDonationDTO.getPackages());
 						sendMail(plantationAndDonationDTO.getUserName());
+						plantationRepository.save(plantation);
 						// Plantation =>done
 						// userPackages isPlanted make true;===>done
 						// Put Date into PlantationMater ===>done
 						// if(userPackage==true){
-						// sendMail()
+						// sendMail()==>done
 						// }
 						// Commitment Name class And make mapping one Plantation have many commitment
 						// send report
