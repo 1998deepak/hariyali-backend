@@ -1,5 +1,6 @@
 package com.hariyali.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,12 +30,19 @@ public class Plantation {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	private String season;
-	private LocalDateTime plantationDate;
 	private Integer finacialYear;
 	private Long noOfplantsPlanted;
-	
+	private String state;
+	private String district;
+	private String village;
+	private String plot;
+	private LocalDate plantationDate;
+	private Float lattitude;
+	private Float longitude;
+	private String status;
+
 	@ManyToOne
-    @JoinColumn(name = "user_package_id") // Foreign key column in Plantation table
-    private UserPackages userPackages;
+	@JoinColumn(name = "user_package_id") // Foreign key column in Plantation table
+	private UserPackages userPackages;
 
 }

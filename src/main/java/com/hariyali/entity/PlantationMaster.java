@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "_tbl_plantation_master")
+@Table(name = "tbl_plantation_master")
 public class PlantationMaster {
 
 	@Id

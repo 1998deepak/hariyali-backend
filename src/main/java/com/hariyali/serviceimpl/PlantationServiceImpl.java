@@ -352,29 +352,41 @@ public class PlantationServiceImpl implements PlantationService {
 						.collect(Collectors.summingLong(UserPlantationAndDonationDTO::getNoOfBuckets));
 				List<Plantation> plantations = new ArrayList<>();
 				if (noOfPlantsPlanted.equals(sum)) {
-					
-					for (UserPlantationAndDonationDTO plantationAndDonationDTO : userPlantationAndDonationDTO) {
-						Plantation plantation = new Plantation();
-						plantation.setSeason("MONSOON");
-						plantation.setNoOfplantsPlanted(noOfPlantsPlanted);
-						plantation.setUserPackages(
-								userPackageRepository.findById(plantationAndDonationDTO.getPackages()).get());
-						System.out.println(excelUserPlantationDTOs.get(0).getPlantationDate());
-//						plantation.setPlantationDate();
-						plantation.setFinacialYear(LocalDate.now().getYear());
-						userPackageRepository.update(plantationAndDonationDTO.getPackages());
-						sendMail(plantationAndDonationDTO.getUserName());
-						plantationRepository.save(plantation);
-						// Plantation =>done
-						// userPackages isPlanted make true;===>done
-						// Put Date into PlantationMater ===>done
-						// if(userPackage==true){
-						// sendMail()==>done
-						// }
-						// Commitment Name class And make mapping one Plantation have many commitment
-						// send report
-						// validation
+
+					long noPlantsPlantedTemp = 0;
+					for (ExcelUserPlantationDTO dto : excelUserPlantationDTOs) {
+						noPlantsPlantedTemp = dto.getNoOfPlantsPlanted();
+						List<UserPlantationAndDonationDTO> userPlantationAndDonationDTOs = mapper.convertValue(
+								plantationRepository.getUserDonationAndPlantationData(),
+								new TypeReference<List<UserPlantationAndDonationDTO>>() {
+								});
+						for (UserPlantationAndDonationDTO plantationAndDonationDTO : userPlantationAndDonationDTOs) {
+							Plantation plantation = new Plantation();
+							plantation.setNoOfplantsPlanted(plantationAndDonationDTO.getNoOfBuckets());
+							noPlantsPlantedTemp -= plantationAndDonationDTO.getNoOfBuckets();
+							plantation.setDistrict(dto.getDistrict());
+							plantation.setState(dto.getState());
+							plantation.setSeason(dto.getSeason());
+							plantation.setFinacialYear(LocalDate.now().getYear());
+							plantation.setPlot(dto.getPlot());
+							plantation.setLongitude(dto.getLongitude());
+							plantation.setLattitude(dto.getLattitude());
+							System.out.println("Plantation date=" + dto.getPlantationDate());
+							plantation.setPlantationDate(LocalDate.now());
+							plantation.setStatus(dto.getStatus());
+							plantation.setVillage(dto.getVillage());
+							plantation.setUserPackages(
+									userPackageRepository.findById(plantationAndDonationDTO.getPackages()).get());
+							plantationRepository.save(plantation);
+							userPackageRepository.update(plantationAndDonationDTO.getPackages());
+							if (noPlantsPlantedTemp == 0) {
+								break;
+							}
+
+						}
+
 					}
+
 					for (ExcelUserPlantationDTO dto : excelUserPlantationDTOs) {
 						PlantationMaster plantationMaster = new PlantationMaster();
 						plantationMaster.setDistrict(dto.getDistrict());
