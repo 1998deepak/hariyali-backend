@@ -350,9 +350,7 @@ public class PlantationServiceImpl implements PlantationService {
 
 				Long sum = userPlantationAndDonationDTO.stream()
 						.collect(Collectors.summingLong(UserPlantationAndDonationDTO::getNoOfBuckets));
-				List<Plantation> plantations = new ArrayList<>();
 				if (noOfPlantsPlanted.equals(sum)) {
-
 					long noPlantsPlantedTemp = 0;
 					for (ExcelUserPlantationDTO dto : excelUserPlantationDTOs) {
 						noPlantsPlantedTemp = dto.getNoOfPlantsPlanted();
@@ -382,9 +380,7 @@ public class PlantationServiceImpl implements PlantationService {
 							if (noPlantsPlantedTemp == 0) {
 								break;
 							}
-
 						}
-
 					}
 
 					for (ExcelUserPlantationDTO dto : excelUserPlantationDTOs) {
