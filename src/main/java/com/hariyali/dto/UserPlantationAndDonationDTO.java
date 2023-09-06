@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class UserPlantationAndDonationDTO {
 	private long user;
 	private long donation;
-	private long packages;
+	private Integer packages;
 	private float amount;
 	private String userName;
 	private String packageName;

@@ -2,6 +2,7 @@ package com.hariyali.serviceimpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,8 +25,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hariyali.dto.ExcelUserPlantationDTO;
 import com.hariyali.dto.UserPlantationAndDonationDTO;
 import com.hariyali.entity.Plantation;
+import com.hariyali.entity.PlantationMaster;
+import com.hariyali.entity.UserPackages;
 import com.hariyali.repository.CommitmentRepository;
 import com.hariyali.repository.DonationRepository;
+import com.hariyali.repository.PlantationMasterRepository;
 import com.hariyali.repository.PlantationRepository;
 import com.hariyali.repository.RecipientRepository;
 import com.hariyali.repository.UserPackageRepository;
@@ -57,6 +61,9 @@ public class PlantationServiceImpl implements PlantationService {
 
 	@Autowired
 	private RecipientRepository recipientRepository;
+
+	@Autowired
+	private PlantationMasterRepository plantationMasterRepository;
 
 	@Override
 	public ByteArrayInputStream exportExcelUserPlant() {
@@ -349,15 +356,35 @@ public class PlantationServiceImpl implements PlantationService {
 						Plantation plantation = new Plantation();
 						plantation.setSeason("MONSOON");
 						plantation.setNoOfplantsPlanted(noOfPlantsPlanted);
-						//Plantation
-						//userPackages isPlanted make true;
-						//Put Date into PlantationMater 
-						//if(userPackage==true){
+						plantation.setUserPackages(
+								userPackageRepository.findById(plantationAndDonationDTO.getPackages()).get());
+						System.out.println(excelUserPlantationDTOs.get(0).getPlantationDate());
+//						plantation.setPlantationDate();
+						plantation.setFinacialYear(LocalDate.now().getYear());
+						userPackageRepository.update(plantationAndDonationDTO.getPackages());
+						sendMail(plantationAndDonationDTO.getUserName());
+						// Plantation =>done
+						// userPackages isPlanted make true;===>done
+						// Put Date into PlantationMater ===>done
+						// if(userPackage==true){
 						// sendMail()
-						//}
-						//Commitment Name class And make mapping one Plantation have many commitment
-						//send report
-						//validation
+						// }
+						// Commitment Name class And make mapping one Plantation have many commitment
+						// send report
+						// validation
+					}
+					for (ExcelUserPlantationDTO dto : excelUserPlantationDTOs) {
+						PlantationMaster plantationMaster = new PlantationMaster();
+						plantationMaster.setDistrict(dto.getDistrict());
+						plantationMaster.setState(dto.getState());
+						plantationMaster.setLattitude(dto.getLattitude());
+						plantationMaster.setLongitude(dto.getLongitude());
+						plantationMaster.setVillage(dto.getVillage());
+						plantationMaster.setPlot(dto.getPlot());
+						plantationMaster.setSeason(dto.getSeason());
+						plantationMaster.setNoOfPlantsPlanted(dto.getNoOfPlantsPlanted());
+						plantationMasterRepository.save(plantationMaster);
+
 					}
 
 				} else {
@@ -370,6 +397,17 @@ public class PlantationServiceImpl implements PlantationService {
 			e.printStackTrace();
 		}
 		return "Success";
+	}
+
+	private void sendMail(String userName) {
+		String toMail = userName;
+		System.err.println(toMail);
+		String subject = "Update about plantation";
+		String bodyMessage = "your plantation is done \n and plantation commited start date is and end date is ";
+//		String bodyMessage = "your plantation is done \n and plantation commited start date is "+commitment.getStartDate()+" and end date is "+commitment.getEndDate();
+
+		emailService.sendPlantationEmail(toMail, subject, bodyMessage);
+
 	}
 
 	@Override
