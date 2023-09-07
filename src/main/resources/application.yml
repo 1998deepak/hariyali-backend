@@ -2,15 +2,15 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/hariyalidbletest?allowPublicKeyRetrieval=true&useSSL=false
     username: root
-    password: root
+    password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
     #    show-sql: true
   main:
        lazy-initialization: true
   servlet:
           multipart:
-                    max-file-size:5MB
-                    max-request-size:5MB
+              max-file-size: 5MB
+              max-request-size: 5MB
 
   mail:
     host : smtp.gmail.com
@@ -70,3 +70,5 @@ request:
 # change this path as per environment
 log:
     path: c:/log
+encryption:
+           key: emgut@kL9RQ%L#tt

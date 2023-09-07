@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.hariyali.dto.ApiResponse;
+import com.hariyali.dto.LoginRequest;
 import com.hariyali.dto.UsersDTO;
 import com.hariyali.entity.Users;
 import com.hariyali.exceptions.CustomException;
@@ -19,7 +20,7 @@ public interface UsersService {
 
 	public ApiResponse<Map<String, Object>> getUsers(int pageNo, int pageSize);
 
-	public ApiResponse<UsersDTO> saveUserAndDonationsOffline(JsonNode jsonNode,HttpServletRequest request) throws JsonMappingException, JsonProcessingException, MessagingException;
+	public ApiResponse<UsersDTO> saveUserAndDonationsOffline(UsersDTO usersDTO,HttpServletRequest request) throws JsonMappingException, JsonProcessingException, MessagingException;
 	
 	public ApiResponse<UsersDTO> deleteUserById(int userId) throws CustomException;
 
@@ -37,7 +38,7 @@ public interface UsersService {
 	
 	public ApiResponse<Object> getAllDonationOfSpecificUser(String email);
 	    
-	public ApiResponse<UsersDTO> updateUser(JsonNode jsonNode, String emailId,HttpServletRequest request);
+	public ApiResponse<UsersDTO> updateUser(UsersDTO usersDTO, String emailId,HttpServletRequest request);
 
 	public ApiResponse<String> verifyOtp(String string, HttpSession session, HttpServletRequest request) throws JsonMappingException, JsonProcessingException;
 
@@ -47,7 +48,7 @@ public interface UsersService {
 
 	void saveOtp(String donorId, String otp);
 
-	ApiResponse<String> forgetPassword(String formData, HttpSession session)
+	ApiResponse<String> forgetPassword(String donorId, HttpSession session)
 			throws JsonProcessingException;
 
 	Users findByDonorId(String donorId);
@@ -55,14 +56,14 @@ public interface UsersService {
 	
 	ApiResponse<UsersDTO> getUserPersonalDetailsByDonorId(String donorId);
 
-	ApiResponse<String> approvedOnlineDonationOfUser(String formData, HttpServletRequest request)
+	ApiResponse<String> approvedOnlineDonationOfUser(UsersDTO usersDTO, HttpServletRequest request)
 			throws JsonProcessingException, MessagingException;
 
-	ApiResponse<UsersDTO> saveUserAndDonationsOnline(JsonNode jsonNode, HttpServletRequest request)
+	ApiResponse<UsersDTO> saveUserAndDonationsOnline(UsersDTO usersDTO, HttpServletRequest request)
 			throws JsonProcessingException;
 
 	
-	ApiResponse<String> forgetUserPassword(String formData, HttpSession session) throws JsonProcessingException;
+	ApiResponse<String> forgetUserPassword(LoginRequest loginRequest, HttpSession session) throws JsonProcessingException;
 
 	public ApiResponse<UsersDTO> getUserPersonalDetailsbyEmailOrDonorId(String emailOrDonorId);
 
