@@ -1,14 +1,20 @@
 package com.hariyali.serviceimpl;
 
+import static java.util.Optional.ofNullable;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -18,15 +24,20 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hariyali.EnumConstants;
+import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.ExcelUserPlantationDTO;
 import com.hariyali.dto.UserPlantationAndDonationDTO;
 import com.hariyali.entity.Plantation;
 import com.hariyali.entity.PlantationMaster;
 import com.hariyali.entity.UserPackages;
+import com.hariyali.entity.Users;
+import com.hariyali.exceptions.CustomException;
 import com.hariyali.repository.CommitmentRepository;
 import com.hariyali.repository.DonationRepository;
 import com.hariyali.repository.PlantationMasterRepository;
@@ -52,6 +63,7 @@ public class PlantationServiceImpl implements PlantationService {
 
 	@Autowired
 	private DonationRepository donationRepository;
+	
 
 	@Autowired
 	private UserPackageRepository userPackageRepository;
@@ -66,85 +78,95 @@ public class PlantationServiceImpl implements PlantationService {
 	private PlantationMasterRepository plantationMasterRepository;
 
 	@Override
-	public ByteArrayInputStream exportExcelUserPlant() {
+	public ByteArrayInputStream exportExcelUserPlant(String seasonType) {
 
-		Workbook workbook = new SXSSFWorkbook();
+	    Workbook workbook = new SXSSFWorkbook();
 
-		try {
+	    try {
+	        Sheet sheet = workbook.createSheet("User Plant Report ");
 
-			Sheet sheet = workbook.createSheet("User Plant Report ");
+	        Row row = sheet.createRow(0);
+	        CellStyle style = workbook.createCellStyle();
+	        XSSFFont font = (XSSFFont) workbook.createFont();
+	        font.setBold(true);
+	        font.setFontHeight(12);
+	        style.setFont(font);
+	        
+	        
+	        
+	        // Set the background color directly (YELLOW)
+	        style.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
+	        style.setFillPattern((short) FillPatternType.SOLID_FOREGROUND.ordinal());
+	        
+	       
 
-			CellStyle cellStyle1 = workbook.createCellStyle();
+	        Cell cell = row.createCell(0);
+	        cell.setCellValue("State");
+	        sheet.autoSizeColumn(0);
+	        cell.setCellStyle(style);
 
-			Row row = sheet.createRow(0);
+	        cell = row.createCell(1);
+	        cell.setCellValue("District");
+	        sheet.autoSizeColumn(1);
+	        cell.setCellStyle(style);
 
-			CellStyle style = workbook.createCellStyle();
+	        cell = row.createCell(2);
+	        cell.setCellValue("Village");
+	        sheet.autoSizeColumn(2);
+	        cell.setCellStyle(style);
 
-			XSSFFont font = (XSSFFont) workbook.createFont();
+	        cell = row.createCell(3);
+	        cell.setCellValue("Season");
+	        sheet.autoSizeColumn(3);
+	        cell.setCellStyle(style);
 
-			font.setBold(true);
-			font.setFontHeight(12);
-			style.setFont(font);
+	        cell = row.createCell(4);
+	        cell.setCellValue("Plot");
+	        sheet.autoSizeColumn(4);
+	        cell.setCellStyle(style);
 
-			Cell cell = row.createCell(0);
-			cell.setCellValue("State");
-			sheet.autoSizeColumn(0);
-			cell.setCellStyle(style);
+	        cell = row.createCell(5);
+	        cell.setCellValue("NoOfPlantsPlanted");
+	        sheet.autoSizeColumn(5);
+	        cell.setCellStyle(style);
 
-			cell = row.createCell(1);
-			cell.setCellValue("District");
-			sheet.autoSizeColumn(1);
-			cell.setCellStyle(style);
+	        cell = row.createCell(6);
+	        cell.setCellValue("Plantation Date");
+	        sheet.autoSizeColumn(6);
+	        cell.setCellStyle(style);
 
-			cell = row.createCell(2);
-			cell.setCellValue("Village");
-			sheet.autoSizeColumn(2);
-			cell.setCellStyle(style);
+	        cell = row.createCell(7);
+	        cell.setCellValue("Lattitude");
+	        sheet.autoSizeColumn(7);
+	        cell.setCellStyle(style);
 
-			cell = row.createCell(3);
-			cell.setCellValue("Season");
-			sheet.autoSizeColumn(3);
-			cell.setCellStyle(style);
+	        cell = row.createCell(8);
+	        cell.setCellValue("Longitude");
+	        sheet.autoSizeColumn(8);
+	        cell.setCellStyle(style);
 
-			cell = row.createCell(4);
-			cell.setCellValue("Plot");
-			sheet.autoSizeColumn(4);
-			cell.setCellStyle(style);
+	        cell = row.createCell(9);
+	        cell.setCellValue("Status");
+	        sheet.autoSizeColumn(9);
+	        cell.setCellStyle(style);
 
-			cell = row.createCell(5);
-			cell.setCellValue("NoOfPlantsPlanted ");
-			sheet.autoSizeColumn(5);
-			cell.setCellStyle(style);
+	        row = sheet.createRow(1);
+	        cell = row.createCell(3);
+	        cell.setCellValue(seasonType);
+	        
+	        // Auto-size columns
+	        for (int i = 0; i <= 9; i++) {
+	            sheet.autoSizeColumn(i);
+	        }
 
-			cell = row.createCell(6);
-			cell.setCellValue("Plantation Date");
-			sheet.autoSizeColumn(6);
-			cell.setCellStyle(style);
+	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	        workbook.write(outputStream);
+	        return new ByteArrayInputStream(outputStream.toByteArray());
 
-			cell = row.createCell(7);
-			cell.setCellValue("Lattitude");
-			sheet.autoSizeColumn(7);
-			cell.setCellStyle(style);
-
-			cell = row.createCell(8);
-			cell.setCellValue("Longitude");
-			sheet.autoSizeColumn(8);
-			cell.setCellStyle(style);
-
-			cell = row.createCell(9);
-			cell.setCellValue("Status");
-			sheet.autoSizeColumn(9);
-			cell.setCellStyle(style);
-
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			workbook.write(outputStream);
-			return new ByteArrayInputStream(outputStream.toByteArray());
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
 	}
 
 //	@Override
@@ -309,6 +331,8 @@ public class PlantationServiceImpl implements PlantationService {
 //		}
 //		return "Success";
 //	}
+	
+	
 	@Override
 	public String uploadPlantationExcel(XSSFWorkbook workbook) {
 		int countRow = 0;
@@ -424,6 +448,27 @@ public class PlantationServiceImpl implements PlantationService {
 	public List<Plantation> getPlantationsByDonationId(Long donationId) {
 
 		return plantationRepository.getPlantationByDonationId(donationId);
+	}
+
+	@Override
+	public ApiResponse<Object> getAllPlantationMaster() {
+		
+		ApiResponse<Object> response = new ApiResponse<>();
+
+		Optional<List<PlantationMaster>> plantationMasterOptional = ofNullable(this.plantationMasterRepository.findAll());
+
+		if (plantationMasterOptional.isPresent()) {
+			
+			response.setData(plantationMasterOptional);
+			response.setStatus(EnumConstants.SUCCESS);
+			response.setStatusCode(HttpStatus.OK.value());
+			response.setMessage("Data fetched successfully..!!");
+			return response;
+
+		} else {
+			throw new CustomException("plantation data Doesn't Exist.");
+		}
+		
 	}
 
 }
