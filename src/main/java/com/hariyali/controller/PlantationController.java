@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.hariyali.dto.ApiResponse;
 import com.hariyali.entity.Plantation;
 import com.hariyali.repository.PlantationRepository;
 import com.hariyali.service.PlantationService;
-
 
 @RestController
 @RequestMapping("/api/v1")
@@ -35,25 +35,29 @@ public class PlantationController {
 
 	@Autowired
 	private PlantationService plantationService;
-	
+
 	@Autowired
 	private PlantationRepository plantationRepository;
 
 	@GetMapping("/excelExportUserPlant")
-	public void exportExcelUserPlant(HttpServletResponse response) {
-		
-		try {
-			ByteArrayInputStream byteArrayInputStream = plantationService.exportExcelUserPlant();
-			response.setContentType("application/octet-stream");
-			response.setHeader("Content-Disposition", "attachment; filename= User Plant Report.xlsx");
-			IOUtils.copy(byteArrayInputStream, response.getOutputStream());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public void exportExcelUserPlant(HttpServletResponse response,@RequestParam("seasonType") String seasonType) {
+
+		 try {
+	            ByteArrayInputStream byteArrayInputStream = plantationService.exportExcelUserPlant(seasonType);
+	            response.setContentType("application/octet-stream");
+
+	            // Set the filename based on the seasonType
+	            String fileName = seasonType + "_User_Plant_Report.xlsx";
+	            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+
+	            IOUtils.copy(byteArrayInputStream, response.getOutputStream());
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
 	}
 
 	@PostMapping("/uploadPlantationExcel")
-	public ResponseEntity<?> uploadPlantationExcel(@RequestParam("file") MultipartFile excelfile) {
+	public ResponseEntity<?> uploadPlantationExcel(@RequestParam("file") MultipartFile excelfile ) {
 		try {
 			String uploadRPTRows = "Failed";
 			Map<Object, Object> map = new HashMap<>();
@@ -73,19 +77,24 @@ public class PlantationController {
 		} catch (Exception e) {
 			e.printStackTrace();
 
-		}	
+		}
 		return null;
 	}
+
+	@GetMapping("/plantations")
+	public ResponseEntity<List<Plantation>> getPlantationsByDonationId(@RequestParam Long donationId) {
+		if (donationId != null) {
+			List<Plantation> plantationDTOs = plantationService.getPlantationsByDonationId(donationId);
+			return new ResponseEntity<>(plantationDTOs, HttpStatus.OK);
+		} else {
+			return ResponseEntity.badRequest().build();
+		}
+	}
 	
-	 @GetMapping("/plantations")
-	    public ResponseEntity<List<Plantation>> getPlantationsByDonationId(@RequestParam Long donationId) {
-		 if (donationId != null) {  
-		 List<Plantation> plantationDTOs = plantationService.getPlantationsByDonationId(donationId);
-	        return new ResponseEntity<>(plantationDTOs, HttpStatus.OK);
-		 }else {
-			 return ResponseEntity.badRequest().build();
-		 }
-	    }
-	
+	@GetMapping("/getAllPlantationMaster")
+	public ResponseEntity<ApiResponse<Object>> getAllPlantationMaster() {
+		ApiResponse<Object> apiResponse = plantationService.getAllPlantationMaster();
+		return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+	}
 
 }

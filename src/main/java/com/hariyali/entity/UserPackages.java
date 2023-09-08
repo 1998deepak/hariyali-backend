@@ -17,10 +17,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
@@ -78,6 +76,8 @@ public class UserPackages implements Serializable{
 	@OneToMany(mappedBy="userPackages")
 	private List<Plantation> plantation;
 
+	private boolean isPlanted;
+	
 	public int getPackageId() {
 		return packageId;
 	}
@@ -172,6 +172,14 @@ public class UserPackages implements Serializable{
 
 	public void setNoOfBouquets(Integer noOfBouquets) {
 		this.noOfBouquets = noOfBouquets;
+	}
+
+	public boolean isPlanted() {
+		return isPlanted;
+	}
+
+	public void setPlanted(boolean isPlanted) {
+		this.isPlanted = isPlanted;
 	}
 
 	

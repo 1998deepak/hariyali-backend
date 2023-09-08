@@ -1,0 +1,23 @@
+package com.hariyali.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class UserPlantationAndDonationDTO {
+	private long user;
+	private long donation;
+	private Integer packages;
+	private float amount;
+	private String userName;
+	private String packageName;
+	private long donarId;
+	private long recipientId;
+	private String firstName;
+	private String donationType;
+	private long noOfBuckets;
+
+}

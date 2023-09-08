@@ -885,19 +885,19 @@ public class UsersServiceImpl implements UsersService {
 							.getRecipientDataByDonationId(d.getDonationId());
 					for (Recipient recipient : recipients) {
 						recipientEmail = this.usersRepository.findByEmailId(recipient.getEmailId());
-						System.err.println("Recipient" + recipientEmail.toString());
 						recipientEmail.setDonorId(generateDonorId());
 						recipientEmail.setIsApproved(true);
-						recipientEmail.setIsDeleted(false);
 						recipientEmail.setIsDeleted(false);
 						recipientEmail.setCreatedBy(userName);
 						recipientEmail.setModifiedBy(userName);
 						recipientEmail.setModifiedDate(new Date());
 						usersRepository.save(recipientEmail);
-						System.err.println("After save Recipient" + recipientEmail.toString());
 						System.out.println("new User:" + recipientEmail);
 
 					}
+					user.setIsApproved(true);
+					user.setModifiedDate(new Date());
+					usersRepository.save(user);
 
 				} else if (d.getDonationType().equalsIgnoreCase("self-Donate")) {
 					List<Users> users = this.usersRepository.getUserDataByDonationId(d.getDonationId());
@@ -905,7 +905,6 @@ public class UsersServiceImpl implements UsersService {
 						recipientEmail = this.usersRepository.findByEmailId(userdata.getEmailId());
 						recipientEmail.setDonorId(generateDonorId());
 						recipientEmail.setIsApproved(true);
-						recipientEmail.setIsDeleted(false);
 						recipientEmail.setIsDeleted(false);
 						recipientEmail.setCreatedBy(userName);
 						recipientEmail.setModifiedBy(userName);
@@ -923,7 +922,7 @@ public class UsersServiceImpl implements UsersService {
 						receiptService.generateReceipt(d);
 						Receipt receipt = receiptRepository.getUserReceipt(user.getUserId());
 						Users recipientData = usersRepository.findByEmailId(recipientEmail.getEmailId());
-						if (d.getDonationType().equals("gift-donate")) {
+						if (d.getDonationType().equalsIgnoreCase("gift-donate")) {
 							emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
 							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content, user);
 							emailService.sendReceiptWithAttachment(user.getEmailId(),receipt);
