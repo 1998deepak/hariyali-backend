@@ -134,9 +134,8 @@ public class DonationServiceImpl implements DonationService {
 			response = saveDonationOffline(jsonNode, usersServiceImpl.generateDonorId(), request);
 			Receipt receipt = receiptRepository.getUserReceipt(userEmail.getUserId());
 			int donationCnt=donationRepository.donationCount(userEmail.getEmailId());
-			try {
 				if(donationCnt>1) {
-				emailService.sendReceiptWithAttachment(userEmail.getEmailId(),receipt);
+					emailService.sendReceiptWithAttachment(userEmail.getEmailId(), receipt);
 				}
 				else {
 //					emailService.sendEmailWithAttachment(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content,
@@ -144,9 +143,7 @@ public class DonationServiceImpl implements DonationService {
 					emailService.sendWelcomeLetterMail(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content, userEmail);
 					emailService.sendReceiptWithAttachment(userEmail.getEmailId(),receipt);
 				}
-			} catch (MessagingException e) {
-				throw new CustomException("Issued to email send:"+e.getMessage());
-			}
+			
 			return response;
 		} else if (donationMode.equalsIgnoreCase("online")) {
 			return saveDonation(jsonNode, donarID, request);
