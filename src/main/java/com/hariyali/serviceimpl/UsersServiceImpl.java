@@ -178,8 +178,8 @@ public class UsersServiceImpl implements UsersService {
 		Users resulEntity = usersRepository.findByEmailId(usersDTO.getEmailId());
 
 		Receipt receipt = receiptRepository.getUserReceipt(resulEntity.getUserId());
-		emailService.sendEmailWithAttachment(resulEntity.getEmailId(), EnumConstants.subject, EnumConstants.content,
-				receipt.getReciept_Path(), resulEntity);
+//		emailService.sendEmailWithAttachment(resulEntity.getEmailId(), EnumConstants.subject, EnumConstants.content,
+//				receipt.getReciept_Path(), resulEntity);
 
 		return response;
 
@@ -197,14 +197,18 @@ public class UsersServiceImpl implements UsersService {
 //		return null;
 	}
 
-	private void validateDonation(UsersDTO usersDTO, String donationMode){
-		ofNullable(usersDTO.getDonations()).filter(data -> !data.isEmpty()).orElseThrow(() ->  new CustomException("Donation not found"));
+	private void validateDonation(UsersDTO usersDTO, String donationMode) {
+		ofNullable(usersDTO.getDonations()).filter(data -> !data.isEmpty())
+				.orElseThrow(() -> new CustomException("Donation not found"));
 
 		DonationDTO donationDTO = of(usersDTO.getDonations()).get().stream().findFirst().get();
-		of(donationDTO).map(DonationDTO::getDonationMode).filter(mode -> !mode.isEmpty()).orElseThrow(()-> new CustomException("Donation mode OR  Donation Type not selected"));
-		of(donationDTO).map(DonationDTO::getDonationType).filter(mode -> !mode.isEmpty()).orElseThrow(()-> new CustomException("Donation mode OR  Donation Type not selected"));
+		of(donationDTO).map(DonationDTO::getDonationMode).filter(mode -> !mode.isEmpty())
+				.orElseThrow(() -> new CustomException("Donation mode OR  Donation Type not selected"));
+		of(donationDTO).map(DonationDTO::getDonationType).filter(mode -> !mode.isEmpty())
+				.orElseThrow(() -> new CustomException("Donation mode OR  Donation Type not selected"));
 
-		of(donationDTO).map(DonationDTO::getDonationMode).filter(mode -> donationMode.equalsIgnoreCase(mode)).orElseThrow(()->new CustomException("Invalid donation mode"));
+		of(donationDTO).map(DonationDTO::getDonationMode).filter(mode -> donationMode.equalsIgnoreCase(mode))
+				.orElseThrow(() -> new CustomException("Invalid donation mode"));
 
 	}
 
@@ -252,7 +256,7 @@ public class UsersServiceImpl implements UsersService {
 
 		if ("online".equalsIgnoreCase(donationMode)) {
 			createdBy = isRecipient ? userEmailRecipent : usersDTO.getEmailId();
-		} else{
+		} else {
 			Users userToken = null;
 			if (request != null) {
 				String token = request.getHeader("Authorization");
@@ -376,10 +380,8 @@ public class UsersServiceImpl implements UsersService {
 		Object user = usersRepository.getUserByEmail(email);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
-		//Gson gson = new Gson();
-		Gson gson = new GsonBuilder()
-	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
-	            .create();
+		// Gson gson = new Gson();
+		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
 			if (entity.getDonorId() != null && entity.getWebId() == null) {
@@ -400,10 +402,8 @@ public class UsersServiceImpl implements UsersService {
 		Object user = usersRepository.getUserByEmail(email);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
-		//Gson gson = new Gson();
-		Gson gson = new GsonBuilder()
-	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
-	            .create();
+		// Gson gson = new Gson();
+		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
 //			if (entity.getDonorId() != null && entity.getWebId() == null) {
@@ -502,7 +502,7 @@ public class UsersServiceImpl implements UsersService {
 
 		Users tokenUserUpdate = this.usersRepository.findByEmailId(userName);
 
-		ofNullable(userDTO).orElseThrow(() ->new CustomException("No data found in User"));
+		ofNullable(userDTO).orElseThrow(() -> new CustomException("No data found in User"));
 
 		Users user = usersRepository.findByEmailId(emailId);
 
@@ -684,7 +684,8 @@ public class UsersServiceImpl implements UsersService {
 
 	// forget User Password
 	@Override
-	public ApiResponse<String> forgetUserPassword(LoginRequest request, HttpSession session) throws JsonProcessingException {
+	public ApiResponse<String> forgetUserPassword(LoginRequest request, HttpSession session)
+			throws JsonProcessingException {
 		ApiResponse<String> res = new ApiResponse<>();
 
 		String userEmail = session.getAttribute("email").toString();
@@ -779,7 +780,7 @@ public class UsersServiceImpl implements UsersService {
 			result.setMessage("Donation Rejected By " + userName);
 			result.setStatusCode(HttpStatus.FORBIDDEN.value());
 			sendRejectDonationEmails(user.getEmailId());
-			sendRejectDonationEmails(recipientEmail.getEmailId());
+//			sendRejectDonationEmails(recipientEmail.getEmailId());
 
 		} else if ("Approved".equalsIgnoreCase(usersDTO.getApprovalStatus())) {
 			recipientEmail = handleDonationApproval(user, donation, userName);
@@ -840,8 +841,12 @@ public class UsersServiceImpl implements UsersService {
 
 		{
 			String subject = "Reject Donation";
-			String content = "Dear User,\n\n" + "dear " + user.getEmailId() + "\n"
-					+ "Donation made by you has been rejected. \n" + "Best regards,\n" + "Hariyali Team";
+			String content = "Dear Sponsor,<br>"
+					+ "<p>Donation made by you has been rejected.</p>"
+					+"<p>Thanking you for your support to Project Hariyali.</p>"+ "Mahindra Foundation<br>" + "Sheetal Mehta<br>"
+					+ "Trustee & Executive Director<br>" + "K.C. Mahindra Education Trust,<br>" + "3rd Floor, Cecil Court,<br>"
+					+ "Near Regal Cinema,<br>" + "Mahakavi Bushan Marg,<br>" + "Mumbai 400001<br>"
+					+"<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>";
 
 			emailService.sendSimpleEmail(user.getEmailId(), subject, content);
 		}
@@ -859,8 +864,6 @@ public class UsersServiceImpl implements UsersService {
 						recipientEmail = this.usersRepository.findByEmailId(recipient.getEmailId());
 						System.err.println("Recipient" + recipientEmail.toString());
 						recipientEmail.setDonorId(generateDonorId());
-						recipientEmail.setIsApproved(true);
-						recipientEmail.setIsDeleted(false);
 						recipientEmail.setIsDeleted(false);
 						recipientEmail.setCreatedBy(userName);
 						recipientEmail.setModifiedBy(userName);
@@ -868,8 +871,10 @@ public class UsersServiceImpl implements UsersService {
 						usersRepository.save(recipientEmail);
 						System.err.println("After save Recipient" + recipientEmail.toString());
 						System.out.println("new User:" + recipientEmail);
-
 					}
+					user.setIsApproved(true);
+					user.setModifiedDate(new Date());
+					usersRepository.save(user);
 
 				} else if (d.getDonationType().equalsIgnoreCase("self-Donate")) {
 					List<Users> users = this.usersRepository.getUserDataByDonationId(d.getDonationId());
@@ -877,7 +882,6 @@ public class UsersServiceImpl implements UsersService {
 						recipientEmail = this.usersRepository.findByEmailId(userdata.getEmailId());
 						recipientEmail.setDonorId(generateDonorId());
 						recipientEmail.setIsApproved(true);
-						recipientEmail.setIsDeleted(false);
 						recipientEmail.setIsDeleted(false);
 						recipientEmail.setCreatedBy(userName);
 						recipientEmail.setModifiedBy(userName);
@@ -895,15 +899,20 @@ public class UsersServiceImpl implements UsersService {
 						Receipt receipt = receiptRepository.getUserReceipt(user.getUserId());
 						Users recipientData = usersRepository.findByEmailId(recipientEmail.getEmailId());
 						if (d.getDonationType().equals("gift-donate")) {
-						    emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
-							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content, user);
-							emailService.sendReceiptWithAttachment(user.getEmailId(),receipt);
+							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
+									EnumConstants.content, user);
+							emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
+							emailService.sendReceiptWithAttachment(user.getEmailId(), receipt);
+
+// 						    emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
+// 							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content, user);
+// 							emailService.sendReceiptWithAttachment(user.getEmailId(),receipt);
+
 						}
-//						emailService.sendEmailWithAttachment(user.getEmailId(), EnumConstants.subject,
-//								EnumConstants.content, receipt.getReciept_Path(), recipientEmail);
-						emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content, user);
-						emailService.sendReceiptWithAttachment(user.getEmailId(),receipt);
-						
+						emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
+								EnumConstants.content, user);
+						emailService.sendReceiptWithAttachment(user.getEmailId(), receipt);
+
 					} else {
 						sendRejectDonationEmails(user.getEmailId());
 					}

@@ -39,19 +39,6 @@ public class EmailService {
 
 	}
 
-//	public void sendEmailWithAttachment(String to, String subject, String text, String attachmentPath, Users user)
-//			throws MessagingException {
-//		MimeMessage mimeMessage = mailSender.createMimeMessage();
-//		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-//		helper.setTo(to);
-//		helper.setSubject(subject);
-//		helper.setText(String.format(text, user.getEmailId(),user.getPassword()));
-//		FileSystemResource file = new FileSystemResource(attachmentPath);
-//		helper.addAttachment(file.getFilename(), file, "application/pdf");
-//		mailSender.send(mimeMessage);
-//		System.out.println("Mail send");
-//	}
-
 	public void sendWelcomeLetterMail(String to, String subject, String text, Users user) {
 		String body = String.format(text, user.getEmailId(), user.getPassword());
 		ccServiceEmailAPI.sendCorrespondenceMail(to, subject, body);
@@ -70,7 +57,10 @@ public class EmailService {
 		String body = "Dear Sponsor,<br> <p>Welcome to Project Hariyali.</p>"
 				+ "The Mahindra Foundation and Naandi Foundation would like to thank you for your donation."
 				+ "Below is your Web Id :<b>" + user.getWebId() + "</b><br>Wait For Admin Approval.<br>"
-				+ "<br>Best wishes,<br>Team Hariyali<br>" + "<br>";
+				+ "Thanks & Regards,<br>"+"Mahindra Foundation<br>" + "Sheetal Mehta<br>"
+				+ "Trustee & Executive Director<br>" + "K.C. Mahindra Education Trust,<br>" + "3rd Floor, Cecil Court,<br>"
+				+ "Near Regal Cinema,<br>" + "Mahakavi Bushan Marg,<br>" + "Mumbai 400001<br>"
+				+ "PS : Contact support@hariyali.org.in in case of any query.";
 		try {
 			ccServiceEmailAPI.sendCorrespondenceMail(toEmail, "Web Id for Plant Donation", body);
 		} catch (EmailNotConfiguredException e) {
@@ -92,7 +82,7 @@ public class EmailService {
 		String text = "Dear Sponsor,<br>" + "<p>We thank you for your sponsorship.<br>" + "Rec.No:"
 				+ receipt.getRecieptNumber() + " Date:" + formattedDate + "<br></p>"
 				+ "Please find a PDF version of the receipt attached herewith.<br>"
-				+ "<p>Thanking you for your support to project Hariyali.</p><br>Naandi Foundation<br>Address : <br>PS : Contact 'support@hariyali.org.in' in case of any query.";
+				+ "<p>Thanking you for your support to project Hariyali.</p><br>Naandi Foundation<br>PS : Contact 'support@hariyali.org.in' in case of any query.";
 		ccServiceEmailAPI.sendPaymentsMail(to, "Receipt For Your Donation", text,files);
 	}
 }
