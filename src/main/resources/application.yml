@@ -74,3 +74,5 @@ log:
 cc_service: 
           APP_ID: caf3ebf3-67c0-43f3-ad1a-7d5d3437d760
           CC_BASE_URL: https://ccservice-dev.m-devsecops.com/
+encryption:
+           key: emgut@kL9RQ%L#tt
