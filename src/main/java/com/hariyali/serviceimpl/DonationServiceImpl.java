@@ -8,10 +8,7 @@ import com.hariyali.EnumConstants;
 import com.hariyali.config.JwtHelper;
 import com.hariyali.dao.UserDao;
 import com.hariyali.dao.paymentGateway.PaymentGatewayConfigurationDao;
-import com.hariyali.dto.AddressDTO;
-import com.hariyali.dto.ApiResponse;
-import com.hariyali.dto.DonationDTO;
-import com.hariyali.dto.UsersDTO;
+import com.hariyali.dto.*;
 import com.hariyali.entity.*;
 import com.hariyali.entity.paymentGateway.PaymentGatewayConfiguration;
 import com.hariyali.exceptions.CustomException;
@@ -20,25 +17,27 @@ import com.hariyali.repository.*;
 import com.hariyali.service.DonationService;
 import com.hariyali.service.ReceiptService;
 import com.hariyali.utils.EmailService;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
-import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
+import static java.util.Optional.*;
+
 @Service
+@Slf4j
 public class DonationServiceImpl implements DonationService {
 
 	@Autowired
@@ -127,7 +126,7 @@ public class DonationServiceImpl implements DonationService {
 			response = saveDonationOffline(usersDTO, usersServiceImpl.generateDonorId(), request);
 			Receipt receipt = receiptRepository.getUserReceipt(userEmail.getUserId());
 			try {
-				emailService.sendReceiptWithAttachment(userEmail.getEmailId(),receipt.getReciept_Path());
+				emailService.sendReceiptWithAttachment(userEmail.getEmailId(),receipt);
 			} catch (MessagingException e) {
 				throw new CustomException("Issued to email send:"+e.getMessage());
 			}
@@ -258,7 +257,8 @@ public class DonationServiceImpl implements DonationService {
 								}
 							}
 						}
-						emailService.sendGiftingLetterEmail(recipient.getEmailId(),resulEntity);
+						Users existingUser = usersRepository.findByEmailId(recipient.getEmailId());
+						emailService.sendGiftingLetterEmail(existingUser,donation.getDonationEvent());
 					}
 
 				}
@@ -580,8 +580,26 @@ public class DonationServiceImpl implements DonationService {
 	@Override
 	public Donation searchDonationById1(int donationId) {
 		Donation d = donationRepository.findById(donationId).get();
-		System.out.println(d.toString());
+		log.info(d.toString());
 		return d;
+	}
+
+	@Override
+	public ApiResponse<List<DonationDTO>> getDonations(DonorListRequestDTO requestDTO) {
+		ApiResponse<List<DonationDTO>> response = new ApiResponse<>();
+		Pageable pageable = PageRequest.of(requestDTO.getPageNumber(), requestDTO.getPageSize());
+		Page<Donation> result = donationRepository.findByUserId(requestDTO.getUserId(), pageable);
+		if (!isNull(result) && !result.getContent().isEmpty()) {
+			List<DonationDTO> donationDTOS = of(result.getContent()).get().stream()
+					.map(data -> modelMapper.map(data, DonationDTO.class)).collect(Collectors.toList());
+			response.setData(donationDTOS);
+			response.setTotalPages(result.getTotalPages());
+			response.setStatus(EnumConstants.SUCCESS);
+			response.setStatusCode(HttpStatus.OK.value());
+			response.setMessage("Data fetched successfully..!!");
+			return response;
+		} else
+			throw new CustomException("No donation found!!");
 	}
 
 }

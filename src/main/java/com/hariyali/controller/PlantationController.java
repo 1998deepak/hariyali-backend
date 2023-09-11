@@ -43,7 +43,7 @@ public class PlantationController {
 		
 		System.err.println(donationType);
 		try {
-			ByteArrayInputStream byteArrayInputStream = plantationService.exportExcelUserPlant(donationType,packageName);
+			ByteArrayInputStream byteArrayInputStream = plantationService.exportExcelUserPlant();
 			response.setContentType("application/octet-stream");
 			response.setHeader("Content-Disposition", "attachment; filename= User Plant Report.xlsx");
 			IOUtils.copy(byteArrayInputStream, response.getOutputStream());
