@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.hariyali.dto.ApiResponse;
+import com.hariyali.dto.DonorListRequestDTO;
 import com.hariyali.dto.LoginRequest;
 import com.hariyali.dto.UsersDTO;
 import com.hariyali.entity.Users;
@@ -34,7 +35,7 @@ public interface UsersService {
 
 	public ApiResponse<Object> getAllUsersWithDonarID();
 	
-	public ApiResponse<Object> getAllUsersWithWebId();
+	public ApiResponse<List<UsersDTO>> getAllUsersWithWebId(DonorListRequestDTO requestDTO);
 	
 	public ApiResponse<Object> getAllDonationOfSpecificUser(String email);
 	    

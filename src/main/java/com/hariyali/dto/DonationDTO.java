@@ -40,7 +40,7 @@ public class DonationDTO {
 	
 	private List<PaymentInfo> paymentInfo;
 
-	private UsersDTO users;
+//	private UsersDTO users;
 
 	private List<Recipient> recipient;
 		

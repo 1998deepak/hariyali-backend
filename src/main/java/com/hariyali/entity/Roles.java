@@ -33,8 +33,8 @@ public class Roles implements Serializable {
 	@Column(name = "role_name")
 	private String usertypeName;
 
-	@JsonIgnoreProperties(allowSetters = true)
-	@OneToMany(mappedBy = "userRole")
-	private List<Users> usermsts;
+//	@JsonIgnoreProperties(allowSetters = true)
+//	@OneToMany(mappedBy = "userRole")
+//	private List<Users> usermsts;
 
 }

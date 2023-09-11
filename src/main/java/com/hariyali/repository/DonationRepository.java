@@ -4,6 +4,8 @@ import com.hariyali.entity.Donation;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -160,4 +162,9 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 			+ "LEFT JOIN tbl_donation d ON u.user_id = d.userId\r\n"
 			+ "WHERE u.emailId = ?;",nativeQuery = true)
 	public int donationCount(String emailId);
+
+	@Query(value = "SELECT * FROM tbl_donation WHERE userId = :userId",
+	countQuery = "SELECT COUNT(*) FROM tbl_donation WHERE userId = :userId",
+	nativeQuery = true)
+	Page<Donation> findByUserId(@Param("userId") Integer userId, Pageable pageable);
 }

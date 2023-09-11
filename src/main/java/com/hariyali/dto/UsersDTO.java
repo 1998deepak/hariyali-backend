@@ -88,6 +88,9 @@ public class UsersDTO {
 	
 	private String country ;
 
+	private String approvalStatus;
+	private String remark;
+
 	
 	
 }

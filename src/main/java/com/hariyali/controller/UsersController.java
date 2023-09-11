@@ -6,6 +6,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.hariyali.dto.*;
 import com.hariyali.exceptions.TooManyRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,10 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hariyali.EnumConstants;
-import com.hariyali.dto.ApiRequest;
-import com.hariyali.dto.ApiResponse;
-import com.hariyali.dto.LoginRequest;
-import com.hariyali.dto.UsersDTO;
 import com.hariyali.entity.OtpModel;
 import com.hariyali.entity.Users;
 import com.hariyali.exceptions.CustomException;
@@ -199,9 +196,9 @@ public class UsersController {
 	}
 
 	// method to get user by email
-	@GetMapping("/getAlluserWithWebId")
-	public ResponseEntity<ApiResponse<Object>> getAllusersWithWebId() {
-		return new ResponseEntity<>(usersService.getAllUsersWithWebId(), HttpStatus.OK);
+	@PostMapping("/getAlluserWithWebId")
+	public ResponseEntity<ApiResponse<List<UsersDTO>>> getAllusersWithWebId(@RequestBody DonorListRequestDTO requestDTO) {
+		return new ResponseEntity<>(usersService.getAllUsersWithWebId(requestDTO), HttpStatus.OK);
 	}
 
 	@PostMapping("/approvedDonation")

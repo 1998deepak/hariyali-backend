@@ -90,4 +90,55 @@ public class PaymentInfo implements Serializable {
 	@Column(name = "order_id")
 	private String orderId;
 
+	@Column(name = "account_id")
+	private Integer accountId;
+
+	@Column(name = "receipt_date")
+	private Date receiptDate;
+
+	@Column(name = "received_amount")
+	private Double receivedAmount;
+
+	@Column(name = "bank_charge")
+	private Double bankCharge;
+
+	@Column(name = "document_number")
+	private String documentNumber;
+
+	@Column(name = "bank_address")
+	private String bankAddress;
+
+	@Column(name = "deposit_number")
+	private String depositNumber;
+
+	@Column(name = "deposit_date")
+	private Date depositDate;
+
+	@Column(name = "receipt_number")
+	private String receiptNumber;
+
+	@Column(name = "realization_date")
+	private String realizationDate;
+
+	@Column(name = "credit_card_no")
+	private String creditCardNumber;
+
+	@Column(name = "expiry")
+	private String cardExpiry;
+
+	@Column(name = "cardholder_name")
+	private String cardHolderName;
+
+	@Column(name = "cheque_number")
+	private String chequeNumber;
+
+	@Column(name = "cheque_date")
+	private String chequeDate;
+
+	@Column(name = "dd_number")
+	private String demandDraftNumber;
+
+	@Column(name = "dd_date")
+	private String demandDraftDate;
+
 }
