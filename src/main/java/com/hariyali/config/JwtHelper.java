@@ -39,7 +39,7 @@ public class JwtHelper implements Serializable {
 	@Value("${jwt.expireTime}")
 	private long timeInHours;
 
-	public static final long JWT_TOKEN_VALIDITY = 60 * 60 * 1000; // 1 Hr
+	public static final long JWT_TOKEN_VALIDITY =15 * 60 * 1000; // 15 minutes
 
 //	@Value("${jwt.secret}")
 //	private String secretKey;

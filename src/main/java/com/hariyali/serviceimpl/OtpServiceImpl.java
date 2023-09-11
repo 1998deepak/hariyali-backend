@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.hariyali.entity.OtpModel;
 import com.hariyali.entity.Users;
+import com.hariyali.exceptions.EmailNotConfiguredException;
 import com.hariyali.repository.OtpRepository;
 import com.hariyali.repository.UsersRepository;
 
@@ -25,7 +26,7 @@ public class OtpServiceImpl {
 	OtpRepository otpRepository;
 
 	@Autowired
-	private JavaMailSender javaMailSender;
+	CCServiceEmailAPI ccServiceEmailAPI;
 
 	public void sendOtpByEmail(String emailId) {
 		Users user = userRepository.findByEmailId(emailId);
@@ -36,11 +37,15 @@ public class OtpServiceImpl {
 
 		String otp = generateOtp();
 		otpModel.setOtpCode(otp);
-		otpModel.setDonarIdOrEmail(emailId);;
+		otpModel.setDonarIdOrEmail(emailId);
+		;
 		otpModel.setOtpExpiryTime(LocalDateTime.now().plusMinutes(10));
 		otpModel.setUsers(user);
 		otpRepository.save(otpModel);
-		sendEmail(emailId, "Your OTP for login: " + otp);
+		String body = "Dear Sponsor,<br>" + "<P> Your OTP for login:<b>" + otp + "</b>.<P><br>Mahindra Foundation<br>"
+				+ "Sheetal Mehta<br>" + "Trustee & Executive Director<br>" + "K.C. Mahindra Education Trust,<br>"
+				+ "3rd Floor, Cecil Court,<br>Near Regal Cinema,<br>Mahakavi Bushan Marg,<br>Mumbai 400001<br>";
+		sendEmail(emailId, body);
 	}
 
 	private String generateOtp() {
@@ -50,11 +55,13 @@ public class OtpServiceImpl {
 	}
 
 	private void sendEmail(String toEmail, String body) {
-		SimpleMailMessage message = new SimpleMailMessage();
-		message.setTo(toEmail);
-		message.setSubject("Login OTP");
-		message.setText(body);
-		javaMailSender.send(message);
+
+		try {
+			ccServiceEmailAPI.sendCorrespondenceMail(toEmail, "Login Otp", body);
+		} catch (EmailNotConfiguredException e) {
+			e.printStackTrace();
+			System.out.println("Exception:" + e.getMessage());
+		}
 	}
 
 	public OtpModel findBydonarIdOrEmail(String donarIdOrEmail, String otp) {

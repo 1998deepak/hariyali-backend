@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.hariyali.dto.ApiResponse;
 import com.hariyali.entity.Plantation;
 import com.hariyali.repository.PlantationRepository;
 import com.hariyali.service.PlantationService;
@@ -38,18 +39,21 @@ public class PlantationController {
 	@Autowired
 	private PlantationRepository plantationRepository;
 
-	@GetMapping("/excelExportUserPlant/{donationType}/{packageName}")
-	public void exportExcelUserPlant(HttpServletResponse response,@PathVariable String donationType,@PathVariable String packageName) {
-		
-		System.err.println(donationType);
-		try {
-			ByteArrayInputStream byteArrayInputStream = plantationService.exportExcelUserPlant();
-			response.setContentType("application/octet-stream");
-			response.setHeader("Content-Disposition", "attachment; filename= User Plant Report.xlsx");
-			IOUtils.copy(byteArrayInputStream, response.getOutputStream());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	@GetMapping("/excelExportUserPlant")
+	public void exportExcelUserPlant(HttpServletResponse response,@RequestParam("seasonType") String seasonType) {
+
+		 try {
+	            ByteArrayInputStream byteArrayInputStream = plantationService.exportExcelUserPlant(seasonType);
+	            response.setContentType("application/octet-stream");
+
+	            // Set the filename based on the seasonType
+	            String fileName = seasonType + "_User_Plant_Report.xlsx";
+	            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+
+	            IOUtils.copy(byteArrayInputStream, response.getOutputStream());
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
 	}
 
 	@PostMapping("/uploadPlantationExcel")
@@ -85,6 +89,12 @@ public class PlantationController {
 		} else {
 			return ResponseEntity.badRequest().build();
 		}
+	}
+
+	@GetMapping("/getAllPlantationMaster")
+	public ResponseEntity<ApiResponse<Object>> getAllPlantationMaster() {
+		ApiResponse<Object> apiResponse = plantationService.getAllPlantationMaster();
+		return new ResponseEntity<>(apiResponse, HttpStatus.OK);
 	}
 
 }

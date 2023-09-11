@@ -33,9 +33,9 @@ public interface PlantationRepository extends JpaRepository<Plantation, Long> {
 			+ "    tbl_user_packages tup ON tup.donationId = td.donation_id\r\n"
 			+ "WHERE\r\n"
 			+ "    tup.isPlanted =false\r\n"
-			+ "    and tup.package_name='Monsoon'\r\n"
-			+ "    and td.created_date BETWEEN '2021-04-01' AND '2022-03-31'" ,nativeQuery = true)
-	List<Map<String,Object>> getUserDonationAndPlantationData();
-
+			+ "    and tup.package_name=?1\r\n"
+			+ "    and td.created_date BETWEEN ?2 AND ?3 " ,nativeQuery = true)
+	List<Map<String,Object>> getUserDonationAndPlantationData(String seasonType, String seasonStartDate, String seasonEndDate);
+	
 
 }
