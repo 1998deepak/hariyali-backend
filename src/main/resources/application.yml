@@ -12,17 +12,17 @@ spring:
                     max-file-size:5MB
                     max-request-size:5MB
 
-  mail:
-    host : smtp.gmail.com
-    port : 587
-    username : nayandandwate55@gmail.com
-    password : hxiiyngadcoxqefa
-    properties :
-      mail :
-        smtp :
-          auth : true
-          starttls :
-            enable : true
+#  mail:
+#    host : smtp.gmail.com
+#    port : 587
+#    username : nayandandwate55@gmail.com
+#    password : hxiiyngadcoxqefa
+#    properties :
+#      mail :
+#        smtp :
+#          auth : true
+#          starttls :
+#            enable : true
   jpa:
     properties:
       hibernate: 
