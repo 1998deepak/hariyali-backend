@@ -9,8 +9,8 @@ spring:
        lazy-initialization: true
   servlet:
           multipart:
-                    max-file-size:5MB
-                    max-request-size:5MB
+             max-file-size : 5MB
+             max-request-size : 5MB
 
   mail:
     host : smtp.gmail.com
@@ -70,5 +70,8 @@ request:
             limit: 500
             noOfMinute: 1
 # change this path as per environment
-log:
-    path: c:/log
+path: c:/log
+#cc_service credentials
+cc_service: 
+          APP_ID: caf3ebf3-67c0-43f3-ad1a-7d5d3437d760
+          CC_BASE_URL: https://ccservice-dev.m-devsecops.com/
