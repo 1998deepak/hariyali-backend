@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.hariyali.entity.Users;
@@ -111,35 +112,17 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "			 where users.donorId IS NOT NULL AND users.is_deleted=false", nativeQuery = true)
 	Object getAllUsersWithDonarID();
 
-	@Query(value = "SELECT \r\n" + "			 			     JSON_ARRAYAGG(\r\n"
-			+ "			 			         JSON_OBJECT(\r\n"
-			+ "			 			             'userId', users.user_id,\r\n"
-			+ "			 			             'firstName', users.first_name,\r\n"
-			+ "			 			             'lastName', users.last_name,\r\n"
-			+ "			 			             'emailId', users.emailId,\r\n"
-			+ "			 			             'donarType', users.donor_type,\r\n"
-			+ "			 			             'panCard', users.pan_card,\r\n"
-			+ "			 			             'webId', users.webId,\r\n"
-			+ "			                          'organisation',users.organisation,\r\n"
-			+ "			 			             'paymentInfo', (\r\n"
-			+ "			 			                 SELECT \r\n"
-			+ "			 			                     JSON_OBJECT(\r\n"
-			+ "			 			                         'paymentDate', MAX(Date(paymentInfo.payment_date)),\r\n"
-			+ "			 			                         'paymentInfoId', MAX(paymentInfo.paymentInfo_id),\r\n"
-			+ "			 			                         'amount', MAX(paymentInfo.amount),\r\n"
-			+ "			                                      'paymentStatus',MAX(paymentInfo.payment_status)\r\n"
-			+ "			 			                     )\r\n"
-			+ "			 			                 FROM tbl_payment_info AS paymentInfo\r\n"
-			+ "			 			                 WHERE paymentInfo.donationId IN (\r\n"
-			+ "			 			                     SELECT d.donation_id\r\n"
-			+ "			 			                     FROM tbl_donation d\r\n"
-			+ "			 			                     INNER JOIN tbl_payment_info p ON d.donation_id = p.donationId\r\n"
-			+ "			 			                     WHERE d.userId = users.user_id\r\n"
-			+ "			 			                 )\r\n" + "			 			             )\r\n"
-			+ "			 			         )\r\n" + "			 			     ) AS 'Result'\r\n"
-			+ "			 			 FROM tbl_user_master AS users\r\n"
-			+ "			 			 WHERE users.webId IS NOT NULL AND users.is_deleted = false AND users.is_approved=false;", nativeQuery = true)
-	Object getAllUsersWithWebId();
+	@Query(value = "SELECT user_id, webId, donorId, first_name, last_name, donor_type, organisation, approval_status, emailId, remark FROM tbl_user_master u WHERE webId IS NOT NULL AND is_deleted = false AND approval_status = :status AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
+			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR first_name LIKE CONCAT(:searchText, '%') \n" +
+			" OR last_name LIKE CONCAT(:searchText, '%') OR donor_type LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%'))"
+			, countQuery = "SELECT COUNT(*) FROM tbl_user_master WHERE webId IS NOT NULL AND is_deleted = false AND approval_status = :status AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null) \n" +
+			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR first_name LIKE CONCAT(:searchText, '%') \n" +
+			"OR last_name LIKE CONCAT(:searchText, '%') OR donor_type LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%'))"
+			, nativeQuery = true)
+	Page<Object[]> getAllUsersWithWebId(@Param("searchText") String searchText,
+									 @Param("status") String status,
+									 @Param("donorType") String donorType,
+									 Pageable pageable);
 
 	@Query(value = "SELECT JSON_ARRAYAGG( " +
 	        "JSON_OBJECT( " +

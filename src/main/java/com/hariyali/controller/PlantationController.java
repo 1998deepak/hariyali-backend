@@ -90,7 +90,7 @@ public class PlantationController {
 			return ResponseEntity.badRequest().build();
 		}
 	}
-	
+
 	@GetMapping("/getAllPlantationMaster")
 	public ResponseEntity<ApiResponse<Object>> getAllPlantationMaster() {
 		ApiResponse<Object> apiResponse = plantationService.getAllPlantationMaster();

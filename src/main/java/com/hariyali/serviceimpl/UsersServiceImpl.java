@@ -7,13 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
-import com.hariyali.dto.LoginRequest;
+import com.hariyali.dto.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,9 +42,6 @@ import com.hariyali.EnumConstants;
 import com.hariyali.config.CustomUserDetailService;
 import com.hariyali.config.JwtHelper;
 import com.hariyali.dao.UserDao;
-import com.hariyali.dto.ApiResponse;
-import com.hariyali.dto.DonationDTO;
-import com.hariyali.dto.UsersDTO;
 import com.hariyali.entity.Address;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.PaymentInfo;
@@ -68,6 +69,7 @@ import static java.util.Objects.isNull;
 import static java.util.Optional.*;
 
 @Service
+@Slf4j
 public class UsersServiceImpl implements UsersService {
 
 	@Autowired
@@ -384,7 +386,7 @@ public class UsersServiceImpl implements UsersService {
 		if (entity.getEmailId() != null) {
 			if (entity.getDonorId() != null && entity.getWebId() == null) {
 				throw new CustomExceptionDataAlreadyExists(
-						"Donar with " + entity.getEmailId() + " is already Resigterd");
+						"Donor with " + entity.getEmailId() + " is already registered, Kindly do login and do donation!");
 			}
 			response.setData(modelMapper.map(entity, UsersDTO.class));
 			response.setStatus(EnumConstants.SUCCESS);
@@ -712,12 +714,21 @@ public class UsersServiceImpl implements UsersService {
 	}
 
 	@Override
-	public ApiResponse<Object> getAllUsersWithWebId() {
-		ApiResponse<Object> response = new ApiResponse<>();
+	public ApiResponse<List<UsersDTO>> getAllUsersWithWebId(DonorListRequestDTO requestDTO) {
+		ApiResponse<List<UsersDTO>> response = new ApiResponse<>();
+		Pageable pageable = PageRequest.of(requestDTO.getPageNumber(), requestDTO.getPageSize());
 
-		Object result = usersRepository.getAllUsersWithWebId();
-		if (result != null) {
-			response.setData(result);
+		Page<Object[]> result = usersRepository.getAllUsersWithWebId(ofNullable(requestDTO.getSearchText()).orElse(""),
+				requestDTO.getStatus(),
+				StringUtils.trimToNull(requestDTO.getDonorType()),
+				pageable);
+
+		if (!isNull(result) && !result.getContent().isEmpty()) {
+			List<UsersDTO> usersDTOS = of(result.getContent()).get().stream()
+					.map(this :: toUsersDTO).collect(Collectors.toList());
+			response.setData(usersDTOS);
+			response.setTotalPages(result.getTotalPages());
+			response.setTotalRecords(result.getTotalElements());
 			response.setStatus(EnumConstants.SUCCESS);
 			response.setStatusCode(HttpStatus.OK.value());
 			response.setMessage("Data fetched successfully..!!");
@@ -725,6 +736,24 @@ public class UsersServiceImpl implements UsersService {
 		} else
 			throw new CustomException("There is No user who has webId");
 
+	}
+
+	private UsersDTO toUsersDTO(Object[] user){
+		UsersDTO dto = new UsersDTO();
+		if(user.length > 0) {
+			dto.setUserId(ofNullable(user[0]).map(String::valueOf).map(Integer::parseInt).orElse(0));
+			dto.setWebId(ofNullable(user[1]).map(String::valueOf).orElse(""));
+			dto.setDonorId(ofNullable(user[2]).map(String::valueOf).orElse(""));
+			dto.setFirstName(ofNullable(user[3]).map(String::valueOf).orElse(""));
+			dto.setLastName(ofNullable(user[4]).map(String::valueOf).orElse(""));
+			dto.setDonarType(ofNullable(user[5]).map(String::valueOf).orElse(""));
+			dto.setOrganisation(ofNullable(user[6]).map(String::valueOf).orElse(""));
+			dto.setApprovalStatus(ofNullable(user[7]).map(String::valueOf).orElse(""));
+			dto.setEmailId(ofNullable(user[8]).map(String::valueOf).orElse(""));
+			dto.setRemark(ofNullable(user[9]).map(String::valueOf).orElse(""));
+
+		}
+		return dto;
 	}
 
 	@Override
@@ -739,12 +768,13 @@ public class UsersServiceImpl implements UsersService {
 		String status = usersDTO.getStatus();
 
 		Users user = this.usersRepository.getUserByWebId(webId);
-		System.out.println("User:" + user.toString());
-		System.out.println("username:" + userName);
-		List<Donation> donation = this.donationRepository.getDonationDataByUserId(user.getUserId());
+		user.setRemark(usersDTO.getRemark());
+		user.setApprovalStatus(usersDTO.getApprovalStatus());
+
+		List<Donation> donation = user.getDonations();//this.donationRepository.getDonationDataByUserId(user.getUserId());
 		Users recipientEmail = null;
 
-		if (status.trim().equalsIgnoreCase("rejected")) {
+		if ("Rejected".equalsIgnoreCase(usersDTO.getApprovalStatus())) {
 			recipientEmail = handleDonationRejection(user, donation);
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Donation Rejected By " + userName);
@@ -752,7 +782,7 @@ public class UsersServiceImpl implements UsersService {
 			sendRejectDonationEmails(user.getEmailId());
 //			sendRejectDonationEmails(recipientEmail.getEmailId());
 
-		} else if (status.trim().equalsIgnoreCase("approved")) {
+		} else if ("Approved".equalsIgnoreCase(usersDTO.getApprovalStatus())) {
 			recipientEmail = handleDonationApproval(user, donation, userName);
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Donation Approved By " + userName);
@@ -873,6 +903,11 @@ public class UsersServiceImpl implements UsersService {
 									EnumConstants.content, user);
 							emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
 							emailService.sendReceiptWithAttachment(user.getEmailId(), receipt);
+
+// 						    emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
+// 							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content, user);
+// 							emailService.sendReceiptWithAttachment(user.getEmailId(),receipt);
+
 						}
 						emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
 								EnumConstants.content, user);
@@ -882,6 +917,7 @@ public class UsersServiceImpl implements UsersService {
 						sendRejectDonationEmails(user.getEmailId());
 					}
 				} catch (Exception e) {
+					log.error("Exception = {}", e);
 					throw new CustomException("Payment not perform.");
 				}
 			}
@@ -892,14 +928,38 @@ public class UsersServiceImpl implements UsersService {
 	}
 
 	// reject donation
-	private Users handleDonationRejection(Users user, List<Donation> donation) {
+	private Users handleDonationRejection(Users user, List<Donation> donations) {
 		user.setIsDeleted(true);
 		user.setDonorId(null);
 		this.usersRepository.save(user);
 
-		if (donation != null) {
-			for (Donation d : donation) {
-				deleteDonation(user, d);
+		if (donations != null) {
+			for (Donation donation : donations) {
+				donation.setIsDeleted(true);
+				if (donation.getPaymentInfo() != null) {
+					for (PaymentInfo payment : donation.getPaymentInfo()) {
+						payment.setIsDeleted(true);
+					}
+					this.paymentInfoRepository.saveAll(donation.getPaymentInfo());
+				}
+				if (donation.getUserPackage() != null) {
+					for (UserPackages packages : donation.getUserPackage()) {
+						packages.setIsdeleted(true);
+					}
+					this.userPackageRepository.saveAll(donation.getUserPackage());
+				}
+				if (donation.getRecipient() != null) {
+					for (Recipient recipient : donation.getRecipient()) {
+						recipient.setIsDeleted(true);
+						Users recipientEmail = this.usersRepository.findByEmailId(recipient.getEmailId());
+						recipientEmail.setIsDeleted(true);
+						this.usersRepository.save(recipientEmail);
+					}
+
+					this.recipientRepository.saveAll(donation.getRecipient());
+				}
+
+
 			}
 		}
 		return user;

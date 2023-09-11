@@ -24,4 +24,6 @@ public class ApiResponse<T> {
 	private String encRequest;
 	private String accessCode;
 	private String gatewayURL;
+	private Integer totalPages;
+	private Long totalRecords;
 }

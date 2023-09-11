@@ -22,6 +22,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hariyali.entity.Donation;
 import com.hariyali.service.DonationService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1")
 public class DonationController {
@@ -88,4 +90,16 @@ public class DonationController {
 		orderId = encryptionDecryptionUtil.decrypt(orderId);
 		return integrationService.findPaymentInfoByOrderId(orderId);
 	}
+
+	/**
+	 * Rest endpoint to get user donation list
+	 *
+	 * @param requestDTO
+	 * @return
+	 */
+	@PostMapping("/getUserDonations")
+	public ApiResponse<List<DonationDTO>> searchDonationById1(@RequestBody DonorListRequestDTO requestDTO){
+		return donationService.getDonations(requestDTO);
+	}
+
 }
