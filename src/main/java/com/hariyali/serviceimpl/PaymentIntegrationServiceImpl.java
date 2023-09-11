@@ -80,10 +80,12 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 		log.info("decryptedResponse :: "+ decryptedResponse);
 		Map<String, String> response = Arrays.stream(of(decryptedResponse.split("&")).orElse(new String[] {}))
 				.filter(values -> !values.isEmpty())
-				.collect(Collectors.toMap(s -> ofNullable(s.split("=")).filter(data-> data.length > 0).map(data -> data[0]).orElse(""), s -> ofNullable(s.split("=")).filter(data-> data.length > 1).map(data -> data[1]).orElse("")));
-
-		Donation donation = donationRepository
-				.findByOrderId(ofNullable(response.get("order_id")).orElse("0"));
+				.collect(Collectors.toMap(
+						s -> ofNullable(s.split("=")).filter(data -> data.length > 0).map(data -> data[0]).orElse(""),
+						s -> ofNullable(s.split("=")).filter(data -> data.length > 1).map(data -> data[1]).orElse("")));
+		String orderId = ofNullable(response.get("order_id")).orElse("0");
+		log.info("Order id ::" + orderId);
+		Donation donation = donationRepository.findByOrderId(orderId);
 		if (isNull(donation))
 			throw new CustomException("Invalid order id received");
 		PaymentInfo paymentInfo = new PaymentInfo();
@@ -111,14 +113,18 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 			System.out.println("user" + user);
 			emailService.sendWebIdEmail(user.getEmailId(), user);
 		}
-		if ("Success".equalsIgnoreCase(paymentInfo.getPaymentStatus()) || "Completed".equalsIgnoreCase(paymentInfo.getPaymentStatus())) {
+		int donationCnt = donationRepository.donationCount(user.getEmailId());
+		if (paymentInfo.getPaymentStatus().equalsIgnoreCase("Completed")) {
 			receiptService.generateReceipt(donation);
 			Receipt receipt = receiptRepository.getUserReceiptbyDonation(user.getUserId(), donation.getDonationId());
-			try {
-				emailService.sendEmailWithAttachment(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
-						receipt.getReciept_Path(),user);
-			} catch (MessagingException e) {
-				throw new CustomException(e.getMessage());
+			if (donationCnt > 1) {
+				emailService.sendReceiptWithAttachment(user.getEmailId(), receipt);
+			} else {
+//					emailService.sendEmailWithAttachment(user.getEmailId(), EnumConstants.subject,
+//							EnumConstants.content, receipt.getReciept_Path(), user);
+				emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
+						user);
+				emailService.sendReceiptWithAttachment(user.getEmailId(), receipt);
 			}
 		}
 		ApiResponse<String> apiResponse = new ApiResponse<>();

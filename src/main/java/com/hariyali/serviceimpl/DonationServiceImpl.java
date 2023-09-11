@@ -126,11 +126,17 @@ public class DonationServiceImpl implements DonationService {
 			// send email to user
 			response = saveDonationOffline(usersDTO, usersServiceImpl.generateDonorId(), request);
 			Receipt receipt = receiptRepository.getUserReceipt(userEmail.getUserId());
-			try {
-				emailService.sendReceiptWithAttachment(userEmail.getEmailId(),receipt.getReciept_Path());
-			} catch (MessagingException e) {
-				throw new CustomException("Issued to email send:"+e.getMessage());
-			}
+			int donationCnt=donationRepository.donationCount(userEmail.getEmailId());
+				if(donationCnt>1) {
+					emailService.sendReceiptWithAttachment(userEmail.getEmailId(), receipt);
+				}
+				else {
+//					emailService.sendEmailWithAttachment(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content,
+//							receipt.getReciept_Path(), userEmail);
+					emailService.sendWelcomeLetterMail(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content, userEmail);
+					emailService.sendReceiptWithAttachment(userEmail.getEmailId(),receipt);
+				}
+			
 			return response;
 		} else if ("online".equalsIgnoreCase(donationDTO.getDonationMode())) {
 			return saveDonation(usersDTO, donarID, request);
