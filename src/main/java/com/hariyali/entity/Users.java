@@ -133,7 +133,7 @@ public class Users implements Serializable {
 	private String country ;
 
 	@Column(name = "approval_status")
-	private String approvalStatus ="Pending";
+	private String approvalStatus;
 
 	@Column(name = "remark")
 	private String remark;
