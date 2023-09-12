@@ -84,6 +84,17 @@ public class JwtWebSecurityConfig   {
 
 	    http.authenticationProvider(authenticationProvider());
 
+		http.headers().frameOptions().sameOrigin()
+				.httpStrictTransportSecurity().disable()
+				.cacheControl()
+				.and().httpStrictTransportSecurity()
+				.includeSubDomains(true)
+				.maxAgeInSeconds(31536000)
+				.and()
+				.xssProtection()
+				.block(true)
+				.and()
+				.contentSecurityPolicy("script-src 'self'");
 	    return http.build();
 	}
 

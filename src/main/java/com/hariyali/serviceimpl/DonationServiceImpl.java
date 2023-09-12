@@ -1,16 +1,14 @@
 package com.hariyali.serviceimpl;
 
+import com.ccavenue.security.AesCryptUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hariyali.EnumConstants;
 import com.hariyali.config.JwtHelper;
 import com.hariyali.dao.UserDao;
 import com.hariyali.dao.paymentGateway.PaymentGatewayConfigurationDao;
-import com.hariyali.dto.ApiResponse;
-import com.hariyali.dto.DonationDTO;
+import com.hariyali.dto.*;
 import com.hariyali.entity.*;
 import com.hariyali.entity.paymentGateway.PaymentGatewayConfiguration;
 import com.hariyali.exceptions.CustomException;
@@ -19,21 +17,27 @@ import com.hariyali.repository.*;
 import com.hariyali.service.DonationService;
 import com.hariyali.service.ReceiptService;
 import com.hariyali.utils.EmailService;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Optional;
+import javax.transaction.Transactional;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import static java.util.Optional.ofNullable;
-import com.ccavenue.security.AesCryptUtil;
+import static java.util.Objects.isNull;
+import static java.util.Optional.*;
+
 @Service
+@Slf4j
 public class DonationServiceImpl implements DonationService {
 
 	@Autowired
@@ -98,40 +102,28 @@ public class DonationServiceImpl implements DonationService {
 	}
 
 	@Override
-	public ApiResponse<DonationDTO> saveUserDonations(JsonNode jsonNode, String donarID, HttpServletRequest request)
+	@Transactional(rollbackOn = Exception.class)
+	public ApiResponse<DonationDTO> saveUserDonations(UsersDTO usersDTO, String donarID, HttpServletRequest request)
 			throws JsonProcessingException {
-		JsonNode userNode = jsonNode.get("user");
+//		JsonNode userNode = jsonNode.get("user");
 		ApiResponse<DonationDTO> response = null;
 
-		JsonNode donationNode = userNode.get("donations");
+//		JsonNode donationNode = userNode.get("donations");
 
-		Users userEmail = this.usersRepository.findByEmailId(userNode.get("emailId").asText());
+		Users userEmail = this.usersRepository.findByEmailId(usersDTO.getEmailId());
 
-		if (userEmail == null) {
-			throw new CustomExceptionNodataFound("Given Email Id doesn't exists");
-		}
+		ofNullable(userEmail).orElseThrow(()->new CustomExceptionNodataFound("Given Email Id doesn't exists"));
 
-		if (donationNode == null) {
-			throw new CustomException("Donation not found");
-		}
+		ofNullable(usersDTO.getDonations()).orElseThrow(()->new CustomException("Donation not found"));
+//		if (donationNode == null) {
+//			throw new CustomException("Donation not found");
+//		}
+		DonationDTO donationDTO = Optional.of(usersDTO.getDonations()).filter(donationDTOS -> !donationDTOS.isEmpty()).get().stream().findFirst().get();
+		Optional.of(donationDTO).map(DonationDTO::getDonationMode).orElseThrow(()->new CustomException("Donation mode not selected"));
 
-		String donationMode = null;
-		if (donationNode.isArray()) {
-			ArrayNode arrayNode = (ArrayNode) donationNode;
-
-			for (JsonNode donation : arrayNode) {
-				if (donation.get("donationMode") != null) {
-					donationMode = donation.get("donationMode").asText();
-				}
-			}
-		}
-		if (donationMode == null) {
-			throw new CustomException("Donation mode not selected");
-		}
-
-		if (donationMode.equalsIgnoreCase("offline")) {
+		if ("offline".equalsIgnoreCase(donationDTO.getDonationMode())) {
 			// send email to user
-			response = saveDonationOffline(jsonNode, usersServiceImpl.generateDonorId(), request);
+			response = saveDonationOffline(usersDTO, usersServiceImpl.generateDonorId(), request);
 			Receipt receipt = receiptRepository.getUserReceipt(userEmail.getUserId());
 			int donationCnt=donationRepository.donationCount(userEmail.getEmailId());
 				if(donationCnt>1) {
@@ -143,34 +135,29 @@ public class DonationServiceImpl implements DonationService {
 					emailService.sendWelcomeLetterMail(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content, userEmail);
 					emailService.sendReceiptWithAttachment(userEmail.getEmailId(),receipt);
 				}
-			
+
 			return response;
-		} else if (donationMode.equalsIgnoreCase("online")) {
-			return saveDonation(jsonNode, donarID, request);
+		} else if ("online".equalsIgnoreCase(donationDTO.getDonationMode())) {
+			return saveDonation(usersDTO, donarID, request);
 		} else {
 			throw new CustomException("Invalid donation mode");
 		}
 	}
 
-	private ApiResponse<DonationDTO> saveDonationOffline(JsonNode jsonNode, String donarID,
+	private ApiResponse<DonationDTO> saveDonationOffline(UsersDTO usersDTO, String donarID,
 			HttpServletRequest request) {
 		ApiResponse<DonationDTO> response = new ApiResponse<>();
-		String donationId = null;
-		JsonNode userNode = jsonNode.get("user");
-		JsonNode donationNode = userNode.get("donations");
-		JsonNode donationString = jsonNode.at("/user/donations/0/recipient");
-		String donationMode = userNode.get("donations").get(0).get("donationMode").asText();
+//		String donationId = null;
+//		JsonNode userNode = jsonNode.get("user");
+//		JsonNode donationNode = userNode.get("donations");
+//		JsonNode donationString = jsonNode.at("/user/donations/0/recipient");
+		String donationMode = usersDTO.getDonations().get(0).getDonationMode();;
 		DonationDTO donationDTO = new DonationDTO();
 
-		if (donationNode == null) {
-			throw new CustomException("Donation not found");
-		}
+		Users resulEntity = usersRepository.findByEmailId(usersDTO.getEmailId());
 
-		Users resulEntity = usersRepository.findByEmailId(userNode.get("emailId").asText());
-
-		if (resulEntity == null)
-			throw new CustomExceptionNodataFound(
-					"User with " + userNode.get("emailId").asText() + " is not Registered");
+		ofNullable(resulEntity).orElseThrow(() -> new CustomExceptionNodataFound(
+				"User with " + usersDTO.getEmailId() + " is not Registered"));
 
 		Date newDate = new Date();
 
@@ -186,19 +173,13 @@ public class DonationServiceImpl implements DonationService {
 		String createdBy = null;
 
 		// set created by based on donationMode
-		if (donationMode.equalsIgnoreCase("online")) {
-
-			createdBy = userNode.get("emailId").asText();
-
+		if ("online".equalsIgnoreCase(donationMode)) {
+			createdBy = usersDTO.getEmailId();
 		} else {
 			createdBy = userToken.getEmailId();
 		}
 
-
-		Gson gson = new GsonBuilder()
-	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
-	            .create();
-		Users user = gson.fromJson(userNode.toString(), Users.class);
+		Users user = modelMapper.map(usersDTO, Users.class);
 
 		// set user to donation and save donation
 		if (user.getDonations() != null) {
@@ -208,8 +189,8 @@ public class DonationServiceImpl implements DonationService {
 				donation.setCreatedBy(createdBy);
 				donation.setUsers(resulEntity);
 				donation.setModifiedBy(createdBy);
-				donationRepository.save(donation);
-				Donation resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
+				Donation resultdonation = donationRepository.save(donation);
+				//resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
 				donationDTO.setDonationId(donation.getDonationId());
 				donationDTO.setCreatedDate(newDate);
 				donationDTO.setCreatedBy(createdBy);
@@ -268,10 +249,9 @@ public class DonationServiceImpl implements DonationService {
 								addressRepository.save(address);
 							}
 
-							if (donationString.isArray()) {
-								ArrayNode arrayNode = (ArrayNode) donationString;
-								for (JsonNode recipients : arrayNode) {
-									String recipientEmail = recipients.get("emailId").asText();
+							if (!isNull(usersDTO.getDonations().get(0).getRecipient()) && !usersDTO.getDonations().get(0).getRecipient().isEmpty()) {
+								for (Recipient recipients : usersDTO.getDonations().get(0).getRecipient()) {
+									String recipientEmail = recipients.getEmailId();
 
 									// Check if the email already exists
 									Users existingUser = usersRepository.findByEmailId(recipientEmail);
@@ -279,17 +259,17 @@ public class DonationServiceImpl implements DonationService {
 
 										continue;
 									}
-									usersServiceImpl.saveUser(recipients, donarID, request, true, createdBy, userNode);
+									usersServiceImpl.saveUser(toUsersDTO(recipients), donarID, request, true, createdBy, donationMode);
 								}
 							}
 						}
 						Users recipientData = usersRepository.findByEmailId(recipient.getEmailId());
-						System.out.println(donation.getDonationEvent());
 						emailService.sendGiftingLetterEmail(recipientData,donation.getDonationEvent());
+
 					}
-					
+
 				}
-				donation.setRecipient(donation.getRecipient());			
+				donation.setRecipient(donation.getRecipient());
 			}
 		}
 		Donation donation = donationRepository.getById(donationDTO.getDonationId());
@@ -304,23 +284,23 @@ public class DonationServiceImpl implements DonationService {
 		return response;
 	}
 
-	public ApiResponse<DonationDTO> saveDonation(JsonNode jsonNode, String donarID, HttpServletRequest request) {
+	public ApiResponse<DonationDTO> saveDonation(UsersDTO usersDTO, String donarID, HttpServletRequest request) {
 		ApiResponse<DonationDTO> response = new ApiResponse<>();
-		
-		JsonNode userNode = jsonNode.get("user");
-		JsonNode donationNode = userNode.get("donations");
-		JsonNode donationString = jsonNode.at("/user/donations/0/recipient");
-		String donationMode = userNode.get("donations").get(0).get("donationMode").asText();
 
-		if (donationNode == null) {
-			throw new CustomException("Donation not found");
-		}
+//		JsonNode userNode = jsonNode.get("user");
+//		JsonNode donationNode = userNode.get("donations");
+//		JsonNode donationString = jsonNode.at("/user/donations/0/recipient");
+		String donationMode = usersDTO.getDonations().get(0).getDonationMode();
 
-		Users resulEntity = usersRepository.findByEmailId(userNode.get("emailId").asText());
+//		if (donationNode == null) {
+//			throw new CustomException("Donation not found");
+//		}
+
+		Users resulEntity = usersRepository.findByEmailId(usersDTO.getEmailId());
 
 		if (resulEntity == null)
 			throw new CustomExceptionNodataFound(
-					"User with " + userNode.get("emailId").asText() + " is not Registered");
+					"User with " + usersDTO.getEmailId() + " is not Registered");
 
 		Date newDate = new Date();
 
@@ -333,21 +313,16 @@ public class DonationServiceImpl implements DonationService {
 			userToken = this.usersRepository.findByEmailId(userName);
 		}
 
-		String createdBy = null;
+		String createdBy;
 
 		// set created by based on donationMode
 		if (donationMode.equalsIgnoreCase("online")) {
-
-			createdBy = userNode.get("emailId").asText();
-
+			createdBy = usersDTO.getEmailId();
 		} else {
 			createdBy = userToken.getEmailId();
 		}
 
-		Gson gson = new GsonBuilder()
-	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
-	            .create();
-		Users user = gson.fromJson(userNode.toString(), Users.class);
+		Users user = modelMapper.map(usersDTO, Users.class);
 		Double totalAmount = 0.0;
 		Long orderId = Calendar.getInstance().getTimeInMillis();
 		// set user to donation and save donation
@@ -412,10 +387,9 @@ public class DonationServiceImpl implements DonationService {
 								addressRepository.save(address);
 							}
 
-							if (donationString.isArray()) {
-								ArrayNode arrayNode = (ArrayNode) donationString;
-								for (JsonNode recipients : arrayNode) {
-									String recipientEmail = recipients.get("emailId").asText();
+							if (!isNull(usersDTO.getDonations().get(0).getRecipient()) && !usersDTO.getDonations().get(0).getRecipient().isEmpty()) {
+								for (Recipient recipients : usersDTO.getDonations().get(0).getRecipient()) {
+									String recipientEmail = recipients.getEmailId();
 
 									// Check if the email already exists
 									Users existingUser = usersRepository.findByEmailId(recipientEmail);
@@ -423,7 +397,8 @@ public class DonationServiceImpl implements DonationService {
 
 										continue;
 									}
-									usersServiceImpl.saveUser(recipients, donarID, request, true, createdBy, userNode);
+
+									usersServiceImpl.saveUser(toUsersDTO(recipients), donarID, request, true, createdBy, donationMode);
 								}
 							}
 						}
@@ -436,10 +411,10 @@ public class DonationServiceImpl implements DonationService {
 		if ("online".equalsIgnoreCase(donationMode)) {
 			// get payment gateway configuration for CCAVENUE
 			PaymentGatewayConfiguration gatewayConfiguration = gatewayConfigurationDao.findByGatewayName("CCAVENUE");
-			
-			
-			Users userPay = gson.fromJson(usersRepository.getUserByEmail(user.getEmailId()).toString(), Users.class);
-			
+
+
+//			Users userPay = new GsonBuilder().create().fromJson(usersRepository.getUserByEmail(user.getEmailId()).toString(), Users.class);
+
 			String queryString = "";
 			queryString += "merchant_id=" + gatewayConfiguration.getMerchantId();
 			queryString += "&order_id=" + orderId;
@@ -448,15 +423,15 @@ public class DonationServiceImpl implements DonationService {
 			queryString += "&redirect_url=" + gatewayConfiguration.getRedirectURL();
 			queryString += "&cancel_url=" + gatewayConfiguration.getRedirectURL();
 			queryString += "&language=EN";
-			queryString += "&billing_name=" + userPay.getFirstName() + " " + userPay.getLastName();
-			Address address = ofNullable(userPay.getAddress()).stream().filter(addresses -> !addresses.isEmpty()).findFirst().get().get(0);
+			queryString += "&billing_name=" + usersDTO.getFirstName() + " " + usersDTO.getLastName();
+			AddressDTO address = ofNullable(usersDTO.getAddress()).stream().filter(addresses -> !addresses.isEmpty()).findFirst().get().get(0);
 			queryString += "&billing_address=" + address.getStreet1() + " " + address.getStreet2() + " "+ address.getStreet3();
 			queryString += "&billing_city=" + address.getCity();
 			queryString += "&billing_state=" + address.getState();
 			queryString += "&billing_zip=" + address.getPostalCode();
 			queryString += "&billing_country=" + address.getCountry();
-			queryString += "&billing_tel=" + userPay.getMobileNo();
-			queryString += "&billing_email=" + userPay.getEmailId();
+			queryString += "&billing_tel=" + usersDTO.getMobileNo();
+			queryString += "&billing_email=" + usersDTO.getEmailId();
 			AesCryptUtil aesUtil=new AesCryptUtil (gatewayConfiguration.getAccessKey());
 			String encRequest=aesUtil.encrypt(queryString);
 			response.setAccessCode(gatewayConfiguration.getAccessCode());
@@ -469,22 +444,32 @@ public class DonationServiceImpl implements DonationService {
 		return response;
 	}
 
+	private UsersDTO toUsersDTO(Recipient recipients){
+		UsersDTO usersDTO = new UsersDTO();
+		usersDTO.setFirstName(recipients.getFirstName());
+		usersDTO.setLastName(recipients.getLastName());
+		usersDTO.setMobileNo(recipients.getMobileNo());
+		usersDTO.setEmailId(recipients.getEmailId());
+		usersDTO.setAddress(ofNullable(recipients.getAddress())
+				.stream()
+				.map(address -> modelMapper.map(address, AddressDTO.class)).collect(Collectors.toList()));
+		return usersDTO;
+	}
+
 	@Override
-	public Object updateUserDonations(JsonNode jsonNode, HttpServletRequest request) {
+	public Object updateUserDonations(UsersDTO usersDTO, HttpServletRequest request) {
 		String subject = "Updated Plant Donation Details";
 		String body = "Dear User,\n We wanted to inform you that your plant donation details have been updated in our records.\\n\\n\""
 				+ "Best regards,\n" + "Hariyai Team";
-		JsonNode userNode = jsonNode.get("user");
+
 		ApiResponse<DonationDTO> response = new ApiResponse<>();
-		if (userNode == null) {
-			throw new CustomException("No data found In User");
-		}
+		ofNullable(usersDTO).orElseThrow(()->new CustomException("No data found In User"));
 
-		Users resulEntity = usersRepository.findByEmailId(userNode.get("emailId").asText());
+		Users resulEntity = usersRepository.findByEmailId(usersDTO.getEmailId());
 
-		if (resulEntity == null)
-			throw new CustomExceptionNodataFound(
-					"User with " + userNode.get("emailId").asText() + " is not Registered");
+		ofNullable(resulEntity).orElseThrow(()-> new CustomExceptionNodataFound(
+				"User with " + usersDTO.getEmailId() + " is not Registered"));
+
 
 		Date newDate = new Date();
 		String token = request.getHeader("Authorization");
@@ -494,7 +479,7 @@ public class DonationServiceImpl implements DonationService {
 		Gson gson = new GsonBuilder()
 	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
 	            .create();
-		Users user = gson.fromJson(userNode.toString(), Users.class);
+		Users user = modelMapper.map(usersDTO, Users.class);
 
 		Users userToken = usersRepository.findByEmailId(userName);
 		// set user to donation and save donation
@@ -602,8 +587,26 @@ public class DonationServiceImpl implements DonationService {
 	@Override
 	public Donation searchDonationById1(int donationId) {
 		Donation d = donationRepository.findById(donationId).get();
-		System.out.println(d.toString());
+		log.info(d.toString());
 		return d;
+	}
+
+	@Override
+	public ApiResponse<List<DonationDTO>> getDonations(DonorListRequestDTO requestDTO) {
+		ApiResponse<List<DonationDTO>> response = new ApiResponse<>();
+		Pageable pageable = PageRequest.of(requestDTO.getPageNumber(), requestDTO.getPageSize());
+		Page<Donation> result = donationRepository.findByUserId(requestDTO.getUserId(), pageable);
+		if (!isNull(result) && !result.getContent().isEmpty()) {
+			List<DonationDTO> donationDTOS = of(result.getContent()).get().stream()
+					.map(data -> modelMapper.map(data, DonationDTO.class)).collect(Collectors.toList());
+			response.setData(donationDTOS);
+			response.setTotalPages(result.getTotalPages());
+			response.setStatus(EnumConstants.SUCCESS);
+			response.setStatusCode(HttpStatus.OK.value());
+			response.setMessage("Data fetched successfully..!!");
+			return response;
+		} else
+			throw new CustomException("No donation found!!");
 	}
 
 }

@@ -28,6 +28,7 @@ public class CustomExceptionHandler {
     @ResponseBody
     public ResponseEntity<ApiResponse> handleException(SQLException exception) {
         log.error("Exception = " + exception.toString());
+        exception.printStackTrace();
         return processException("Internal server error, please try again later", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -35,26 +36,27 @@ public class CustomExceptionHandler {
     @ResponseBody
     public ResponseEntity<ApiResponse> handleException(CustomExceptionDataAlreadyExists exception) {
         log.error("Exception = " + exception.toString());
-        return processException("Internal server error, please try again later", HttpStatus.INTERNAL_SERVER_ERROR);
+        return processException(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(CustomExceptionNodataFound.class)
     @ResponseBody
     public ResponseEntity<ApiResponse> handleException(CustomExceptionNodataFound exception) {
         log.error("Exception = " + exception.toString());
-        return processException("Internal server error, please try again later", HttpStatus.INTERNAL_SERVER_ERROR);
+        return processException(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(CustomException.class)
     @ResponseBody
     public ResponseEntity<ApiResponse> handleException(CustomException exception) {
         log.error("Exception = " + exception.toString());
-        return processException("Internal server error, please try again later", HttpStatus.INTERNAL_SERVER_ERROR);
+        return processException(exception.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseBody
     public ResponseEntity<ApiResponse> handleException(RuntimeException exception) {
+        exception.printStackTrace();
         log.error("Exception = " + exception.toString());
         return processException("Internal server error, please try again later", HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -62,6 +64,7 @@ public class CustomExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public ResponseEntity<ApiResponse> handleException(Exception exception) {
+        exception.printStackTrace();
         log.error("Exception = " + exception.toString());
         return processException("Internal server error, please try again later", HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -69,7 +72,7 @@ public class CustomExceptionHandler {
     private ResponseEntity<ApiResponse> processException(String message, HttpStatus status){
         ApiResponse response = new ApiResponse();
         response.setStatus(status.name());
-        response.setMessage("Internal server error, please try again later");
-        return ResponseEntity.status(status).body(response);
+        response.setMessage(message);
+        return new ResponseEntity<>(response, status);
     }
 }

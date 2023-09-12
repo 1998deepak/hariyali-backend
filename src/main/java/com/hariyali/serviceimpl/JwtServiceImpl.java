@@ -3,6 +3,7 @@ package com.hariyali.serviceimpl;
 import java.util.Date;
 import java.util.Optional;
 
+import com.hariyali.utils.EncryptionDecryptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,9 @@ public class JwtServiceImpl implements JwtService {
 	@Autowired
 	private EmailService emailService;
 
+	@Autowired
+	private EncryptionDecryptionUtil encryptionDecryptionUtil;
+
 	private static final Logger logger = LoggerFactory.getLogger(JwtServiceImpl.class);
 
 	@Value("${user.account.locktime}")
@@ -65,7 +69,6 @@ public class JwtServiceImpl implements JwtService {
 
 	@Override
 	public ApiResponse<String> login(LoginRequest request) {
-
 		ApiResponse<String> result = new ApiResponse<>();
 
 		if (request.getUsername() != null || request.getPassword() != null) {
@@ -377,7 +380,8 @@ public class JwtServiceImpl implements JwtService {
 	public ApiResponse<String> loginOtp(LoginRequest request) {
 
 		ApiResponse<String> result = new ApiResponse<>();
-
+		request.setUsername(encryptionDecryptionUtil.decrypt(request.getUsername()));
+		request.setPassword(encryptionDecryptionUtil.decrypt(request.getPassword()));
 		if (request.getUsername() != null || request.getPassword() != null) {
 
 			Optional<Users> userResponse = Optional

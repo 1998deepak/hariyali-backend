@@ -77,7 +77,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 
 		AesCryptUtil aesUtil = new AesCryptUtil(gatewayConfiguration.getAccessKey());
 		String decryptedResponse = aesUtil.decrypt(encryptedResponse);
-		log.info("decryptedResponse :: " + decryptedResponse);
+		log.info("decryptedResponse :: "+ decryptedResponse);
 		Map<String, String> response = Arrays.stream(of(decryptedResponse.split("&")).orElse(new String[] {}))
 				.filter(values -> !values.isEmpty())
 				.collect(Collectors.toMap(
@@ -126,7 +126,6 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 						user);
 				emailService.sendReceiptWithAttachment(user.getEmailId(), receipt);
 			}
-
 		}
 		ApiResponse<String> apiResponse = new ApiResponse<>();
 		apiResponse.setData(paymentInfo.getOrderId());

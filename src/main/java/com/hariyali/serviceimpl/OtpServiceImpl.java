@@ -65,9 +65,9 @@ public class OtpServiceImpl {
 	}
 
 	public OtpModel findBydonarIdOrEmail(String donarIdOrEmail, String otp) {
-		return otpRepository.findBydonarIdOrEmail(donarIdOrEmail, otp);
+		return otpRepository.findBydonarIdOrEmail(donarIdOrEmail,otp);
 	}
-
+	
 	public OtpModel findByOtp(String otp) {
 		return otpRepository.findByOtp(otp);
 	}
