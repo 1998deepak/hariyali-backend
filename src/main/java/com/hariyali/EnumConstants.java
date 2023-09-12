@@ -31,10 +31,10 @@ public interface EnumConstants {
 
 	public static final String receiptNumber = "txn_23" + donor;
 
-	public static final String GIFTING_MSG_BODY = "Dear Sponsor,<br><p>&nbsp;Welcome to Project &ldquo;Hariyali&rdquo;.<br>"
-			+ "&nbsp;On the occasion of your %s, you have been gifted with Hariyali sponsorship to make your day special.<br>"
+	public static final String GIFTING_MSG_BODY ="<p>Dear Sponsor,</p>" +"<p>Welcome to Project \"Hariyali\".</p>"
+			+ "<p>On the occasion of your %s, you have been gifted with Hariyali sponsorship to make your day special.<br>"
 			+ "The gift certificate is attached herewith.<br></p>"
-			+ "&nbsp;You can login to your account on our website www.hariyali.org.in with your login details.<br>"
+			+ "You can login to your account on our website www.hariyali.org.in with your login details.<br>"
 			+ "Email ID : %s<br>" + "Password : %s<br>" + "<br>" + "Mahindra Foundation<br>" + "Sheetal Mehta<br>"
 			+ "Trustee & Executive Director<br>" + "K.C. Mahindra Education Trust,<br>" + "3rd Floor, Cecil Court,<br>"
 			+ "Near Regal Cinema,<br>" + "Mahakavi Bushan Marg,<br>" + "Mumbai 400001<br>"
@@ -45,12 +45,14 @@ public interface EnumConstants {
 	
 	String subject = "Welcome To Hariyali";
 	String content="<p>Dear Sponsor,</p>" +
-			"<p>&nbsp;&nbsp;Welcome to Project \"Hariyali\".</p>" +
-			"<p>&nbsp;The Mahindra Foundation and Naandi Foundation would like to thank you for your donation.You can login to your account on our website "
+			"<p>Welcome to Project \"Hariyali\".</p>" +
+			"<p>The Mahindra Foundation and Naandi Foundation would like to thank you for your donation.You can login to your account on our website "
 			+"<a href='http://www.hariyali.org.in'>www.hariyali.org.in</a> with your login details.</p>"
 			+"<p>Email ID :%s<br>"
 			+"Password :%s</p>"
-			+"<p>&nbsp;Thanking you for your support to Project Hariyali.</p>"
+			+"<p>&nbsp;Thanking you for your support to Project Hariyali.</p>"+ "Mahindra Foundation<br>" + "Sheetal Mehta<br>"
+			+ "Trustee & Executive Director<br>" + "K.C. Mahindra Education Trust,<br>" + "3rd Floor, Cecil Court,<br>"
+			+ "Near Regal Cinema,<br>" + "Mahakavi Bushan Marg,<br>" + "Mumbai 400001<br>"
 			+"<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>";
 
 }
