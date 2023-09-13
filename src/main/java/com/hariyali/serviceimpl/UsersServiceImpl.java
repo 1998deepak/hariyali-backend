@@ -178,8 +178,11 @@ public class UsersServiceImpl implements UsersService {
 		Users resulEntity = usersRepository.findByEmailId(usersDTO.getEmailId());
 
 		Receipt receipt = receiptRepository.getUserReceipt(resulEntity.getUserId());
+		//emailService.sendEmailWithAttachment(resulEntity.getEmailId(), EnumConstants.subject, EnumConstants.content,
+				//receipt.getReciept_Path(), resulEntity);
 //		emailService.sendEmailWithAttachment(resulEntity.getEmailId(), EnumConstants.subject, EnumConstants.content,
 //				receipt.getReciept_Path(), resulEntity);
+
 
 		return response;
 
@@ -244,7 +247,6 @@ public class UsersServiceImpl implements UsersService {
 		}
 
 		Users user = modelMapper.map(usersDTO, Users.class);
-
 		Users existingUser = usersRepository.findByEmailId(user.getEmailId());
 
 		if (existingUser != null) {
@@ -287,7 +289,12 @@ public class UsersServiceImpl implements UsersService {
 		role.setUsertypeId(2);
 		role.setUsertypeName("User");
 		user.setUserRole(role);
-
+		if ("online".equalsIgnoreCase(donationMode)) {
+		user.setApprovalStatus("Pending");
+		}else {
+			user.setApprovalStatus("Approved");
+		}
+		user.setIsDeleted(false);
 		usersRepository.save(user);
 
 		Users resulEntity = usersRepository.findByEmailId(user.getEmailId());

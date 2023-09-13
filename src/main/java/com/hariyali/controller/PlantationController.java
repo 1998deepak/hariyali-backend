@@ -39,7 +39,7 @@ public class PlantationController {
 	@Autowired
 	private PlantationRepository plantationRepository;
 
-	@GetMapping("/excelExportUserPlant")
+	@PostMapping("/excelExportUserPlant")
 	public void exportExcelUserPlant(HttpServletResponse response,@RequestParam("seasonType") String seasonType) {
 
 		 try {
@@ -47,9 +47,9 @@ public class PlantationController {
 	            response.setContentType("application/octet-stream");
 
 	            // Set the filename based on the seasonType
-	            String fileName = seasonType + "_User_Plant_Report.xlsx";
+	            String fileName = seasonType + "_User_Plant_Report.xlsx";        
 	            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-
+	            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
 	            IOUtils.copy(byteArrayInputStream, response.getOutputStream());
 	        } catch (Exception e) {
 	            e.printStackTrace();
