@@ -77,11 +77,12 @@ podEnv:
   - name: SPRING_DATASOURCE_DRIVERCLASSNAME
     value: "com.mysql.jdbc.Driver"
   - name: SPRING_DATASOURCE_USERNAME
-    value: "mysql-user"
+    #value: "mysql-user"
+    value: "hariyalidb-agdncaf"
   - name: SPRING_DATASOURCE_PASSWORD
     valueFrom:
       secretKeyRef:
-        name: mgcmdmodsqdbmysql02-tlkw-password
+        name: mgcmdmodsqdbmysql02-hariyalidb-password
         key: value
 
 virtualservice:
@@ -93,7 +94,7 @@ virtualservice:
 sync:
   secrets:
     project_id: "modernization-dev-832770"
-    secrets: ["mgcmdmodsqdbmysql02-tlkw-password"]
+    secrets: ["mgcmdmodsqdbmysql02-hariyalidb-password"]
 
 cloudStorage:
   - bucket: bkt-modernization-dev-hariyali
