@@ -105,7 +105,12 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 		paymentInfo.setCardName(ofNullable(response.get("card_name")).orElse(""));
 		paymentInfo.setCurrency(ofNullable(response.get("currency")).orElse(""));
 		paymentInfo.setOrderId(donation.getOrderId());
+		//paymentInfo.setSourceType(ofNullable(response.get("source")).orElse(""));
 		paymentInfo = paymentInfoRepository.save(paymentInfo);
+//		if(!paymentInfo.getSourceType().isEmpty()) {
+//			callGogreenApi();
+//		}
+		
 		Users user = userRepository.getUserByDonationId(donation.getDonationId());
 		if (user.getWebId() == null) {
 			user.setWebId(userService.generateWebId());

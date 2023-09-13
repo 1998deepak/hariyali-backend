@@ -336,7 +336,7 @@ public class DonationServiceImpl implements DonationService {
 				donation.setOrderId(orderId.toString());
 				totalAmount = donation.getTotalAmount();
 				donation = donationRepository.save(donation);
-				Donation resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
+				//Donation resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
 
 				// set paymentInfo donation wise
 //				if (donation.getPaymentInfo() != null) {
@@ -358,7 +358,7 @@ public class DonationServiceImpl implements DonationService {
 						userPackage.setModifiedDate(newDate);
 						userPackage.setCreatedBy(createdBy);
 						userPackage.setModifiedBy(createdBy);
-						userPackage.setUserDonation(resultdonation);
+						userPackage.setUserDonation(donation);
 						userPackageRepository.save(userPackage);
 					}
 				}
@@ -370,11 +370,11 @@ public class DonationServiceImpl implements DonationService {
 						recipient.setModifiedDate(newDate);
 						recipient.setCreatedBy(createdBy);
 						recipient.setModifiedBy(createdBy);
-						recipient.setUserDonation(resultdonation);
+						recipient.setUserDonation(donation);
 						recipientRepository.save(recipient);
 
 						Recipient resultRecipient = recipientRepository
-								.getRecipientByDonationId(resultdonation.getDonationId());
+								.getRecipientByDonationId(donation.getDonationId());
 
 						// set recipient to address and save address
 						if (recipient.getAddress() != null) {
