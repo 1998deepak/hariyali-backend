@@ -37,6 +37,7 @@ public class DonationDTO {
 	private Date modifiedDate;
 
 	private String modifiedBy;
+	public String orderId;
 	
 	private List<PaymentInfo> paymentInfo;
 
