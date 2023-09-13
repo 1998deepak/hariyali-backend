@@ -75,27 +75,24 @@ podEnv:
   - name: envTarget
     value: "cloud"
   - name: SPRING_DATASOURCE_URL
-    value: "jdbc:mysql://mgcmumodsqdbmysql02-cgmo.mysql.uat.database.gcp.com:3306/hariyalibackendservices?allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Kolkata"
+    value: "jdbc:mysql://mgcmumodsqdbmysql02-cgmo.mysql.uat.database.gcp.com:3306/hariyalidb?allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Kolkata"
   - name: SPRING_DATASOURCE_DRIVERCLASSNAME
     value: "com.mysql.jdbc.Driver"
   - name: SPRING_DATASOURCE_USERNAME
-    #value: "mysql-user"
-    value: "hariyalidb-hcufwza"
+    value: "mysql-user"
   - name: SPRING_DATASOURCE_PASSWORD
     valueFrom:
       secretKeyRef:
-        name: mgcmumodsqdbmysql02-hariyalidb-password
+        name: mgcmumodsqdbmysql02-cgmo-password
         key: value
 
 virtualservice:
-  host: "hariyalibackendservice-uat.m-devsecops.com"
+  host: "hariyali-uat.m-devsecops.com"
   gateway: "istio-system/default-internal-gateway"
   port: 8080
-  prefix: /
+  prefix: /api
 
 sync:
   secrets:
     project_id: "modernization-uatx-505932"
-    secrets: ["mgcmumodsqdbmysql02-hariyalidb-password"]
-
-
+    secrets: ["mgcmumodsqdbmysql02-cgmo-password"]
