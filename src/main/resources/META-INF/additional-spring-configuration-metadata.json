@@ -28,5 +28,25 @@
     "name": "jwt.expireTime",
     "type": "java.lang.String",
     "description": "A description for 'jwt.expireTime'"
+  },
+  {
+    "name": "frontend.redirect-url",
+    "type": "java.lang.String",
+    "description": "A description for 'frontend.redirect-url'"
+  },
+  {
+    "name": "receipt.receipt-path",
+    "type": "java.lang.String",
+    "description": "A description for 'receipt.receipt-path'"
+  },
+  {
+    "name": "frontend.redirect-url-gogreen",
+    "type": "java.lang.String",
+    "description": "A description for 'frontend.redirect-url-gogreen'"
+  },
+  {
+    "name": "frontend.redirect-gogreen-url",
+    "type": "java.lang.String",
+    "description": "A description for 'frontend.redirect-gogreen-url'"
   }
 ]}

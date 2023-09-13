@@ -61,6 +61,7 @@ jwt:
 frontend:
         # redirect-url: http://localhost:3000/OnlineDonation?orderId=
         redirect-url: https://hariyali-dev.m-devsecops.com/OnlineDonation?orderId=
+        redirect-gogreen-url: https://hariyali-dev.m-devsecops.com/OnlineDonation
 receipt:
         receiptPath: classpath:DonationReceipt/        
    
@@ -78,3 +79,6 @@ cc_service:
           CC_BASE_URL: https://ccservice-dev.m-devsecops.com/
 encryption:
            key: emgut@kL9RQ%L#tt
+           
+server:
+        port: 8082          
