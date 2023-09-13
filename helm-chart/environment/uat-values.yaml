@@ -79,11 +79,12 @@ podEnv:
   - name: SPRING_DATASOURCE_DRIVERCLASSNAME
     value: "com.mysql.jdbc.Driver"
   - name: SPRING_DATASOURCE_USERNAME
-    value: "mysql-user"
+    #value: "mysql-user"
+    value: "hariyalidb-hcufwza"
   - name: SPRING_DATASOURCE_PASSWORD
     valueFrom:
       secretKeyRef:
-        name: mgcmumodsqdbmysql02-cgmo-password
+        name: mgcmumodsqdbmysql02-hariyalidb-password
         key: value
 
 virtualservice:
@@ -95,6 +96,6 @@ virtualservice:
 sync:
   secrets:
     project_id: "modernization-uatx-505932"
-    secrets: ["mgcmumodsqdbmysql02-cgmo-password"]
+    secrets: ["mgcmumodsqdbmysql02-hariyalidb-password"]
 
 
