@@ -393,7 +393,7 @@ public class UsersServiceImpl implements UsersService {
 		if (entity.getEmailId() != null) {
 			if (entity.getDonorId() != null && entity.getWebId() == null) {
 				throw new CustomExceptionDataAlreadyExists(
-						"Donor with " + entity.getEmailId() + " is already registered, Kindly do login and do donation!");
+						"Donor with " + entity.getEmailId() + " is already registered, Kindly do click here to login or click on proceed button to continue your donation!");
 			}
 			response.setData(modelMapper.map(entity, UsersDTO.class));
 			response.setStatus(EnumConstants.SUCCESS);

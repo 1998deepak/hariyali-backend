@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -34,6 +35,7 @@ import com.hariyali.exceptions.InactiveConfigurationUsageException;
  * 
  */
 @Service
+@Slf4j
 public class CCServiceEmailAPI {
 	
 	@Value("${cc_service.APP_ID}")
@@ -159,6 +161,7 @@ public class CCServiceEmailAPI {
 						throw new Exception(errorType);
 					}
 				} catch (Exception e) {
+					log.error("Exception = {}", e);
 					throw new EmailNotConfiguredException(result);
 				}
 			}
