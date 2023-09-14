@@ -76,3 +76,6 @@ cc_service:
           CC_BASE_URL: https://ccservice-dev.m-devsecops.com/
 encryption:
            key: emgut@kL9RQ%L#tt
+           
+gogreen:
+        transaction-update-url: https://gogreen-dev.m-devsecops.com/updateGogreenTrasaction
