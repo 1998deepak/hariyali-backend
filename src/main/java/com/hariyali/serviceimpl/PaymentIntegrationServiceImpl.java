@@ -123,13 +123,15 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 			receiptService.generateReceipt(donation);
 			Receipt receipt = receiptRepository.getUserReceiptbyDonation(user.getUserId(), donation.getDonationId());
 			if (donationCnt > 1) {
-				emailService.sendReceiptWithAttachment(user.getEmailId(), receipt);
+				emailService.sendReceiptWithAttachment(user,donation.getOrderId(), receipt);
+				emailService.sendThankyouLatter(user.getEmailId(), user);
 			} else {
 //					emailService.sendEmailWithAttachment(user.getEmailId(), EnumConstants.subject,
 //							EnumConstants.content, receipt.getReciept_Path(), user);
 				emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
 						user);
-				emailService.sendReceiptWithAttachment(user.getEmailId(), receipt);
+				emailService.sendReceiptWithAttachment(user,donation.getOrderId(), receipt);
+				emailService.sendThankyouLatter(user.getEmailId(), user);
 			}
 		}
 		ApiResponse<String> apiResponse = new ApiResponse<>();

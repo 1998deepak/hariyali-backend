@@ -393,7 +393,7 @@ public class UsersServiceImpl implements UsersService {
 		if (entity.getEmailId() != null) {
 			if (entity.getDonorId() != null && entity.getWebId() == null) {
 				throw new CustomExceptionDataAlreadyExists(
-						"Donor with " + entity.getEmailId() + " is already registered, Kindly do login and do donation!");
+						"Donor with " + entity.getEmailId() + " is already registered, Kindly do click here to login or click on proceed button to continue your donation!");
 			}
 			response.setData(modelMapper.map(entity, UsersDTO.class));
 			response.setStatus(EnumConstants.SUCCESS);
@@ -909,16 +909,14 @@ public class UsersServiceImpl implements UsersService {
 							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
 									EnumConstants.content, user);
 							emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
-							emailService.sendReceiptWithAttachment(user.getEmailId(), receipt);
-
-// 						    emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
-// 							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content, user);
-// 							emailService.sendReceiptWithAttachment(user.getEmailId(),receipt);
+							emailService.sendReceiptWithAttachment(user,d.getOrderId(), receipt);
+							
 
 						}
 						emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
 								EnumConstants.content, user);
-						emailService.sendReceiptWithAttachment(user.getEmailId(), receipt);
+						emailService.sendReceiptWithAttachment(user,d.getOrderId(), receipt);
+						emailService.sendThankyouLatter(user.getEmailId(), user);
 
 					} else {
 						sendRejectDonationEmails(user.getEmailId());
