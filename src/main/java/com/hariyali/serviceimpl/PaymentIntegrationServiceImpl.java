@@ -176,6 +176,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 		List<UserPackages> userPackages=userPackageRepository.findPackageByDonationId(donation.getDonationId());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("Authorization", "b6942c2e22e092eedc5c242a3d924672");
 		HariyaliGogreenIntegrationDTO dto=new HariyaliGogreenIntegrationDTO();
 		dto.setMeconnectId(donation.getMeconnectId());
