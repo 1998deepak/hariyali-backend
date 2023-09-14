@@ -158,6 +158,9 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 				emailService.sendReceiptWithAttachment(user,donation.getOrderId(), receipt);
 				emailService.sendThankyouLatter(user.getEmailId(), user);
 			}
+			
+		}
+		if(paymentInfo.getPaymentStatus().equalsIgnoreCase("SUCCESS")) {
 			//Call Gogreen API
 			if((donation.getMeconnectId() != 0)&&(!donation.getSource().isEmpty())) {
 				String result=updateGogreenDetails(donation);
@@ -173,6 +176,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 		List<UserPackages> userPackages=userPackageRepository.findPackageByDonationId(donation.getDonationId());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+		headers.set("Authorization", "b6942c2e22e092eedc5c242a3d924672");
 		HariyaliGogreenIntegrationDTO dto=new HariyaliGogreenIntegrationDTO();
 		dto.setMeconnectId(donation.getMeconnectId());
 		dto.setNumberOfTreesMonsoon(userPackages.get(0).getNoOfBouquets());
