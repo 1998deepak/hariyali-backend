@@ -9,11 +9,11 @@ import javax.persistence.*;
 import java.util.Date;
 
 /**
- * Entity class for bank account
+ * Entity class for bank
  *
  * @author Vinod
  * @version 1.0
- * @date 09/09/2023
+ * @date 13/09/2023
  */
 @Entity
 @Table(name = "tbl_Account")
@@ -21,31 +21,15 @@ import java.util.Date;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BankAccount {
+public class Bank {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "account_id")
+    @Column(name = "bank_id")
     Integer id;
 
-    @Column(name = "account_holder_name")
+    @Column(name = "bank_name")
     String accountHolderName;
-
-    @Column(name = "account_no")
-    String accountNumber;
-
-    @ManyToOne( cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "bank_id", referencedColumnName = "bank_id")
-    Bank bank;
-
-    @Column(name = "bank_branch")
-    String bankBranch;
-
-    @Column(name = "bank_address")
-    String bankAddress;
-
-    @Column(name = "ifsc_code")
-    String ifscCode;
 
     @Column(name = "isactive")
     Boolean isActive;
@@ -55,5 +39,4 @@ public class BankAccount {
 
     @Column(name = "created_by")
     String created_by;
-
 }
