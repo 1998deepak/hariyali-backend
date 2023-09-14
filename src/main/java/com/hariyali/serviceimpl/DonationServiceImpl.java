@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -363,8 +364,15 @@ public class DonationServiceImpl implements DonationService {
 				donation.setModifiedBy(createdBy);
 				donation.setOrderId(orderId.toString());
 				totalAmount = donation.getTotalAmount();
+				if(usersDTO.getMeconnectId() != "" && usersDTO.getSource() != "") {
+					Base64.Decoder decoder = Base64.getDecoder();   
+			        Integer meconnectId = Integer.parseInt(new String(decoder.decode(usersDTO.getMeconnectId())));
+			        String source =new String(decoder.decode(usersDTO.getSource()));
+			        donation.setMeconnectId(meconnectId);	
+			        donation.setSource(source);
+			    }
 				donation = donationRepository.save(donation);
-				Donation resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
+				//Donation resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
 
 				// set paymentInfo donation wise
 //				if (donation.getPaymentInfo() != null) {
@@ -386,7 +394,7 @@ public class DonationServiceImpl implements DonationService {
 						userPackage.setModifiedDate(newDate);
 						userPackage.setCreatedBy(createdBy);
 						userPackage.setModifiedBy(createdBy);
-						userPackage.setUserDonation(resultdonation);
+						userPackage.setUserDonation(donation);
 						userPackageRepository.save(userPackage);
 					}
 				}
@@ -398,11 +406,11 @@ public class DonationServiceImpl implements DonationService {
 						recipient.setModifiedDate(newDate);
 						recipient.setCreatedBy(createdBy);
 						recipient.setModifiedBy(createdBy);
-						recipient.setUserDonation(resultdonation);
+						recipient.setUserDonation(donation);
 						recipientRepository.save(recipient);
 
 						Recipient resultRecipient = recipientRepository
-								.getRecipientByDonationId(resultdonation.getDonationId());
+								.getRecipientByDonationId(donation.getDonationId());
 
 						// set recipient to address and save address
 						if (recipient.getAddress() != null) {

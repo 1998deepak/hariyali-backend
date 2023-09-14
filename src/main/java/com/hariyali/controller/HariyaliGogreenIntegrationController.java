@@ -15,19 +15,19 @@ import com.hariyali.dto.HariyaliGogreenIntegrationDTO;
 @RequestMapping("/api/v1")
 public class HariyaliGogreenIntegrationController {
 
-	@Value("${frontend.redirect-gogreen-url}")
-	String frontendRedirectGogreenURL;
+//	@Value("${frontend.redirect-gogreen-url}")
+//	String frontendRedirectGogreenURL;
 
-	@PostMapping("/hariyaliGogreenTrasaction")
-	public void hariyaliGogreenTrasaction(@RequestBody HariyaliGogreenIntegrationDTO dto, HttpServletRequest request,
-			HttpServletResponse response) {
-		try {
-//			ResponseEntity.status(HttpStatus.FOUND).location(URI.create("https://fullstackdeveloper.guru")).build();
-
-			response.sendRedirect(
-					frontendRedirectGogreenURL + "?meconnectId=" + dto.getMeconnectId() + "&source=" + dto.getSource());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+//	@PostMapping("/hariyaliGogreenTrasaction")
+//	public void hariyaliGogreenTrasaction(@RequestBody HariyaliGogreenIntegrationDTO dto, HttpServletRequest request,
+//			HttpServletResponse response) {
+//		try {
+////			ResponseEntity.status(HttpStatus.FOUND).location(URI.create("https://fullstackdeveloper.guru")).build();
+//
+//			response.sendRedirect(
+//					frontendRedirectGogreenURL + "?meconnectId=" + dto.getMeconnectId() + "&source=" + dto.getSource());
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
 }
