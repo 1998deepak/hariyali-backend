@@ -126,8 +126,8 @@ public class ReceiptServiceImpl implements ReceiptService {
 
 			Image logo = null;
 			try {
-				logo = Image.getInstance("src/main/resources/hariyalilogo.png");
-				logo.scaleToFit(100, 80); // Adjust the size as needed
+				logo = Image.getInstance("src/main/resources/Logo.jpg");
+				logo.scaleToFit(500, 50); // Adjust the size as needed
 				logo.setAlignment(Element.ALIGN_CENTER);
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
@@ -145,11 +145,11 @@ public class ReceiptServiceImpl implements ReceiptService {
 
 			// Add the logo to the document
 			document.add(logoParagraph);
-
+			document.add(new Paragraph("\n"));
 			PdfPTable receiptTable = new PdfPTable(3);
 			receiptTable.setWidthPercentage(100);
 
-			PdfPCell leftCell = new PdfPCell(new Phrase("NO:" + receiptNo));
+			PdfPCell leftCell = new PdfPCell(new Phrase("NO:" + donation.getOrderId()));
 			leftCell.setBorder(Rectangle.NO_BORDER);
 			receiptTable.addCell(leftCell);
 

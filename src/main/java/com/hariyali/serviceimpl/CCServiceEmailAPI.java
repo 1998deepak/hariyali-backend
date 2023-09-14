@@ -31,16 +31,19 @@ import com.hariyali.exceptions.EmailNotConfiguredException;
 import com.hariyali.exceptions.ExpiredEmailConfigurationUsageException;
 import com.hariyali.exceptions.InactiveConfigurationUsageException;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * 
  */
+@Slf4j
 @Service
 @Slf4j
 public class CCServiceEmailAPI {
-	
+
 	@Value("${cc_service.APP_ID}")
 	String APP_ID;
-	
+
 	@Value("${cc_service.CC_BASE_URL}")
 	String HOST;
 
@@ -51,8 +54,9 @@ public class CCServiceEmailAPI {
 		EmailContentDto emailContentDto = new EmailContentDto("support@hariyali.org.in",
 				Arrays.asList(toUser.split(",")), null, null, subject, emailContent, null, null, true, null);
 		try {
-			System.out.println(sendEmail(emailContentDto, null));
+			sendEmail(emailContentDto, null);
 		} catch (IOException e) {
+			log.info(e.getMessage());
 			throw new RuntimeException(e);
 		}
 
@@ -64,16 +68,33 @@ public class CCServiceEmailAPI {
 				+ "</body>\n" + "</html>");
 		EmailContentDto emailContentDto = new EmailContentDto("correspondence@hariyali.org.in",
 				Arrays.asList(toUser.split(",")), null, null, subject, mailBody, null, null, true, null);
-		System.out.println("toUser:" + Arrays.asList(toUser.split(",")));
+		log.info("toUser:" + Arrays.asList(toUser.split(",")));
 		try {
-			System.out.println(sendEmail(emailContentDto, null));
+			sendEmail(emailContentDto, null);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			log.info(e.getMessage());
+			throw new RuntimeException(e);			
+		}
+
+	}
+	
+	public void sendCorrespondenceMailwithAttachment(String toUser, String subject, String emailContent, File[] files)
+			throws EmailNotConfiguredException {
+		String mailBody = ("<!DOCTYPE html>\n" + "<html>\n" + "<head>\n" + "</head>\n" + "<body>\n" + emailContent
+				+ "</body>\n" + "</html>");
+		EmailContentDto emailContentDto = new EmailContentDto("correspondence@hariyali.org.in",
+				Arrays.asList(toUser.split(",")), null, null, subject, mailBody, null, null, true, null);
+		log.info("toUser:" + Arrays.asList(toUser.split(",")));
+		try {
+			sendEmail(emailContentDto, files);
+		} catch (IOException e) {
+			log.info(e.getMessage());
+			throw new RuntimeException(e);			
 		}
 
 	}
 
-	public void sendPaymentsMail(String toUser, String subject, String emailContent,File[] files)
+	public void sendPaymentsMail(String toUser, String subject, String emailContent, File[] files)
 			throws EmailNotConfiguredException {
 		String mailBody = ("<!DOCTYPE html>\n" + "<html>\n" + "<head>\n" + "</head>\n" + "<body>\n" + emailContent
 				+ "</body>\n" + "</html>");
@@ -118,6 +139,7 @@ public class CCServiceEmailAPI {
 			try {
 				response = httpClient.execute(post);
 			} catch (IOException e) {
+				log.info(e.getMessage());
 				throw new RuntimeException(e.getMessage());
 			}
 			return handleResponse(response);

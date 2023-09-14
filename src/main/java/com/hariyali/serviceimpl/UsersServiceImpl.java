@@ -909,16 +909,14 @@ public class UsersServiceImpl implements UsersService {
 							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
 									EnumConstants.content, user);
 							emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
-							emailService.sendReceiptWithAttachment(user.getEmailId(), receipt);
-
-// 						    emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
-// 							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content, user);
-// 							emailService.sendReceiptWithAttachment(user.getEmailId(),receipt);
+							emailService.sendReceiptWithAttachment(user,d.getOrderId(), receipt);
+							
 
 						}
 						emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
 								EnumConstants.content, user);
-						emailService.sendReceiptWithAttachment(user.getEmailId(), receipt);
+						emailService.sendReceiptWithAttachment(user,d.getOrderId(), receipt);
+						emailService.sendThankyouLatter(user.getEmailId(), user);
 
 					} else {
 						sendRejectDonationEmails(user.getEmailId());
