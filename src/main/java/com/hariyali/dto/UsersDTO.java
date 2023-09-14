@@ -89,8 +89,10 @@ public class UsersDTO {
 	private String country ;
 
 	private String approvalStatus;
+	
 	private String remark;
 
+	private String source;
 	
-	
+	private String meconnectId;
 }
