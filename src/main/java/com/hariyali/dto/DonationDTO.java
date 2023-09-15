@@ -17,6 +17,8 @@ import lombok.Data;
 public class DonationDTO {
 	
 	private int donationId;
+	
+	private String donationCode;
 
 	private String donationType;
 

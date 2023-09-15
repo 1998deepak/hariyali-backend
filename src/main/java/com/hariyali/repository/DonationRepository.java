@@ -167,4 +167,7 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 	countQuery = "SELECT COUNT(*) FROM tbl_donation WHERE userId = :userId",
 	nativeQuery = true)
 	Page<Donation> findByUserId(@Param("userId") Integer userId, Pageable pageable);
+
+	@Query(value = "SELECT donation_code FROM hariyalidbletest.tbl_donation ORDER BY donation_code DESC LIMIT 1")
+	public String getLastDonationID();
 }
