@@ -55,6 +55,7 @@ import com.hariyali.repository.UserPackageRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.DonationService;
 import com.hariyali.service.ReceiptService;
+import com.hariyali.utils.AES;
 import com.hariyali.utils.EmailService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -364,10 +365,13 @@ public class DonationServiceImpl implements DonationService {
 				donation.setModifiedBy(createdBy);
 				donation.setOrderId(orderId.toString());
 				totalAmount = donation.getTotalAmount();
-				if(usersDTO.getMeconnectId() != "" && usersDTO.getSource() != "") {
-					Base64.Decoder decoder = Base64.getDecoder();   
-			        Integer meconnectId = Integer.parseInt(new String(decoder.decode(usersDTO.getMeconnectId())));
-			        String source =new String(decoder.decode(usersDTO.getSource()));
+				if(!usersDTO.getMeconnectId().isEmpty()) {
+					String str=AES.decrypt(usersDTO.getMeconnectId());
+					String[] parts = str.split("\\|\\|");
+					System.out.println(parts[0]+":=>"+parts[1]);
+					
+			        Integer meconnectId = Integer.parseInt(parts[0]);
+			        String source =new String(parts[1]);
 			        donation.setMeconnectId(meconnectId);	
 			        donation.setSource(source);
 			    }

@@ -62,6 +62,7 @@ import com.hariyali.repository.UserPackageRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.ReceiptService;
 import com.hariyali.service.UsersService;
+import com.hariyali.utils.AES;
 import com.hariyali.utils.EmailService;
 
 import static java.util.Collections.emptyList;
@@ -212,6 +213,15 @@ public class UsersServiceImpl implements UsersService {
 
 		of(donationDTO).map(DonationDTO::getDonationMode).filter(mode -> donationMode.equalsIgnoreCase(mode))
 				.orElseThrow(() -> new CustomException("Invalid donation mode"));
+		if(!usersDTO.getMeconnectId().isEmpty()) {
+			try {
+				String str=AES.decrypt(usersDTO.getMeconnectId());
+				String[] parts = str.split("\\|\\|");
+				System.out.println(parts[0]+":=>"+parts[1]);
+			}catch(Exception e) {
+				 throw new CustomException("Something went wrong...!");
+			}
+		}
 
 	}
 

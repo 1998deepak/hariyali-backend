@@ -178,6 +178,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("Authorization", "b6942c2e22e092eedc5c242a3d924672");
+		headers.set("Key", "ELGJY9V0z0sQxRqn429K8QYGkRqAmAkw9yo/2NLPNOVP/fclNGnMm1oZiGP8fi/w");
 		HariyaliGogreenIntegrationDTO dto=new HariyaliGogreenIntegrationDTO();
 		dto.setMeconnectId(donation.getMeconnectId());
 		dto.setNumberOfTreesMonsoon(userPackages.get(0).getNoOfBouquets());
