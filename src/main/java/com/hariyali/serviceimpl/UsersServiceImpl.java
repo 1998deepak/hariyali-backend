@@ -280,6 +280,9 @@ public class UsersServiceImpl implements UsersService {
 		user.setDonorId(donarID);
 		user.setCreatedBy(createdBy);
 		user.setModifiedBy(createdBy);
+		user.setCitizenship(usersDTO.getCitizenship());
+		user.setCountry(usersDTO.getCountry());
+		user.setOrganisation(usersDTO.getOrganisation());
 
 		// set last login date
 		user.setLastloginDate(newDate);
