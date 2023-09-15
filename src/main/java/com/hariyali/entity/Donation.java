@@ -46,8 +46,6 @@ public class Donation implements Serializable {
 	@Column(name = "donation_event")
 	private String donationEvent;
 
-	
-
 	@Column(name = "total_amount")
 	private double totalAmount;
 
@@ -90,9 +88,31 @@ public class Donation implements Serializable {
 
 	@Column(name = "order_id")
 	private String orderId;
+	
+	@Column(name = "source")
+	private String source;
+	
+	@Column(name = "meconnect_id")
+	private int meconnectId;
 
 	public int getDonationId() {
 		return donationId;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	public int getMeconnectId() {
+		return meconnectId;
+	}
+
+	public void setMeconnectId(int meconnectId) {
+		this.meconnectId = meconnectId;
 	}
 
 	public void setDonationId(int donationId) {

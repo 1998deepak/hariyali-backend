@@ -140,5 +140,8 @@ public class PaymentInfo implements Serializable {
 
 	@Column(name = "dd_date")
 	private String demandDraftDate;
+	
+	@Column(name = "source_type")
+	private String sourceType;
 
 }
