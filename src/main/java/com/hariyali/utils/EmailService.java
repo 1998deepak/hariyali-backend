@@ -2,23 +2,17 @@ package com.hariyali.utils;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import com.hariyali.EnumConstants;
+import com.hariyali.entity.Donation;
 import com.hariyali.entity.Receipt;
 import com.hariyali.entity.Users;
 import com.hariyali.exceptions.EmailNotConfiguredException;
+import com.hariyali.repository.DonationRepository;
 import com.hariyali.serviceimpl.CCServiceEmailAPI;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class EmailService {
 
+	@Autowired
+	DonationRepository donationRepository;
+	
 	@Autowired
 	CCServiceEmailAPI ccServiceEmailAPI;
 
@@ -101,5 +98,23 @@ public class EmailService {
 		String mailBody = String.format(body, user.getFirstName() + " " + user.getLastName());
 		ccServiceEmailAPI.sendCorrespondenceMailwithAttachment(user.getEmailId(), subject, mailBody,files);
 		log.info("Mail Sent...");
+	}
+	
+	public void sendDonationRejectionMail(Users user) {
+		Donation donation=donationRepository.getDonationByWebId(user.getWebId());
+		 SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy"); 
+	        String strDate = formatter.format(donation.getCreatedDate());
+			String subject = "Reject Donation";
+			String content = "Dear Donor,<br><br>"
+					+ "Thank you for your interest in Project Hariyali.<br>"
+					+"Unfortunately we cannot proceed with the donation dated %s reference ID %s.<br>"
+					+"Please feel free to reach out to us at <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> <br><br>"
+					+"Team Hariyali<br>"
+					+ "Mahindra Foundation<br>" + "Sheetal Mehta<br>"
+					+ "Trustee & Executive Director<br>" + "K.C. Mahindra Education Trust,<br>" + "3rd Floor, Cecil Court,<br>"
+					+ "Near Regal Cinema,<br>" + "Mahakavi Bushan Marg,<br>" + "Mumbai 400001<br>";
+			String mailBody = String.format(content,strDate,donation.getOrderId());
+			ccServiceEmailAPI.sendCorrespondenceMail(user.getEmailId(), subject, mailBody);
+		
 	}
 }

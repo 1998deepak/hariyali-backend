@@ -216,6 +216,7 @@ public class DonationServiceImpl implements DonationService {
 				donation.setUsers(resulEntity);
 				donation.setModifiedBy(createdBy);
 				donation.setOrderId(orderId.toString());
+				donation.setDonationDate(newDate);
 				Donation resultdonation = donationRepository.save(donation);
 				//resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
 				donationDTO.setDonationId(donation.getDonationId());
@@ -363,6 +364,7 @@ public class DonationServiceImpl implements DonationService {
 				donation.setUsers(resulEntity);
 				donation.setModifiedBy(createdBy);
 				donation.setOrderId(orderId.toString());
+				donation.setDonationDate(newDate);
 				totalAmount = donation.getTotalAmount();
 				if(usersDTO.getMeconnectId() != "" && usersDTO.getSource() != "") {
 					Base64.Decoder decoder = Base64.getDecoder();   

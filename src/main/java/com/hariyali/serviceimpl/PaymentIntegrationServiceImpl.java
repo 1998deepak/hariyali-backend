@@ -29,7 +29,6 @@ import com.hariyali.dto.HariyaliGogreenIntegrationDTO;
 import com.hariyali.dto.PaymentInfoDTO;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.PaymentInfo;
-import com.hariyali.entity.Receipt;
 import com.hariyali.entity.UserPackages;
 import com.hariyali.entity.Users;
 import com.hariyali.entity.paymentGateway.PaymentGatewayConfiguration;
@@ -79,13 +78,13 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 
 	@Autowired
 	ReceiptRepository receiptRepository;
-	
+
 	@Autowired
 	UserPackageRepository userPackageRepository;
-	
+
 	@Value("${gogreen.transaction-update-url}")
 	private String gogreenUpdateurl;
-	
+
 	@Bean
 	public RestTemplate restTemplate() {
 		return new RestTemplate();
@@ -102,7 +101,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 
 		AesCryptUtil aesUtil = new AesCryptUtil(gatewayConfiguration.getAccessKey());
 		String decryptedResponse = aesUtil.decrypt(encryptedResponse);
-		log.info("decryptedResponse :: "+ decryptedResponse);
+		log.info("decryptedResponse :: " + decryptedResponse);
 		Map<String, String> response = Arrays.stream(of(decryptedResponse.split("&")).orElse(new String[] {}))
 				.filter(values -> !values.isEmpty())
 				.collect(Collectors.toMap(
@@ -130,58 +129,55 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 		paymentInfo.setCardName(ofNullable(response.get("card_name")).orElse(""));
 		paymentInfo.setCurrency(ofNullable(response.get("currency")).orElse(""));
 		paymentInfo.setOrderId(donation.getOrderId());
-		//paymentInfo.setSourceType(ofNullable(response.get("source")).orElse(""));
+		// paymentInfo.setSourceType(ofNullable(response.get("source")).orElse(""));
 		paymentInfo = paymentInfoRepository.save(paymentInfo);
 //		if(!paymentInfo.getSourceType().isEmpty()) {
 //			callGogreenApi();
 //		}
-		
+
 		Users user = userRepository.getUserByDonationId(donation.getDonationId());
 		if (user.getWebId() == null) {
 			user.setWebId(userService.generateWebId());
 			userRepository.save(user);
-			System.out.println("user" + user);
-			emailService.sendWebIdEmail(user.getEmailId(), user);
+			log.info("user" + user);
 		}
-		int donationCnt = donationRepository.donationCount(user.getEmailId());
-		if (paymentInfo.getPaymentStatus().equalsIgnoreCase("Completed")) {
-			receiptService.generateReceipt(donation);
-			Receipt receipt = receiptRepository.getUserReceiptbyDonation(user.getUserId(), donation.getDonationId());
-			if (donationCnt > 1) {
-				emailService.sendReceiptWithAttachment(user,donation.getOrderId(), receipt);
-				emailService.sendThankyouLatter(user.getEmailId(), user);
-			} else {
-//					emailService.sendEmailWithAttachment(user.getEmailId(), EnumConstants.subject,
-//							EnumConstants.content, receipt.getReciept_Path(), user);
-				emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
-						user);
-				emailService.sendReceiptWithAttachment(user,donation.getOrderId(), receipt);
-				emailService.sendThankyouLatter(user.getEmailId(), user);
+		if ("Completed".equalsIgnoreCase(paymentInfo.getPaymentStatus())
+				|| "Success".equalsIgnoreCase(paymentInfo.getPaymentStatus())) {
+			if (donation.getDonationType().equalsIgnoreCase("self-donate")) {
+					emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
+							user);
 			}
-			//Call Gogreen API
-			if((donation.getMeconnectId() != 0)&&(!donation.getSource().isEmpty())) {
-				String result=updateGogreenDetails(donation);
-				System.out.println("update gogreen=>"+result);
+			if(donation.getDonationType().equalsIgnoreCase("gift-donate")) {
+				String recipientEmail=donation.getRecipient().get(0).getEmailId();
+				Users recipientData = userRepository.findByEmailId(recipientEmail);
+				emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
+						EnumConstants.content, user);
+				emailService.sendGiftingLetterEmail(recipientData, donation.getDonationEvent());
+			}
+			// Call Gogreen API
+			if ((donation.getMeconnectId() != 0) && (!donation.getSource().isEmpty())) {
+				String result = updateGogreenDetails(donation);
+				System.out.println("update gogreen=>" + result);
 			}
 		}
 		ApiResponse<String> apiResponse = new ApiResponse<>();
 		apiResponse.setData(paymentInfo.getOrderId());
 		return apiResponse;
 	}
-	
+
 	private String updateGogreenDetails(Donation donation) {
-		List<UserPackages> userPackages=userPackageRepository.findPackageByDonationId(donation.getDonationId());
+		List<UserPackages> userPackages = userPackageRepository.findPackageByDonationId(donation.getDonationId());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-		HariyaliGogreenIntegrationDTO dto=new HariyaliGogreenIntegrationDTO();
+		HariyaliGogreenIntegrationDTO dto = new HariyaliGogreenIntegrationDTO();
 		dto.setMeconnectId(donation.getMeconnectId());
 		dto.setNumberOfTreesMonsoon(userPackages.get(0).getNoOfBouquets());
 		dto.setNumberOfTreesWinter(userPackages.get(1).getNoOfBouquets());
 		HttpEntity<HariyaliGogreenIntegrationDTO> requestEntity = new HttpEntity<>(dto, headers);
-		
+
 		String output = restTemplate.exchange(gogreenUpdateurl, HttpMethod.POST, requestEntity, String.class).getBody();
 		System.out.println("output=>" + output);
-		
+
 		return output;
 	}
 
