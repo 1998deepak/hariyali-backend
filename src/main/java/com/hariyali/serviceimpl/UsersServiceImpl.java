@@ -179,11 +179,11 @@ public class UsersServiceImpl implements UsersService {
 		Users resulEntity = usersRepository.findByEmailId(usersDTO.getEmailId());
 
 		Receipt receipt = receiptRepository.getUserReceipt(resulEntity.getUserId());
-		//emailService.sendEmailWithAttachment(resulEntity.getEmailId(), EnumConstants.subject, EnumConstants.content,
-				//receipt.getReciept_Path(), resulEntity);
+		// emailService.sendEmailWithAttachment(resulEntity.getEmailId(),
+		// EnumConstants.subject, EnumConstants.content,
+		// receipt.getReciept_Path(), resulEntity);
 //		emailService.sendEmailWithAttachment(resulEntity.getEmailId(), EnumConstants.subject, EnumConstants.content,
 //				receipt.getReciept_Path(), resulEntity);
-
 
 		return response;
 
@@ -213,13 +213,15 @@ public class UsersServiceImpl implements UsersService {
 
 		of(donationDTO).map(DonationDTO::getDonationMode).filter(mode -> donationMode.equalsIgnoreCase(mode))
 				.orElseThrow(() -> new CustomException("Invalid donation mode"));
-		if(!usersDTO.getMeconnectId().isEmpty()) {
-			try {
-				String str=AES.decrypt(usersDTO.getMeconnectId());
-				String[] parts = str.split("\\|\\|");
-				System.out.println(parts[0]+":=>"+parts[1]);
-			}catch(Exception e) {
-				 throw new CustomException("Something went wrong...!");
+		if (usersDTO.getMeconnectId() != null) {
+			if (!usersDTO.getMeconnectId().isEmpty()) {
+				try {
+					String str = AES.decrypt(usersDTO.getMeconnectId());
+					String[] parts = str.split("\\|\\|");
+					System.out.println(parts[0] + ":=>" + parts[1]);
+				} catch (Exception e) {
+					throw new CustomException("Something went wrong...!");
+				}
 			}
 		}
 
@@ -300,8 +302,8 @@ public class UsersServiceImpl implements UsersService {
 		role.setUsertypeName("User");
 		user.setUserRole(role);
 		if ("online".equalsIgnoreCase(donationMode)) {
-		user.setApprovalStatus("Pending");
-		}else {
+			user.setApprovalStatus("Pending");
+		} else {
 			user.setApprovalStatus("Approved");
 		}
 		user.setIsDeleted(false);
@@ -402,8 +404,8 @@ public class UsersServiceImpl implements UsersService {
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
 			if (entity.getDonorId() != null && entity.getWebId() == null) {
-				throw new CustomExceptionDataAlreadyExists(
-						"Donor with " + entity.getEmailId() + " is already registered, Kindly do click here to login or click on proceed button to continue your donation!");
+				throw new CustomExceptionDataAlreadyExists("Donor with " + entity.getEmailId()
+						+ " is already registered, Kindly do click here to login or click on proceed button to continue your donation!");
 			}
 			response.setData(modelMapper.map(entity, UsersDTO.class));
 			response.setStatus(EnumConstants.SUCCESS);
@@ -736,13 +738,11 @@ public class UsersServiceImpl implements UsersService {
 		Pageable pageable = PageRequest.of(requestDTO.getPageNumber(), requestDTO.getPageSize());
 
 		Page<Object[]> result = usersRepository.getAllUsersWithWebId(ofNullable(requestDTO.getSearchText()).orElse(""),
-				requestDTO.getStatus(),
-				StringUtils.trimToNull(requestDTO.getDonorType()),
-				pageable);
+				requestDTO.getStatus(), StringUtils.trimToNull(requestDTO.getDonorType()), pageable);
 
 		if (!isNull(result) && !result.getContent().isEmpty()) {
-			List<UsersDTO> usersDTOS = of(result.getContent()).get().stream()
-					.map(this :: toUsersDTO).collect(Collectors.toList());
+			List<UsersDTO> usersDTOS = of(result.getContent()).get().stream().map(this::toUsersDTO)
+					.collect(Collectors.toList());
 			response.setData(usersDTOS);
 			response.setTotalPages(result.getTotalPages());
 			response.setTotalRecords(result.getTotalElements());
@@ -755,9 +755,9 @@ public class UsersServiceImpl implements UsersService {
 
 	}
 
-	private UsersDTO toUsersDTO(Object[] user){
+	private UsersDTO toUsersDTO(Object[] user) {
 		UsersDTO dto = new UsersDTO();
-		if(user.length > 0) {
+		if (user.length > 0) {
 			dto.setUserId(ofNullable(user[0]).map(String::valueOf).map(Integer::parseInt).orElse(0));
 			dto.setWebId(ofNullable(user[1]).map(String::valueOf).orElse(""));
 			dto.setDonorId(ofNullable(user[2]).map(String::valueOf).orElse(""));
@@ -788,7 +788,7 @@ public class UsersServiceImpl implements UsersService {
 		user.setRemark(usersDTO.getRemark());
 		user.setApprovalStatus(usersDTO.getApprovalStatus());
 
-		List<Donation> donation = user.getDonations();//this.donationRepository.getDonationDataByUserId(user.getUserId());
+		List<Donation> donation = user.getDonations();// this.donationRepository.getDonationDataByUserId(user.getUserId());
 		Users recipientEmail = null;
 
 		if ("Rejected".equalsIgnoreCase(usersDTO.getApprovalStatus())) {
@@ -858,12 +858,12 @@ public class UsersServiceImpl implements UsersService {
 
 		{
 			String subject = "Reject Donation";
-			String content = "Dear Sponsor,<br>"
-					+ "<p>Donation made by you has been rejected.</p>"
-					+"<p>Thanking you for your support to Project Hariyali.</p>"+ "Mahindra Foundation<br>" + "Sheetal Mehta<br>"
-					+ "Trustee & Executive Director<br>" + "K.C. Mahindra Education Trust,<br>" + "3rd Floor, Cecil Court,<br>"
-					+ "Near Regal Cinema,<br>" + "Mahakavi Bushan Marg,<br>" + "Mumbai 400001<br>"
-					+"<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>";
+			String content = "Dear Sponsor,<br>" + "<p>Donation made by you has been rejected.</p>"
+					+ "<p>Thanking you for your support to Project Hariyali.</p>" + "Mahindra Foundation<br>"
+					+ "Sheetal Mehta<br>" + "Trustee & Executive Director<br>" + "K.C. Mahindra Education Trust,<br>"
+					+ "3rd Floor, Cecil Court,<br>" + "Near Regal Cinema,<br>" + "Mahakavi Bushan Marg,<br>"
+					+ "Mumbai 400001<br>"
+					+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>";
 
 			emailService.sendSimpleEmail(user.getEmailId(), subject, content);
 		}
@@ -919,13 +919,12 @@ public class UsersServiceImpl implements UsersService {
 							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
 									EnumConstants.content, user);
 							emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
-							emailService.sendReceiptWithAttachment(user,d.getOrderId(), receipt);
-							
+							emailService.sendReceiptWithAttachment(user, d.getOrderId(), receipt);
 
 						}
 						emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
 								EnumConstants.content, user);
-						emailService.sendReceiptWithAttachment(user,d.getOrderId(), receipt);
+						emailService.sendReceiptWithAttachment(user, d.getOrderId(), receipt);
 						emailService.sendThankyouLatter(user.getEmailId(), user);
 
 					} else {
@@ -973,7 +972,6 @@ public class UsersServiceImpl implements UsersService {
 
 					this.recipientRepository.saveAll(donation.getRecipient());
 				}
-
 
 			}
 		}
