@@ -32,6 +32,9 @@ public class Donation implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "donation_id")
 	private int donationId;
+	
+	@Column(name ="donation_code")
+	private String donationCode;
 
 	@Column(name = "donation_type")
 	private String donationType;

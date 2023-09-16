@@ -283,4 +283,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	
 	@Query(value="select * from tbl_user_master as users left join tbl_donation as donation on users.user_id=donation.userId where donation.donation_id=?",nativeQuery=true)
 	public Users getUserByDonationId(int donationId);
+
+	@Query(value = "SELECT donorId FROM tbl_user_master ORDER BY donorId DESC LIMIT 1")
+	String getLastDonorID();
 }
