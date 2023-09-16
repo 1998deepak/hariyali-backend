@@ -23,7 +23,7 @@ public class EmailService {
 
 	@Autowired
 	DonationRepository donationRepository;
-	
+
 	@Autowired
 	CCServiceEmailAPI ccServiceEmailAPI;
 
@@ -40,7 +40,7 @@ public class EmailService {
 	}
 
 	public void sendWelcomeLetterMail(String to, String subject, String text, Users user) {
-		String body = String.format(text, user.getFirstName() + " " + user.getLastName(), user.getEmailId(),
+		String body = String.format(text, user.getFirstName(), user.getEmailId(),
 				user.getPassword());
 		ccServiceEmailAPI.sendCorrespondenceMail(to, subject, body);
 		log.info("Mail send");
@@ -75,19 +75,22 @@ public class EmailService {
 		ccServiceEmailAPI.sendCorrespondenceMail(toEmail, subject, bodyMessage);
 	}
 
-	public void sendReceiptWithAttachment(Users user,String orderId, Receipt receipt) {
+	public void sendReceiptWithAttachment(Users user, String orderId, Receipt receipt) {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 		String formattedDate = sdf.format(receipt.getRecieptDate());
-		String name = user.getFirstName() + " " + user.getLastName();
+		String name = user.getFirstName();
 		FileSystemResource resource = new FileSystemResource(receipt.getReciept_Path());
 		File[] files = { resource.getFile() };
-		String text = "Dear Tree Planter \"%s\" Green Warrior<br><br>"
-				+ "<p>We thank you for your donation dated %s ,ref no %s<br></p>"
-				+ "Please find a PDF version of the receipt attached herewith."
-				+ "<p>Thanking you for your support to project Hariyali.</p><br>Team Hariyali<br>Naandi Foundation<br>"+"<br>PS : Contact 'support@hariyali.org.in' in case of any query.<br>"
+		String text = "Dear %s,<br>" + "We thank you for your donation dated %s ,ref no %s<br>"
+				+ "Please find a PDF version of the receipt attached herewith.<br>"
+				+ "Thanking you for your support to Project Hariyali.<br><br>"
+				+ "Team Hariyali<br>Naandi Foundation<br>" + "502, Trendset Towers,<br>"
+				+ "Road No 2, Banjara Hills,<br>" + "Hyderabad, Telangana - 500 034<br>"
+				+ "<br>PS : Contact 'support@hariyali.org.in' in case of any query.<br>"
 				+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
 		String mailBody = String.format(text, name, formattedDate, orderId);
-		ccServiceEmailAPI.sendPaymentsMail(user.getEmailId(), "Receipt For Your Donation", mailBody, files);
+		ccServiceEmailAPI.sendPaymentsMail(user.getEmailId(),
+				"Project Hariyali –Receipt towards your donation", mailBody, files);
 	}
 
 	public void sendThankyouLatter(String to, Users user) {
@@ -95,26 +98,26 @@ public class EmailService {
 		String body = EnumConstants.thankYouLetterContent;
 		FileSystemResource resource = new FileSystemResource("src/main/resources/thankyouletter.jpg");
 		File[] files = { resource.getFile() };
-		String mailBody = String.format(body, user.getFirstName() + " " + user.getLastName());
-		ccServiceEmailAPI.sendCorrespondenceMailwithAttachment(user.getEmailId(), subject, mailBody,files);
+		String mailBody = String.format(body, user.getFirstName());
+		ccServiceEmailAPI.sendCorrespondenceMailwithAttachment(user.getEmailId(), subject, mailBody, files);
 		log.info("Mail Sent...");
 	}
-	
+
 	public void sendDonationRejectionMail(Users user) {
-		Donation donation=donationRepository.getDonationByWebId(user.getWebId());
-		 SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy"); 
-	        String strDate = formatter.format(donation.getCreatedDate());
-			String subject = "Reject Donation";
-			String content = "Dear Donor,<br><br>"
-					+ "Thank you for your interest in Project Hariyali.<br>"
-					+"Unfortunately we cannot proceed with the donation dated %s reference ID %s.<br>"
-					+"Please feel free to reach out to us at <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> <br><br>"
-					+"Team Hariyali<br>"
-					+ "Mahindra Foundation<br>" + "Sheetal Mehta<br>"
-					+ "Trustee & Executive Director<br>" + "K.C. Mahindra Education Trust,<br>" + "3rd Floor, Cecil Court,<br>"
-					+ "Near Regal Cinema,<br>" + "Mahakavi Bushan Marg,<br>" + "Mumbai 400001<br>";
-			String mailBody = String.format(content,strDate,donation.getOrderId());
-			ccServiceEmailAPI.sendCorrespondenceMail(user.getEmailId(), subject, mailBody);
-		
+		Donation donation = donationRepository.getDonationByWebId(user.getWebId());
+		SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+		String strDate = formatter.format(donation.getCreatedDate());
+		String subject = "Project Hariyali – Donation Failure";
+		String content = "Dear %s,<br><br>" + "<p>Thank you for your interest in Project Hariyali."
+				+ "Unfortunately we cannot proceed with the donation dated %s reference ID %s.</p><br><br>"
+				+ "Thank you.<br>"
+				+ "Team Hariyali<br>" + "Mahindra Foundation<br>"
+				+ "3rd Floor, Cecil Court,Near Regal Cinema,<br>" + "Mahakavi Bushan Marg,Colaba.<br>"
+				+ "Mumbai, Maharashtra  - 400001<br>"
+				+"<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
+				+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
+		String mailBody = String.format(content,user.getFirstName(), strDate, donation.getOrderId());
+		ccServiceEmailAPI.sendCorrespondenceMail(user.getEmailId(), subject, mailBody);
+
 	}
 }
