@@ -72,4 +72,6 @@ public interface UsersService {
 
 	ApiResponse<String> getUserDonarId(String email);
 
+	List<String> getAllUserIds();
+
 }

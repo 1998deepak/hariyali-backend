@@ -1085,6 +1085,14 @@ public class UsersServiceImpl implements UsersService {
 	}
 	
 	@Override
+	public List<String> getAllUserIds(){
+        List<String> userIds = usersRepository.getAllDonorId();
+        userIds.addAll(usersRepository.getAllEmailId());
+        return userIds;
+    }
+
+	
+	@Override
 	public ApiResponse<String> getUserDonarId(String email) {
 		ApiResponse<String> response = new ApiResponse<>();
 		String donarId = usersRepository.findDonarIdByEmail(email);

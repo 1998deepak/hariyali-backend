@@ -236,6 +236,12 @@ public class UsersController {
 		List<String> donarId = usersService.getAllDonarId();
 		return ResponseEntity.ok(donarId);
 	}
+	
+    @GetMapping("/getAllUserId")
+    public ResponseEntity<List<String>> getAllUserIds() {
+        List<String> donarId = usersService.getAllUserIds();
+        return ResponseEntity.ok(donarId);
+    }
 
 	@PostMapping("/sendOtp")
 	public ResponseEntity<?> sendOtp(@RequestParam String email){
