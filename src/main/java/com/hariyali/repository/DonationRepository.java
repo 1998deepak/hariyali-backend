@@ -25,6 +25,7 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 			+ "						 			             SELECT JSON_ARRAYAGG(\r\n"
 			+ "						 			                 JSON_OBJECT(\r\n"
 			+ "						 			                     'donationId', donations.donation_id,\r\n"
+			+ "						 			                     'donationCode', donations.donation_code,\r\n"
 			+ "						 			                     'donationType', donations.donation_type,\r\n"
 			+ "						 			                     'donationMode', donations.donation_mode,\r\n"
 			+ "						 			                     'donationEvent', donations.donation_event,\r\n"
@@ -146,7 +147,7 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 	@Query(value = "select * from tbl_donation where userId=?", nativeQuery = true)
 	List<Donation> getDonationDataByUserId(int userId);
 
-	@Query(value = "SELECT JSON_ARRAYAGG(JSON_OBJECT('donationId', d.donation_id,'donationMode',d.donation_mode,'donationType',d.donation_type,'paymentInfo', JSON_OBJECT(\r\n"
+	@Query(value = "SELECT JSON_ARRAYAGG(JSON_OBJECT('donationId', d.donation_id,'donationCode', d.donation_code,'donationMode',d.donation_mode,'donationType',d.donation_type,'paymentInfo', JSON_OBJECT(\r\n"
 			+ "'paymentInfoId', p.paymentInfo_id,'paymentDate', DATE(p.payment_date),'paymentStatus', p.payment_status,'amount',p.amount,\r\n"
 			+ "'donorId', u.donorId,'firstName', u.first_name,'lastName', u.last_name))) AS Result\r\n"
 			+ "FROM tbl_donation d INNER JOIN tbl_payment_info p ON d.donation_id = p.donationId\r\n"
@@ -167,7 +168,12 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 	countQuery = "SELECT COUNT(*) FROM tbl_donation WHERE userId = :userId",
 	nativeQuery = true)
 	Page<Donation> findByUserId(@Param("userId") Integer userId, Pageable pageable);
-	
+
+	@Query(value="select * from tbl_donation as d, tbl_user_master as u where u.user_id=d.userId anf u.webId=?;",nativeQuery = true)
+	public Donation getDonationByWebId(String webId);
+
+	@Query(value = "SELECT donation_code FROM hariyalidbletest.tbl_donation ORDER BY donation_code DESC LIMIT 1",nativeQuery = true)
+	public String getLastDonationID();
 	
 	@Query(value = "SELECT * FROM tbl_donation where userId in(select user_id from tbl_user_master where pan_card=?1 )",nativeQuery = true)
 	public Donation findByUserPan(String panCard);
