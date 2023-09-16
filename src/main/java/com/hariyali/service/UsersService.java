@@ -70,4 +70,6 @@ public interface UsersService {
 
 	public List<String> getAllDonarId();
 
+	ApiResponse<String> getUserDonarId(String email);
+
 }

@@ -467,7 +467,9 @@ public class UsersServiceImpl implements UsersService {
 		Object user = usersRepository.getUserPersonalDetailsByEmail(email);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
-		Gson gson = new Gson();
+		Gson gson = new GsonBuilder()
+	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
+	            .create();
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
 
@@ -479,6 +481,8 @@ public class UsersServiceImpl implements UsersService {
 		return response;
 
 	}
+	
+	
 
 	@Override
 	public ApiResponse<UsersDTO> getUserPersonalDetailsByDonorId(String donorId) {
@@ -1078,6 +1082,22 @@ public class UsersServiceImpl implements UsersService {
 	@Override
 	public List<String> getAllDonarId() {
 		return usersRepository.getAllDonorId();
+	}
+	
+	@Override
+	public ApiResponse<String> getUserDonarId(String email) {
+		ApiResponse<String> response = new ApiResponse<>();
+		String donarId = usersRepository.findDonarIdByEmail(email);
+		if (donarId == null)
+			throw new CustomExceptionNodataFound("No user found with emailId " + email);
+		if (donarId != null) {
+			response.setData(donarId);
+			response.setStatus(EnumConstants.SUCCESS);
+			response.setStatusCode(HttpStatus.OK.value());
+			response.setMessage("Donar Id found Successfully");
+		}
+		return response;
+
 	}
 
 }

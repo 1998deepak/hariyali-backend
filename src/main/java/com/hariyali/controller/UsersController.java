@@ -136,6 +136,13 @@ public class UsersController {
 		return new ResponseEntity<>(usersService.getUserPersonalDetails(email), HttpStatus.OK);
 	}
 	
+	// method to get user donar Id by email
+		@GetMapping("/getUserDonarId/{email}")
+		public ResponseEntity<ApiResponse<String>> getUserDonarId(@PathVariable String email) {
+			email = encryptionDecryptionUtil.decrypt(email);
+			return new ResponseEntity<>(usersService.getUserDonarId(email), HttpStatus.OK);
+		}
+	
 	// method to get existing user details by email
 		@GetMapping("/getExistingUser/{email}")
 		public ResponseEntity<ApiResponse<UsersDTO>> getExistingUserPersonalDetails(@PathVariable String email) {
