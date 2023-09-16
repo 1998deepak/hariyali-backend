@@ -128,6 +128,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	@Query(value = "SELECT JSON_ARRAYAGG( " +
 	        "JSON_OBJECT( " +
 	        "'donationId', d.donation_id, " +
+	        "'donationCode', d.donation_code, " +
 	        "'donationType', d.donation_type, " + // Add this line for donation type
 	        "'paymentInfo', JSON_OBJECT( " +
 	        "'paymentInfoId', p.paymentInfo_id, " +
