@@ -204,34 +204,6 @@ public class ReceiptServiceImpl implements ReceiptService {
 			document.add(lastPara2);
 			document.add(lastPara3);
 
-			// Add Amount Details
-//			PdfPTable receiptTable1 = new PdfPTable(2);
-//			receiptTable.setWidthPercentage(100);
-//
-//			PdfPCell amount = new PdfPCell(new Paragraph("INR." + donation.getTotalAmount(), receiptFont));
-//			amount.setBorder(Rectangle.NO_BORDER);
-//			amount.setHorizontalAlignment(Element.ALIGN_LEFT);
-//			amount.setVerticalAlignment(Element.ALIGN_TOP);
-//			receiptTable1.addCell(amount);
-//
-//			PdfPCell sign = new PdfPCell(new Paragraph("Naandi Foudation", receiptFont));
-//			sign.setBorder(Rectangle.NO_BORDER);
-////			sign.setSpacingAfter(50f);
-//			sign.setHorizontalAlignment(Element.ALIGN_RIGHT);
-//			receiptTable1.addCell(sign);
-//			document.add(receiptTable1);
-//			document.add(new Paragraph("\n"));
-//			document.add(new Paragraph("\n"));
-//			document.add(new Paragraph("\n"));
-//			Paragraph signParagraph = new Paragraph("(Authorized Signatory)",
-//					FontFactory.getFont(FontFactory.HELVETICA_BOLD));
-//			signParagraph.setAlignment(Element.ALIGN_RIGHT);
-//			document.add(signParagraph);
-
-//		Image signatureImage = Image.getInstance(getClass().getResource("C:/Users/HP/Pictures/I_R_multi_1610868885987.jpg"));
-//		signatureImage.scaleToFit(100, 100); // Adjust size as needed
-//		signatureImage.setAlignment(Element.ALIGN_RIGHT);
-//		document.add(signatureImage);
 			document.add(new Paragraph("\n"));
 			document.add(new Paragraph("\n"));
 

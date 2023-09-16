@@ -91,6 +91,8 @@ public class UsersDTO {
 	private String approvalStatus;
 	
 	private String remark;
+
+	private String source;
 	
 	private String meconnectId;
 }
