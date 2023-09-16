@@ -6,7 +6,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -24,14 +26,19 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hariyali.EnumConstants;
 import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.ExcelUserPlantationDTO;
+import com.hariyali.dto.PlantationMasterDTO;
 import com.hariyali.dto.UserPlantationAndDonationDTO;
 import com.hariyali.entity.Plantation;
 import com.hariyali.entity.PlantationMaster;
@@ -472,25 +479,27 @@ public class PlantationServiceImpl implements PlantationService {
 	}
 
 	@Override
-	public ApiResponse<Object> getAllPlantationMaster() {
+	public Map<String, Object> getAllPlantationMaster(Integer page, Integer size) {
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	    Pageable pageable = PageRequest.of(page, size);
+		
+		Page<PlantationMaster> plantationMasterPage = plantationMasterRepository.findAll(pageable);
+		List<PlantationMaster> plantationMaster = plantationMasterPage.getContent();
+		System.err.println(plantationMaster.toString());
+		
+		List<PlantationMasterDTO> plantation = objectMapper.convertValue(plantationMaster,
+				new TypeReference<List<PlantationMasterDTO>>() {
+				});
 
-		ApiResponse<Object> response = new ApiResponse<>();
-
-		Optional<List<PlantationMaster>> plantationMasterOptional = ofNullable(
-				this.plantationMasterRepository.findAll());
-
-		if (plantationMasterOptional.isPresent()) {
-
-			response.setData(plantationMasterOptional);
-			response.setStatus(EnumConstants.SUCCESS);
-			response.setStatusCode(HttpStatus.OK.value());
-			response.setMessage("Data fetched successfully..!!");
-			return response;
-
-		} else {
-			throw new CustomException("plantation data Doesn't Exist.");
-		}
-
+		Map<String, Object> response = new HashMap<>();
+		response.put("billdata", plantation);
+		response.put("currentPage", plantationMasterPage.getNumber());
+		response.put("totalItems", plantationMasterPage.getTotalElements());
+		response.put("totalPages", plantationMasterPage.getTotalPages());
+		response.put("Page", page);
+		return response;
 	}
 
 }

@@ -26,12 +26,17 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @Table(name = "tbl_donation")
 public class Donation implements Serializable {
 
+	
+
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "donation_id")
 	private int donationId;
+	
+	@Column(name ="donation_code")
+	private String donationCode;
 
 	@Column(name = "donation_type")
 	private String donationType;
@@ -45,8 +50,6 @@ public class Donation implements Serializable {
 
 	@Column(name = "donation_event")
 	private String donationEvent;
-
-	
 
 	@Column(name = "total_amount")
 	private double totalAmount;
@@ -90,9 +93,31 @@ public class Donation implements Serializable {
 
 	@Column(name = "order_id")
 	private String orderId;
+	
+	@Column(name = "source")
+	private String source;
+	
+	@Column(name = "meconnect_id")
+	private int meconnectId;
 
 	public int getDonationId() {
 		return donationId;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	public int getMeconnectId() {
+		return meconnectId;
+	}
+
+	public void setMeconnectId(int meconnectId) {
+		this.meconnectId = meconnectId;
 	}
 
 	public void setDonationId(int donationId) {
@@ -229,5 +254,13 @@ public class Donation implements Serializable {
 
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
+	}
+	
+	public String getDonationCode() {
+		return donationCode;
+	}
+
+	public void setDonationCode(String donationCode) {
+		this.donationCode = donationCode;
 	}
 }

@@ -2,6 +2,7 @@ package com.hariyali.service;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -15,6 +16,6 @@ public interface PlantationService {
 	public String uploadPlantationExcel(XSSFWorkbook workbook);
 
 	public List<Plantation> getPlantationsByDonationId(Long donationId);
-
-	public ApiResponse<Object> getAllPlantationMaster();
+	
+	public Map<String, Object> getAllPlantationMaster(Integer page, Integer size);
 }
