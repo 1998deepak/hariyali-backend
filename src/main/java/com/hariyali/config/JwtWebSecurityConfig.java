@@ -72,7 +72,7 @@ public class JwtWebSecurityConfig   {
 	                         "/api/v1/downloadFileDocument/**", "/api/v1/donorList", "/api/v1/leaderBoard", "/api/v1/map/**",
 	                         "/api/v1/AddMap", "/api/v1/deleteuser/**", "/api/v1/userAdd","/api/v1/updateDonation","/api/v1/inactivePackages/**","/ai/v1/approvedDonation")
 	                .hasAnyAuthority("Admin")
-	            .antMatchers("/api/v1/updateUser/**","/api/v1/newDonation","/api/v1/getUserPersonalDetailsbyEmailOrDonorId","/api/v1/getAllDonationByUser/").hasAnyAuthority("User","Admin")
+	            .antMatchers("/api/v1/updateUser/**","/api/v1/newDonation","/api/v1/getUserPersonalDetailsbyEmailOrDonorId","/api/v1/getAllDonationByUser/", "/api/v1/plantation/**").hasAnyAuthority("User","Admin")
 	            .and()
 	        .exceptionHandling()
 	            .authenticationEntryPoint(this.jwtAuthenticationEntryPoint)
