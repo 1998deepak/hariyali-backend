@@ -18,6 +18,8 @@ public class CommonService {
 	@Autowired 
 	private DonationRepository donationRepository;
 	
+	
+	//method to generate new donor or donation id
 	public String createDonarIDORDonationID(String idForEntity) {
         LocalDate currentDate = LocalDate.now();
         int year = currentDate.getYear();
@@ -26,15 +28,18 @@ public class CommonService {
         int lastFiveDigits ;
         String lastFiveDigitsStr = null;
         
-        // Format the sequence with leading zeros
         if(idForEntity.equalsIgnoreCase("user")) {
         	 String lastDonarID = usersRepository.getLastDonorID();
+        	 if(lastDonarID == null)
+        		 return "DID20230900001";
              lastFiveDigitsStr = lastDonarID.substring(lastDonarID.length() - 5);
              lastFiveDigits = Integer.parseInt(lastFiveDigitsStr) + 1;
              formattedResult = String.format("%05d", lastFiveDigits);
              return "DN" + year + String.format("%02d", month) + formattedResult;
         }else if(idForEntity.equalsIgnoreCase("donation")){
         	  String lastDonationID = donationRepository.getLastDonationID();
+        	  if(lastDonationID == null)
+        		  return "DN20230900001";
               lastFiveDigitsStr = lastDonationID.substring(lastDonationID.length() - 5);
               lastFiveDigits = Integer.parseInt(lastFiveDigitsStr) + 1;
               formattedResult = String.format("%05d", lastFiveDigits);
