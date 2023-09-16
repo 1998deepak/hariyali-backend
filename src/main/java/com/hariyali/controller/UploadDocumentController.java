@@ -33,7 +33,7 @@ public class UploadDocumentController {
 			map.put("message", "Please select a ZIP file to upload...!");
 			return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
 		}
-		formTenbService.uploadFormTenBe(multipartFile);
+		formTenbService.uploadFormTenBe(multipartFile,request);
 		map.put("message", "File uploaded Succcessfully..!");
 		return new ResponseEntity<>(map, HttpStatus.OK);
 	}
