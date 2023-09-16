@@ -167,4 +167,8 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 	countQuery = "SELECT COUNT(*) FROM tbl_donation WHERE userId = :userId",
 	nativeQuery = true)
 	Page<Donation> findByUserId(@Param("userId") Integer userId, Pageable pageable);
+	
+	
+	@Query(value = "SELECT * FROM tbl_donation where userId in(select user_id from tbl_user_master where pan_card=?1 )",nativeQuery = true)
+	public Donation findByUserPan(String panCard);
 }
