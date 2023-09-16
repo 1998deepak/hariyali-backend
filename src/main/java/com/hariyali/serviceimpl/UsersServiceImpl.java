@@ -67,6 +67,7 @@ import com.hariyali.repository.UserPackageRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.ReceiptService;
 import com.hariyali.service.UsersService;
+import com.hariyali.utils.CommonService;
 import com.hariyali.utils.EmailService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -128,6 +129,9 @@ public class UsersServiceImpl implements UsersService {
 
 	@Autowired
 	ReceiptService receiptService;
+	
+	@Autowired
+	CommonService commonService;
 
 	private static final Logger logger = LoggerFactory.getLogger(UsersServiceImpl.class);
 
@@ -176,7 +180,7 @@ public class UsersServiceImpl implements UsersService {
 		validateDonation(usersDTO, "offline");
 
 		// send email to user
-		ApiResponse<UsersDTO> response = save(usersDTO, generateDonorId(), request);
+		ApiResponse<UsersDTO> response = save(usersDTO,commonService.createDonarIDORDonationID("user"), request);
 
 		Users resulEntity = usersRepository.findByEmailId(usersDTO.getEmailId());
 
@@ -199,7 +203,7 @@ public class UsersServiceImpl implements UsersService {
 			throws JsonProcessingException {
 
 		validateDonation(usersDTO, "online");
-		return save(usersDTO, generateDonorId(), null);
+		return save(usersDTO, commonService.createDonarIDORDonationID("user"), null);
 //		return null;
 	}
 

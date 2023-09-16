@@ -26,6 +26,8 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @Table(name = "tbl_donation")
 public class Donation implements Serializable {
 
+	
+
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -252,5 +254,13 @@ public class Donation implements Serializable {
 
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
+	}
+	
+	public String getDonationCode() {
+		return donationCode;
+	}
+
+	public void setDonationCode(String donationCode) {
+		this.donationCode = donationCode;
 	}
 }
