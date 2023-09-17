@@ -91,10 +91,17 @@ public class PlantationController {
 		}
 	}
 
+
+		
 	@GetMapping("/getAllPlantationMaster")
-	public ResponseEntity<ApiResponse<Object>> getAllPlantationMaster() {
-		ApiResponse<Object> apiResponse = plantationService.getAllPlantationMaster();
+	public ResponseEntity<Object> getAllPlantationMaster(
+			 @RequestParam(name = "page", defaultValue = "1") int page,
+		     @RequestParam(name = "size", defaultValue = "10") int size
+			) {
+
+		Map<String, Object> apiResponse = plantationService.getAllPlantationMaster(page, size);
 		return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
 	}
 
 }

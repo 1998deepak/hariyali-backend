@@ -1,5 +1,9 @@
 package com.hariyali.serviceimpl;
 
+import static java.util.Objects.isNull;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,8 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
-import com.hariyali.dto.*;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -27,7 +29,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,13 +36,17 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hariyali.EnumConstants;
 import com.hariyali.config.CustomUserDetailService;
 import com.hariyali.config.JwtHelper;
 import com.hariyali.dao.UserDao;
+import com.hariyali.dto.ApiResponse;
+import com.hariyali.dto.DonationDTO;
+import com.hariyali.dto.DonorListRequestDTO;
+import com.hariyali.dto.LoginRequest;
+import com.hariyali.dto.UsersDTO;
 import com.hariyali.entity.Address;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.PaymentInfo;
@@ -62,11 +67,10 @@ import com.hariyali.repository.UserPackageRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.ReceiptService;
 import com.hariyali.service.UsersService;
+import com.hariyali.utils.CommonService;
 import com.hariyali.utils.EmailService;
 
-import static java.util.Collections.emptyList;
-import static java.util.Objects.isNull;
-import static java.util.Optional.*;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -125,6 +129,9 @@ public class UsersServiceImpl implements UsersService {
 
 	@Autowired
 	ReceiptService receiptService;
+	
+	@Autowired
+	CommonService commonService;
 
 	private static final Logger logger = LoggerFactory.getLogger(UsersServiceImpl.class);
 
@@ -173,7 +180,7 @@ public class UsersServiceImpl implements UsersService {
 		validateDonation(usersDTO, "offline");
 
 		// send email to user
-		ApiResponse<UsersDTO> response = save(usersDTO, generateDonorId(), request);
+		ApiResponse<UsersDTO> response = save(usersDTO,commonService.createDonarIDORDonationID("user"), request);
 
 		Users resulEntity = usersRepository.findByEmailId(usersDTO.getEmailId());
 
@@ -196,7 +203,7 @@ public class UsersServiceImpl implements UsersService {
 			throws JsonProcessingException {
 
 		validateDonation(usersDTO, "online");
-		return save(usersDTO, null, null);
+		return save(usersDTO, commonService.createDonarIDORDonationID("user"), null);
 //		return null;
 	}
 
@@ -277,6 +284,9 @@ public class UsersServiceImpl implements UsersService {
 		user.setDonorId(donarID);
 		user.setCreatedBy(createdBy);
 		user.setModifiedBy(createdBy);
+		user.setCitizenship(usersDTO.getCitizenship());
+		user.setCountry(usersDTO.getCountry());
+		user.setOrganisation(usersDTO.getOrganisation());
 
 		// set last login date
 		user.setLastloginDate(newDate);
@@ -791,8 +801,6 @@ public class UsersServiceImpl implements UsersService {
 			result.setMessage("Donation Rejected By " + userName);
 			result.setStatusCode(HttpStatus.FORBIDDEN.value());
 			sendRejectDonationEmails(user.getEmailId());
-//			sendRejectDonationEmails(recipientEmail.getEmailId());
-
 		} else if ("Approved".equalsIgnoreCase(usersDTO.getApprovalStatus())) {
 			recipientEmail = handleDonationApproval(user, donation, userName);
 			result.setStatus(EnumConstants.SUCCESS);
@@ -874,7 +882,7 @@ public class UsersServiceImpl implements UsersService {
 					for (Recipient recipient : recipients) {
 						recipientEmail = this.usersRepository.findByEmailId(recipient.getEmailId());
 						System.err.println("Recipient" + recipientEmail.toString());
-						recipientEmail.setDonorId(generateDonorId());
+						recipientEmail.setDonorId(recipientEmail.getDonorId());
 						recipientEmail.setIsDeleted(false);
 						recipientEmail.setCreatedBy(userName);
 						recipientEmail.setModifiedBy(userName);
@@ -891,7 +899,7 @@ public class UsersServiceImpl implements UsersService {
 					List<Users> users = this.usersRepository.getUserDataByDonationId(d.getDonationId());
 					for (Users userdata : users) {
 						recipientEmail = this.usersRepository.findByEmailId(userdata.getEmailId());
-						recipientEmail.setDonorId(generateDonorId());
+						recipientEmail.setDonorId(recipientEmail.getDonorId());
 						recipientEmail.setIsApproved(true);
 						recipientEmail.setIsDeleted(false);
 						recipientEmail.setCreatedBy(userName);
@@ -909,7 +917,7 @@ public class UsersServiceImpl implements UsersService {
 						receiptService.generateReceipt(d);
 						Receipt receipt = receiptRepository.getUserReceipt(user.getUserId());
 						Users recipientData = usersRepository.findByEmailId(recipientEmail.getEmailId());
-						if (d.getDonationType().equals("gift-donate")) {
+						if (d.getDonationType().equalsIgnoreCase("gift-donate")) {
 							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
 									EnumConstants.content, user);
 							emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
@@ -917,8 +925,8 @@ public class UsersServiceImpl implements UsersService {
 							
 
 						}
-						emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
-								EnumConstants.content, user);
+//						emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
+//								EnumConstants.content, user);
 						emailService.sendReceiptWithAttachment(user,d.getOrderId(), receipt);
 						emailService.sendThankyouLatter(user.getEmailId(), user);
 
@@ -929,7 +937,11 @@ public class UsersServiceImpl implements UsersService {
 					log.error("Exception = {}", e);
 					throw new CustomException("Payment not perform.");
 				}
+				d.setApprovalDate(new Date());
+				d.setIsApproved(true);
+				d.setApprovalStatus("Approved");
 			}
+			donationRepository.saveAll(donations);
 		}
 
 		return recipientEmail;

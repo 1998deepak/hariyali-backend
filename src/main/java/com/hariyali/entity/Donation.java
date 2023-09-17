@@ -21,7 +21,15 @@ import javax.persistence.TemporalType;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "tbl_donation")
 public class Donation implements Serializable {
@@ -32,6 +40,9 @@ public class Donation implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "donation_id")
 	private int donationId;
+
+	@Column(name ="donation_code")
+	private String donationCode;
 
 	@Column(name = "donation_type")
 	private String donationType;
@@ -46,7 +57,7 @@ public class Donation implements Serializable {
 	@Column(name = "donation_event")
 	private String donationEvent;
 
-	
+
 
 	@Column(name = "total_amount")
 	private double totalAmount;
@@ -91,143 +102,22 @@ public class Donation implements Serializable {
 	@Column(name = "order_id")
 	private String orderId;
 
-	public int getDonationId() {
-		return donationId;
-	}
+	@Column(name = "source")
+	private String source;
 
-	public void setDonationId(int donationId) {
-		this.donationId = donationId;
-	}
+	@Column(name = "meconnect_id")
+	private int meconnectId;
 
-	public String getDonationType() {
-		return donationType;
-	}
+	@Column(name = "approval_status")
+	private String approvalStatus;
 
-	public void setDonationType(String donationType) {
-		this.donationType = donationType;
-	}
+	@Column(name = "remark")
+	private String remark;
 
-	public Date getDonationDate() {
-		return donationDate;
-	}
+	@Column(name = "is_approved")
+	private Boolean isApproved = Boolean.FALSE;
 
-	public void setDonationDate(Date donationDate) {
-		this.donationDate = donationDate;
-	}
+	@Column(name = "approval_date")
+	private Date approvalDate;
 
-	public String getDonationMode() {
-		return donationMode;
-	}
-
-	public void setDonationMode(String donationMode) {
-		this.donationMode = donationMode;
-	}
-
-	public String getDonationEvent() {
-		return donationEvent;
-	}
-
-	public void setDonationEvent(String donationEvent) {
-		this.donationEvent = donationEvent;
-	}
-
-	public double getTotalAmount() {
-		return totalAmount;
-	}
-
-	public void setTotalAmount(double totalAmount) {
-		this.totalAmount = totalAmount;
-	}
-
-	public double getGeneralDonation() {
-		return generalDonation;
-	}
-
-	public void setGeneralDonation(double generalDonation) {
-		this.generalDonation = generalDonation;
-	}
-
-	public Date getCreatedDate() {
-		return createdDate;
-	}
-
-	public void setCreatedDate(Date createdDate) {
-		this.createdDate = createdDate;
-	}
-
-	public String getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
-	}
-
-	public Date getModifiedDate() {
-		return modifiedDate;
-	}
-
-	public void setModifiedDate(Date modifiedDate) {
-		this.modifiedDate = modifiedDate;
-	}
-
-	public String getModifiedBy() {
-		return modifiedBy;
-	}
-
-	public void setModifiedBy(String modifiedBy) {
-		this.modifiedBy = modifiedBy;
-	}
-
-	public Users getUsers() {
-		return users;
-	}
-
-	public void setUsers(Users users) {
-		this.users = users;
-	}
-
-	public List<Recipient> getRecipient() {
-		return recipient;
-	}
-
-	public void setRecipient(List<Recipient> recipient) {
-		this.recipient = recipient;
-	}
-
-	public List<UserPackages> getUserPackage() {
-		return userPackage;
-	}
-
-	public void setUserPackage(List<UserPackages> userPackage) {
-		this.userPackage = userPackage;
-	}
-
-	public Boolean getIsDeleted() {
-		return isDeleted;
-	}
-
-	public void setIsDeleted(Boolean isDeleted) {
-		this.isDeleted = isDeleted;
-	}
-
-	public static long getSerialversionuid() {
-		return serialVersionUID;
-	}
-
-	public List<PaymentInfo> getPaymentInfo() {
-		return paymentInfo;
-	}
-
-	public void setPaymentInfo(List<PaymentInfo> paymentInfo) {
-		this.paymentInfo = paymentInfo;
-	}
-
-	public String getOrderId() {
-		return orderId;
-	}
-
-	public void setOrderId(String orderId) {
-		this.orderId = orderId;
-	}
 }

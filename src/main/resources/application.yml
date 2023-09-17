@@ -1,28 +1,17 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/hariyalidb?allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mysql://localhost:3306/hariyali_dev?allowPublicKeyRetrieval=true&useSSL=false
     username: root
-    password: root@123
+    password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
     #    show-sql: true
+    file.path:  /OverseasScolarship/
   main:
        lazy-initialization: true
   servlet:
           multipart:
-                    max-file-size:5MB
-                    max-request-size:5MB
-
-#  mail:
-#    host : smtp.gmail.com
-#    port : 587
-#    username : nayandandwate55@gmail.com
-#    password : hxiiyngadcoxqefa
-#    properties :
-#      mail :
-#        smtp :
-#          auth : true
-#          starttls :
-#            enable : true
+                    max-file-size : 5MB
+                    max-request-size : 5MB
   jpa:
     properties:
       hibernate: 
@@ -76,3 +65,16 @@ cc_service:
           CC_BASE_URL: https://ccservice-dev.m-devsecops.com/
 encryption:
            key: emgut@kL9RQ%L#tt
+#mention value in days
+donation:
+          approval-extension: 7
+           
+gogreen:
+        transaction-update-url: https://gogreen-dev.m-devsecops.com/updateGogreenTrasaction
+
+    
+cloudStorage:
+  - bucket: bkt-modernization-uatx-hariyali
+    mountPath: /DonationReceipt        
+        
+        

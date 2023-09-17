@@ -3,6 +3,7 @@ package com.hariyali.repository;
 import java.util.List;
 import java.util.Map;
 
+import org.aspectj.weaver.tools.Trace;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -127,6 +128,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	@Query(value = "SELECT JSON_ARRAYAGG( " +
 	        "JSON_OBJECT( " +
 	        "'donationId', d.donation_id, " +
+	        "'donationCode', d.donation_code, " +
 	        "'donationType', d.donation_type, " + // Add this line for donation type
 	        "'paymentInfo', JSON_OBJECT( " +
 	        "'paymentInfoId', p.paymentInfo_id, " +
@@ -290,4 +292,10 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	
 	@Query(value="select donorId from tbl_user_master where emailId=?",nativeQuery = true)
 	public String findDonarIdByEmail(String email);
+
+	@Query(value = "SELECT donorId FROM tbl_user_master ORDER BY donorId DESC LIMIT 1",nativeQuery = true)
+	String getLastDonorID();
+  
+	Users findByPanCard(String panCard);
+
 }
