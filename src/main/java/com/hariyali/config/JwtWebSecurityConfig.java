@@ -66,13 +66,13 @@ public class JwtWebSecurityConfig   {
 	        .authorizeRequests()
 	         .antMatchers("/api/v1/login","/api/v1/loginOtp", "api/v1/verify-otp","/api/v1/loginViaOtp", "/api/v1/resetPassword", "/api/v1/sendEmail", "/api/v1/logout",
 	                         "/api/v1/sendEmailForDonorId", "/api/v1/activateuser", "/api/v1/TotalNoOfDonors",
-	                         "/api/v1/formData", "/api/v1/getAllPackages","/api/v1/userAddOnline", "/api/v1/paymentIntegration","/api/v1/sendOtp").permitAll()
+	                         "/api/v1/formData", "/api/v1/getAllPackages","/api/v1/userAddOnline", "/api/v1/paymentIntegration","/api/v1/sendOtp","/api/v1/uploadZipFile","/api/v1/hariyaliGogreenTrasaction").permitAll()
 	            .antMatchers("/api/v1/usersGetAll", "/api/v1/user-by-email/**", "/api/v1/package/**", "/api/v1/AddPackage",
 	                         "/api/v1/package-by-id/**", "/api/v1/GetAllReports", "/api/v1/uploadFileDocument",
 	                         "/api/v1/downloadFileDocument/**", "/api/v1/donorList", "/api/v1/leaderBoard", "/api/v1/map/**",
 	                         "/api/v1/AddMap", "/api/v1/deleteuser/**", "/api/v1/userAdd","/api/v1/updateDonation","/api/v1/inactivePackages/**","/ai/v1/approvedDonation")
 	                .hasAnyAuthority("Admin")
-	            .antMatchers("/api/v1/updateUser/**","/api/v1/newDonation","/api/v1/getUserPersonalDetailsbyEmailOrDonorId","/api/v1/getAllDonationByUser/").hasAnyAuthority("User","Admin")
+	            .antMatchers("/api/v1/updateUser/**","/api/v1/newDonation","/api/v1/getUserPersonalDetailsbyEmailOrDonorId","/api/v1/getAllDonationByUser/", "/api/v1/plantation/**, /api/v1/commitment/**").hasAnyAuthority("User","Admin")
 	            .and()
 	        .exceptionHandling()
 	            .authenticationEntryPoint(this.jwtAuthenticationEntryPoint)

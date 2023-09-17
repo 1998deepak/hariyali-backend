@@ -169,12 +169,12 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 	nativeQuery = true)
 	Page<Donation> findByUserId(@Param("userId") Integer userId, Pageable pageable);
 
-	
 	@Query(value="select * from tbl_donation as d, tbl_user_master as u where u.user_id=d.userId anf u.webId=?;",nativeQuery = true)
 	public Donation getDonationByWebId(String webId);
 
-
-	@Query(value = "SELECT donation_code FROM hariyalidbletest.tbl_donation ORDER BY donation_code DESC LIMIT 1",nativeQuery = true)
+	@Query(value = "SELECT donation_code FROM tbl_donation ORDER BY donation_code DESC LIMIT 1",nativeQuery = true)
 	public String getLastDonationID();
-
+	
+	@Query(value = "SELECT * FROM tbl_donation where userId in(select user_id from tbl_user_master where pan_card=?1 )",nativeQuery = true)
+	public Donation findByUserPan(String panCard);
 }
