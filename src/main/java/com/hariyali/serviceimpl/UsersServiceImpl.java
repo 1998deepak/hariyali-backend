@@ -933,7 +933,11 @@ public class UsersServiceImpl implements UsersService {
 					log.error("Exception = {}", e);
 					throw new CustomException("Payment not perform.");
 				}
+				d.setApprovalDate(new Date());
+				d.setIsApproved(true);
+				d.setApprovalStatus("Approved");
 			}
+			donationRepository.saveAll(donations);
 		}
 
 		return recipientEmail;
