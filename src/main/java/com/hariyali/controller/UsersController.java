@@ -228,6 +228,7 @@ public class UsersController {
 	@GetMapping("/getUserPersonalDetailsbyEmailOrDonorId")
 	public ResponseEntity<ApiResponse<UsersDTO>> getUserPersonalDetailsbyEmailOrDonorId(
 			@RequestParam String emailOrDonorId) {
+		emailOrDonorId = encryptionDecryptionUtil.decrypt(emailOrDonorId);
 		return new ResponseEntity<>(usersService.getUserPersonalDetailsbyEmailOrDonorId(emailOrDonorId), HttpStatus.OK);
 	}
 
