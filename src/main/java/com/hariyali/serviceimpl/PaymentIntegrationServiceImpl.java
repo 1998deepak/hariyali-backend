@@ -144,20 +144,22 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 		if ("Completed".equalsIgnoreCase(paymentInfo.getPaymentStatus())
 				|| "Success".equalsIgnoreCase(paymentInfo.getPaymentStatus())) {
 			if (donation.getDonationType().equalsIgnoreCase("self-donate")) {
-					emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
-							user);
+				emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
+						user);
 			}
-			if(donation.getDonationType().equalsIgnoreCase("gift-donate")) {
-				String recipientEmail=donation.getRecipient().get(0).getEmailId();
+			if (donation.getDonationType().equalsIgnoreCase("gift-donate")) {
+				String recipientEmail = donation.getRecipient().get(0).getEmailId();
 				Users recipientData = userRepository.findByEmailId(recipientEmail);
-				emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
-						EnumConstants.content, user);
+				emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
+						user);
 				emailService.sendGiftingLetterEmail(recipientData, donation.getDonationEvent());
 			}
 			// Call Gogreen API
-			if ((donation.getMeconnectId() != 0) && (!donation.getSource().isEmpty())) {
-				String result = updateGogreenDetails(donation);
-				System.out.println("update gogreen=>" + result);
+			if (paymentInfo.getPaymentStatus().equalsIgnoreCase("SUCCESS")) {
+				if ((donation.getMeconnectId() != 0) && (!donation.getSource().isEmpty())) {
+					String result = updateGogreenDetails(donation);
+					System.out.println("update gogreen=>" + result);
+				}
 			}
 		}
 		ApiResponse<String> apiResponse = new ApiResponse<>();
@@ -168,7 +170,9 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 	private String updateGogreenDetails(Donation donation) {
 		List<UserPackages> userPackages = userPackageRepository.findPackageByDonationId(donation.getDonationId());
 		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "b6942c2e22e092eedc5c242a3d924672");
+		headers.set("Key", "ELGJY9V0z0sQxRqn429K8QYGkRqAmAkw9yo/2NLPNOVP/fclNGnMm1oZiGP8fi/w");
 		HariyaliGogreenIntegrationDTO dto = new HariyaliGogreenIntegrationDTO();
 		dto.setMeconnectId(donation.getMeconnectId());
 		dto.setNumberOfTreesMonsoon(userPackages.get(0).getNoOfBouquets());

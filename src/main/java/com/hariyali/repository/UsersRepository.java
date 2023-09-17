@@ -283,8 +283,15 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	@Query(value ="SELECT r.donorId as donorId FROM tbl_user_master r WHERE r.donorId IS NOT NULL",nativeQuery = true)
 	List<String> getAllDonorId();
 	
+	@Query(value ="SELECT r.emailId as emailId FROM tbl_user_master r WHERE r.emailId IS NOT NULL",nativeQuery = true)
+    List<String> getAllEmailId();
+
+	
 	@Query(value="select * from tbl_user_master as users left join tbl_donation as donation on users.user_id=donation.userId where donation.donation_id=?",nativeQuery=true)
 	public Users getUserByDonationId(int donationId);
+	
+	@Query(value="select donorId from tbl_user_master where emailId=?",nativeQuery = true)
+	public String findDonarIdByEmail(String email);
 
 	@Query(value = "SELECT donorId FROM tbl_user_master ORDER BY donorId DESC LIMIT 1",nativeQuery = true)
 	String getLastDonorID();
