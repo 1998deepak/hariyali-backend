@@ -46,4 +46,41 @@ public class PaymentInfoDTO {
 	private String currency;
 
 	private String paymentStatus;
+
+	private String orderId;
+
+	private Integer accountId;
+
+	private Date receiptDate;
+
+	private Double receivedAmount;
+
+	private Double bankCharge;
+
+	private String documentNumber;
+
+	private String bankAddress;
+
+	private String depositNumber;
+
+	private Date depositDate;
+
+	private String receiptNumber;
+
+	private String realizationDate;
+
+	private String creditCardNumber;
+
+	private String cardExpiry;
+
+	private String cardHolderName;
+
+	private String chequeNumber;
+
+	private String chequeDate;
+
+	private String demandDraftNumber;
+
+	private String demandDraftDate;
+
 }

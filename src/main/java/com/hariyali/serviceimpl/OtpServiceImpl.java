@@ -38,13 +38,12 @@ public class OtpServiceImpl {
 		String otp = generateOtp();
 		otpModel.setOtpCode(otp);
 		otpModel.setDonarIdOrEmail(emailId);
-		;
 		otpModel.setOtpExpiryTime(LocalDateTime.now().plusMinutes(10));
 		otpModel.setUsers(user);
 		otpRepository.save(otpModel);
-		String body = "Dear Sponsor,<br>" + "<P> Your OTP for login:<b>" + otp + "</b>.<P><br>Mahindra Foundation<br>"
-				+ "Sheetal Mehta<br>" + "Trustee & Executive Director<br>" + "K.C. Mahindra Education Trust,<br>"
-				+ "3rd Floor, Cecil Court,<br>Near Regal Cinema,<br>Mahakavi Bushan Marg,<br>Mumbai 400001<br>";
+		String body = "Dear Donor,<br><br>" + "You have are accessing the profile on Hariyali website."
+				+ "<br>Please use OTP for logging in - " + otp + "<br><br>-Team Hariyali<br><br>"
+				+ "PS: For any support or queries please reach out to us at <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a>";
 		sendEmail(emailId, body);
 	}
 
@@ -65,9 +64,9 @@ public class OtpServiceImpl {
 	}
 
 	public OtpModel findBydonarIdOrEmail(String donarIdOrEmail, String otp) {
-		return otpRepository.findBydonarIdOrEmail(donarIdOrEmail,otp);
+		return otpRepository.findBydonarIdOrEmail(donarIdOrEmail, otp);
 	}
-	
+
 	public OtpModel findByOtp(String otp) {
 		return otpRepository.findByOtp(otp);
 	}

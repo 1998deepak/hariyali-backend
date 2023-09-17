@@ -20,7 +20,15 @@ import javax.persistence.TemporalType;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "tbl_user_packages")
 public class UserPackages implements Serializable{
@@ -77,110 +85,8 @@ public class UserPackages implements Serializable{
 	private List<Plantation> plantation;
 
 	private boolean isPlanted;
-	
-	public int getPackageId() {
-		return packageId;
-	}
 
-	public void setPackageId(int packageId) {
-		this.packageId = packageId;
-	}
-
-	public String getPackageName() {
-		return packageName;
-	}
-
-	public void setPackageName(String packageName) {
-		this.packageName = packageName;
-	}
-
-	public double getBouquetPrice() {
-		return bouquetPrice;
-	}
-
-	public void setBouquetPrice(double bouquetPrice) {
-		this.bouquetPrice = bouquetPrice;
-	}
-
-	public double getMaintenanceCost() {
-		return maintenanceCost;
-	}
-
-	public void setMaintenanceCost(double maintenanceCost) {
-		this.maintenanceCost = maintenanceCost;
-	}
-
-	public double getAmount() {
-		return amount;
-	}
-
-	public void setAmount(double amount) {
-		this.amount = amount;
-	}
-
-	public Date getCreatedDate() {
-		return createdDate;
-	}
-
-	public void setCreatedDate(Date createdDate) {
-		this.createdDate = createdDate;
-	}
-
-	public String getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
-	}
-
-	public Date getModifiedDate() {
-		return modifiedDate;
-	}
-
-	public void setModifiedDate(Date modifiedDate) {
-		this.modifiedDate = modifiedDate;
-	}
-
-	public String getModifiedBy() {
-		return modifiedBy;
-	}
-
-	public void setModifiedBy(String modifiedBy) {
-		this.modifiedBy = modifiedBy;
-	}
-
-	public Boolean getIsdeleted() {
-		return isdeleted;
-	}
-
-	public void setIsdeleted(Boolean isdeleted) {
-		this.isdeleted = isdeleted;
-	}
-
-	public Donation getUserDonation() {
-		return userDonation;
-	}
-
-	public void setUserDonation(Donation userDonation) {
-		this.userDonation = userDonation;
-	}
-
-	public Integer getNoOfBouquets() {
-		return noOfBouquets;
-	}
-
-	public void setNoOfBouquets(Integer noOfBouquets) {
-		this.noOfBouquets = noOfBouquets;
-	}
-
-	public boolean isPlanted() {
-		return isPlanted;
-	}
-
-	public void setPlanted(boolean isPlanted) {
-		this.isPlanted = isPlanted;
-	}
-
+	@Column(name = "plant_allocated")
+	private Integer plantAllocated;
 	
 }

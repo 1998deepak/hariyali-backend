@@ -126,8 +126,8 @@ public class ReceiptServiceImpl implements ReceiptService {
 
 			Image logo = null;
 			try {
-				logo = Image.getInstance("src/main/resources/hariyalilogo.png");
-				logo.scaleToFit(100, 80); // Adjust the size as needed
+				logo = Image.getInstance("src/main/resources/Logo.jpg");
+				logo.scaleToFit(500, 50); // Adjust the size as needed
 				logo.setAlignment(Element.ALIGN_CENTER);
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
@@ -145,11 +145,11 @@ public class ReceiptServiceImpl implements ReceiptService {
 
 			// Add the logo to the document
 			document.add(logoParagraph);
-
+			document.add(new Paragraph("\n"));
 			PdfPTable receiptTable = new PdfPTable(3);
 			receiptTable.setWidthPercentage(100);
 
-			PdfPCell leftCell = new PdfPCell(new Phrase("NO:" + receiptNo));
+			PdfPCell leftCell = new PdfPCell(new Phrase("NO:" + donation.getOrderId()));
 			leftCell.setBorder(Rectangle.NO_BORDER);
 			receiptTable.addCell(leftCell);
 
@@ -204,34 +204,6 @@ public class ReceiptServiceImpl implements ReceiptService {
 			document.add(lastPara2);
 			document.add(lastPara3);
 
-			// Add Amount Details
-//			PdfPTable receiptTable1 = new PdfPTable(2);
-//			receiptTable.setWidthPercentage(100);
-//
-//			PdfPCell amount = new PdfPCell(new Paragraph("INR." + donation.getTotalAmount(), receiptFont));
-//			amount.setBorder(Rectangle.NO_BORDER);
-//			amount.setHorizontalAlignment(Element.ALIGN_LEFT);
-//			amount.setVerticalAlignment(Element.ALIGN_TOP);
-//			receiptTable1.addCell(amount);
-//
-//			PdfPCell sign = new PdfPCell(new Paragraph("Naandi Foudation", receiptFont));
-//			sign.setBorder(Rectangle.NO_BORDER);
-////			sign.setSpacingAfter(50f);
-//			sign.setHorizontalAlignment(Element.ALIGN_RIGHT);
-//			receiptTable1.addCell(sign);
-//			document.add(receiptTable1);
-//			document.add(new Paragraph("\n"));
-//			document.add(new Paragraph("\n"));
-//			document.add(new Paragraph("\n"));
-//			Paragraph signParagraph = new Paragraph("(Authorized Signatory)",
-//					FontFactory.getFont(FontFactory.HELVETICA_BOLD));
-//			signParagraph.setAlignment(Element.ALIGN_RIGHT);
-//			document.add(signParagraph);
-
-//		Image signatureImage = Image.getInstance(getClass().getResource("C:/Users/HP/Pictures/I_R_multi_1610868885987.jpg"));
-//		signatureImage.scaleToFit(100, 100); // Adjust size as needed
-//		signatureImage.setAlignment(Element.ALIGN_RIGHT);
-//		document.add(signatureImage);
 			document.add(new Paragraph("\n"));
 			document.add(new Paragraph("\n"));
 

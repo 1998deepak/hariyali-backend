@@ -11,6 +11,8 @@ import com.hariyali.entity.UserPackages;
 
 import lombok.Data;
 
+import javax.persistence.Column;
+
 @Data
 
 @JsonInclude(value = Include.NON_NULL)
@@ -39,6 +41,7 @@ public class DonationDTO {
 	private Date modifiedDate;
 
 	private String modifiedBy;
+	public String orderId;
 	
 	private List<PaymentInfo> paymentInfo;
 
@@ -54,4 +57,7 @@ public class DonationDTO {
 	
 	private List<UserPackages> userPackage;
 
+	private String approvalStatus;
+	private String remark;
+	private Boolean isApproved = Boolean.FALSE;
 }

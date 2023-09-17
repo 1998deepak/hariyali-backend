@@ -1,23 +1,19 @@
 package com.hariyali.serviceimpl;
 
-import com.ccavenue.security.AesCryptUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.hariyali.EnumConstants;
-import com.hariyali.config.JwtHelper;
-import com.hariyali.dao.UserDao;
-import com.hariyali.dao.paymentGateway.PaymentGatewayConfigurationDao;
-import com.hariyali.dto.*;
-import com.hariyali.entity.*;
-import com.hariyali.entity.paymentGateway.PaymentGatewayConfiguration;
-import com.hariyali.exceptions.CustomException;
-import com.hariyali.exceptions.CustomExceptionNodataFound;
-import com.hariyali.repository.*;
-import com.hariyali.service.DonationService;
-import com.hariyali.service.ReceiptService;
-import com.hariyali.utils.EmailService;
-import lombok.extern.slf4j.Slf4j;
+import static java.util.Objects.isNull;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+
+import java.util.Base64;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -27,14 +23,42 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.ccavenue.security.AesCryptUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.hariyali.EnumConstants;
+import com.hariyali.config.JwtHelper;
+import com.hariyali.dao.UserDao;
+import com.hariyali.dao.paymentGateway.PaymentGatewayConfigurationDao;
+import com.hariyali.dto.AddressDTO;
+import com.hariyali.dto.ApiResponse;
+import com.hariyali.dto.DonationDTO;
+import com.hariyali.dto.DonorListRequestDTO;
+import com.hariyali.dto.UsersDTO;
+import com.hariyali.entity.Address;
+import com.hariyali.entity.Donation;
+import com.hariyali.entity.PaymentInfo;
+import com.hariyali.entity.Receipt;
+import com.hariyali.entity.Recipient;
+import com.hariyali.entity.UserPackages;
+import com.hariyali.entity.Users;
+import com.hariyali.entity.paymentGateway.PaymentGatewayConfiguration;
+import com.hariyali.exceptions.CustomException;
+import com.hariyali.exceptions.CustomExceptionNodataFound;
+import com.hariyali.repository.AddressRepository;
+import com.hariyali.repository.DonationRepository;
+import com.hariyali.repository.PaymentInfoRepository;
+import com.hariyali.repository.ReceiptRepository;
+import com.hariyali.repository.RecipientRepository;
+import com.hariyali.repository.UserPackageRepository;
+import com.hariyali.repository.UsersRepository;
+import com.hariyali.service.DonationService;
+import com.hariyali.service.ReceiptService;
+import com.hariyali.utils.CommonService;
+import com.hariyali.utils.EmailService;
 
-import static java.util.Objects.isNull;
-import static java.util.Optional.*;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -86,6 +110,9 @@ public class DonationServiceImpl implements DonationService {
 	@Autowired
 	private PaymentGatewayConfigurationDao gatewayConfigurationDao;
 
+	@Autowired
+	CommonService commonService;
+
 	@Override
 	public ApiResponse<Object> getDonationById(int donationId) {
 		ApiResponse<Object> response = new ApiResponse<>();
@@ -124,16 +151,19 @@ public class DonationServiceImpl implements DonationService {
 		if ("offline".equalsIgnoreCase(donationDTO.getDonationMode())) {
 			// send email to user
 			response = saveDonationOffline(usersDTO, usersServiceImpl.generateDonorId(), request);
+			DonationDTO donationDto=response.getData();
 			Receipt receipt = receiptRepository.getUserReceipt(userEmail.getUserId());
 			int donationCnt=donationRepository.donationCount(userEmail.getEmailId());
 				if(donationCnt>1) {
-					emailService.sendReceiptWithAttachment(userEmail.getEmailId(), receipt);
+					emailService.sendReceiptWithAttachment(userEmail,donationDto.getOrderId(), receipt);
+					emailService.sendThankyouLatter(userEmail.getEmailId(), userEmail);
 				}
 				else {
 //					emailService.sendEmailWithAttachment(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content,
 //							receipt.getReciept_Path(), userEmail);
 					emailService.sendWelcomeLetterMail(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content, userEmail);
-					emailService.sendReceiptWithAttachment(userEmail.getEmailId(),receipt);
+					emailService.sendReceiptWithAttachment(userEmail,donationDto.getOrderId(),receipt);
+					emailService.sendThankyouLatter(userEmail.getEmailId(), userEmail);
 				}
 
 			return response;
@@ -180,7 +210,7 @@ public class DonationServiceImpl implements DonationService {
 		}
 
 		Users user = modelMapper.map(usersDTO, Users.class);
-
+		Long orderId = Calendar.getInstance().getTimeInMillis();
 		// set user to donation and save donation
 		if (user.getDonations() != null) {
 			for (Donation donation : user.getDonations()) {
@@ -189,6 +219,12 @@ public class DonationServiceImpl implements DonationService {
 				donation.setCreatedBy(createdBy);
 				donation.setUsers(resulEntity);
 				donation.setModifiedBy(createdBy);
+				donation.setOrderId(orderId.toString());
+				donation.setApprovalStatus("Approved");
+				donation.setApprovalDate(newDate);
+				donation.setIsApproved(true);
+				donation.setDonationDate(newDate);
+				donation.setDonationCode(commonService.createDonarIDORDonationID("donation"));
 				Donation resultdonation = donationRepository.save(donation);
 				//resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
 				donationDTO.setDonationId(donation.getDonationId());
@@ -197,6 +233,8 @@ public class DonationServiceImpl implements DonationService {
 				donationDTO.setDonationEvent(donation.getDonationEvent());
 				donationDTO.setDonationMode(donation.getDonationMode());
 				donationDTO.setTotalAmount(donation.getTotalAmount());
+				donationDTO.setOrderId(donation.getOrderId());
+				donationDTO.setDonationCode(donation.getDonationCode());
 				// set paymentInfo donation wise
 				if (donation.getPaymentInfo() != null) {
 					for (PaymentInfo paymentInfo : donation.getPaymentInfo()) {
@@ -278,6 +316,7 @@ public class DonationServiceImpl implements DonationService {
 		if (paymentStatus.equalsIgnoreCase("Completed")) {
 			receiptService.generateReceipt(donation);
 		}
+		response.setData(donationDTO);
 		response.setStatus(EnumConstants.SUCCESS);
 		response.setStatusCode(HttpStatus.OK.value());
 		response.setMessage("Donation added Successfully..!");
@@ -287,14 +326,7 @@ public class DonationServiceImpl implements DonationService {
 	public ApiResponse<DonationDTO> saveDonation(UsersDTO usersDTO, String donarID, HttpServletRequest request) {
 		ApiResponse<DonationDTO> response = new ApiResponse<>();
 
-//		JsonNode userNode = jsonNode.get("user");
-//		JsonNode donationNode = userNode.get("donations");
-//		JsonNode donationString = jsonNode.at("/user/donations/0/recipient");
 		String donationMode = usersDTO.getDonations().get(0).getDonationMode();
-
-//		if (donationNode == null) {
-//			throw new CustomException("Donation not found");
-//		}
 
 		Users resulEntity = usersRepository.findByEmailId(usersDTO.getEmailId());
 
@@ -334,9 +366,20 @@ public class DonationServiceImpl implements DonationService {
 				donation.setUsers(resulEntity);
 				donation.setModifiedBy(createdBy);
 				donation.setOrderId(orderId.toString());
+				donation.setDonationDate(newDate);
+				donation.setDonationCode(commonService.createDonarIDORDonationID("donation"));
 				totalAmount = donation.getTotalAmount();
+				if(usersDTO.getMeconnectId() != "" && usersDTO.getSource() != "") {
+					Base64.Decoder decoder = Base64.getDecoder();
+			        Integer meconnectId = Integer.parseInt(new String(decoder.decode(usersDTO.getMeconnectId())));
+			        String source =new String(decoder.decode(usersDTO.getSource()));
+			        donation.setMeconnectId(meconnectId);
+			        donation.setSource(source);
+			    }
+				donation.setApprovalStatus("Pending");
+				donation.setIsApproved(false);
 				donation = donationRepository.save(donation);
-				Donation resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
+				//Donation resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
 
 				// set paymentInfo donation wise
 //				if (donation.getPaymentInfo() != null) {
@@ -358,7 +401,7 @@ public class DonationServiceImpl implements DonationService {
 						userPackage.setModifiedDate(newDate);
 						userPackage.setCreatedBy(createdBy);
 						userPackage.setModifiedBy(createdBy);
-						userPackage.setUserDonation(resultdonation);
+						userPackage.setUserDonation(donation);
 						userPackageRepository.save(userPackage);
 					}
 				}
@@ -370,11 +413,11 @@ public class DonationServiceImpl implements DonationService {
 						recipient.setModifiedDate(newDate);
 						recipient.setCreatedBy(createdBy);
 						recipient.setModifiedBy(createdBy);
-						recipient.setUserDonation(resultdonation);
+						recipient.setUserDonation(donation);
 						recipientRepository.save(recipient);
 
 						Recipient resultRecipient = recipientRepository
-								.getRecipientByDonationId(resultdonation.getDonationId());
+								.getRecipientByDonationId(donation.getDonationId());
 
 						// set recipient to address and save address
 						if (recipient.getAddress() != null) {
