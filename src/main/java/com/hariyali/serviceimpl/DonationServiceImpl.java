@@ -55,6 +55,7 @@ import com.hariyali.repository.UserPackageRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.DonationService;
 import com.hariyali.service.ReceiptService;
+import com.hariyali.utils.CommonService;
 import com.hariyali.utils.EmailService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -108,6 +109,9 @@ public class DonationServiceImpl implements DonationService {
 	
 	@Autowired
 	private PaymentGatewayConfigurationDao gatewayConfigurationDao;
+
+	@Autowired
+	CommonService commonService;
 
 	@Override
 	public ApiResponse<Object> getDonationById(int donationId) {
@@ -216,6 +220,10 @@ public class DonationServiceImpl implements DonationService {
 				donation.setUsers(resulEntity);
 				donation.setModifiedBy(createdBy);
 				donation.setOrderId(orderId.toString());
+				donation.setApprovalStatus("Approved");
+				donation.setIsApproved(true);
+				donation.setDonationDate(newDate);
+				donation.setDonationCode(commonService.createDonarIDORDonationID("donation"));
 				Donation resultdonation = donationRepository.save(donation);
 				//resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
 				donationDTO.setDonationId(donation.getDonationId());
@@ -225,6 +233,7 @@ public class DonationServiceImpl implements DonationService {
 				donationDTO.setDonationMode(donation.getDonationMode());
 				donationDTO.setTotalAmount(donation.getTotalAmount());
 				donationDTO.setOrderId(donation.getOrderId());
+				donationDTO.setDonationCode(donation.getDonationCode());
 				// set paymentInfo donation wise
 				if (donation.getPaymentInfo() != null) {
 					for (PaymentInfo paymentInfo : donation.getPaymentInfo()) {
@@ -316,14 +325,7 @@ public class DonationServiceImpl implements DonationService {
 	public ApiResponse<DonationDTO> saveDonation(UsersDTO usersDTO, String donarID, HttpServletRequest request) {
 		ApiResponse<DonationDTO> response = new ApiResponse<>();
 
-//		JsonNode userNode = jsonNode.get("user");
-//		JsonNode donationNode = userNode.get("donations");
-//		JsonNode donationString = jsonNode.at("/user/donations/0/recipient");
 		String donationMode = usersDTO.getDonations().get(0).getDonationMode();
-
-//		if (donationNode == null) {
-//			throw new CustomException("Donation not found");
-//		}
 
 		Users resulEntity = usersRepository.findByEmailId(usersDTO.getEmailId());
 
@@ -363,14 +365,18 @@ public class DonationServiceImpl implements DonationService {
 				donation.setUsers(resulEntity);
 				donation.setModifiedBy(createdBy);
 				donation.setOrderId(orderId.toString());
+				donation.setDonationDate(newDate);
+				donation.setDonationCode(commonService.createDonarIDORDonationID("donation"));
 				totalAmount = donation.getTotalAmount();
 				if(usersDTO.getMeconnectId() != "" && usersDTO.getSource() != "") {
-					Base64.Decoder decoder = Base64.getDecoder();   
+					Base64.Decoder decoder = Base64.getDecoder();
 			        Integer meconnectId = Integer.parseInt(new String(decoder.decode(usersDTO.getMeconnectId())));
 			        String source =new String(decoder.decode(usersDTO.getSource()));
-			        donation.setMeconnectId(meconnectId);	
+			        donation.setMeconnectId(meconnectId);
 			        donation.setSource(source);
 			    }
+				donation.setApprovalStatus("Pending");
+				donation.setIsApproved(false);
 				donation = donationRepository.save(donation);
 				//Donation resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
 
