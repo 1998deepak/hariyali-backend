@@ -221,6 +221,7 @@ public class DonationServiceImpl implements DonationService {
 				donation.setModifiedBy(createdBy);
 				donation.setOrderId(orderId.toString());
 				donation.setApprovalStatus("Approved");
+				donation.setApprovalDate(newDate);
 				donation.setIsApproved(true);
 				donation.setDonationDate(newDate);
 				donation.setDonationCode(commonService.createDonarIDORDonationID("donation"));
