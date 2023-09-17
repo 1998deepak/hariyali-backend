@@ -16,7 +16,7 @@ import java.util.Date;
  * @date 13/09/2023
  */
 @Entity
-@Table(name = "tbl_Account")
+@Table(name = "tbl_bank")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -29,7 +29,7 @@ public class Bank {
     Integer id;
 
     @Column(name = "bank_name")
-    String accountHolderName;
+    String bankName;
 
     @Column(name = "isactive")
     Boolean isActive;

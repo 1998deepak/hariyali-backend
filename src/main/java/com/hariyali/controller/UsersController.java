@@ -136,6 +136,13 @@ public class UsersController {
 		return new ResponseEntity<>(usersService.getUserPersonalDetails(email), HttpStatus.OK);
 	}
 	
+	// method to get user donar Id by email
+		@GetMapping("/getUserDonarId/{email}")
+		public ResponseEntity<ApiResponse<String>> getUserDonarId(@PathVariable String email) {
+			email = encryptionDecryptionUtil.decrypt(email);
+			return new ResponseEntity<>(usersService.getUserDonarId(email), HttpStatus.OK);
+		}
+	
 	// method to get existing user details by email
 		@GetMapping("/getExistingUser/{email}")
 		public ResponseEntity<ApiResponse<UsersDTO>> getExistingUserPersonalDetails(@PathVariable String email) {
@@ -221,6 +228,7 @@ public class UsersController {
 	@GetMapping("/getUserPersonalDetailsbyEmailOrDonorId")
 	public ResponseEntity<ApiResponse<UsersDTO>> getUserPersonalDetailsbyEmailOrDonorId(
 			@RequestParam String emailOrDonorId) {
+		emailOrDonorId = encryptionDecryptionUtil.decrypt(emailOrDonorId);
 		return new ResponseEntity<>(usersService.getUserPersonalDetailsbyEmailOrDonorId(emailOrDonorId), HttpStatus.OK);
 	}
 
@@ -229,6 +237,12 @@ public class UsersController {
 		List<String> donarId = usersService.getAllDonarId();
 		return ResponseEntity.ok(donarId);
 	}
+	
+    @GetMapping("/getAllUserId")
+    public ResponseEntity<List<String>> getAllUserIds() {
+        List<String> donarId = usersService.getAllUserIds();
+        return ResponseEntity.ok(donarId);
+    }
 
 	@PostMapping("/sendOtp")
 	public ResponseEntity<?> sendOtp(@RequestParam String email){
