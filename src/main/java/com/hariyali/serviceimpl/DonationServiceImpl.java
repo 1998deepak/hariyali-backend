@@ -55,6 +55,7 @@ import com.hariyali.repository.UserPackageRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.DonationService;
 import com.hariyali.service.ReceiptService;
+import com.hariyali.utils.AES;
 import com.hariyali.utils.CommonService;
 import com.hariyali.utils.EmailService;
 
@@ -103,10 +104,10 @@ public class DonationServiceImpl implements DonationService {
 
 	@Autowired
 	PaymentInfoRepository paymentIfoRepository;
-	
+
 	@Autowired
 	ReceiptRepository receiptRepository;
-	
+
 	@Autowired
 	private PaymentGatewayConfigurationDao gatewayConfigurationDao;
 
@@ -139,32 +140,34 @@ public class DonationServiceImpl implements DonationService {
 
 		Users userEmail = this.usersRepository.findByEmailId(usersDTO.getEmailId());
 
-		ofNullable(userEmail).orElseThrow(()->new CustomExceptionNodataFound("Given Email Id doesn't exists"));
+		ofNullable(userEmail).orElseThrow(() -> new CustomExceptionNodataFound("Given Email Id doesn't exists"));
 
-		ofNullable(usersDTO.getDonations()).orElseThrow(()->new CustomException("Donation not found"));
+		ofNullable(usersDTO.getDonations()).orElseThrow(() -> new CustomException("Donation not found"));
 //		if (donationNode == null) {
 //			throw new CustomException("Donation not found");
 //		}
-		DonationDTO donationDTO = Optional.of(usersDTO.getDonations()).filter(donationDTOS -> !donationDTOS.isEmpty()).get().stream().findFirst().get();
-		Optional.of(donationDTO).map(DonationDTO::getDonationMode).orElseThrow(()->new CustomException("Donation mode not selected"));
+		DonationDTO donationDTO = Optional.of(usersDTO.getDonations()).filter(donationDTOS -> !donationDTOS.isEmpty())
+				.get().stream().findFirst().get();
+		Optional.of(donationDTO).map(DonationDTO::getDonationMode)
+				.orElseThrow(() -> new CustomException("Donation mode not selected"));
 
 		if ("offline".equalsIgnoreCase(donationDTO.getDonationMode())) {
 			// send email to user
 			response = saveDonationOffline(usersDTO, usersServiceImpl.generateDonorId(), request);
-			DonationDTO donationDto=response.getData();
+			DonationDTO donationDto = response.getData();
 			Receipt receipt = receiptRepository.getUserReceipt(userEmail.getUserId());
-			int donationCnt=donationRepository.donationCount(userEmail.getEmailId());
-				if(donationCnt>1) {
-					emailService.sendReceiptWithAttachment(userEmail,donationDto.getOrderId(), receipt);
-					emailService.sendThankyouLatter(userEmail.getEmailId(), userEmail);
-				}
-				else {
+			int donationCnt = donationRepository.donationCount(userEmail.getEmailId());
+			if (donationCnt > 1) {
+				emailService.sendReceiptWithAttachment(userEmail, donationDto.getOrderId(), receipt);
+				emailService.sendThankyouLatter(userEmail.getEmailId(), userEmail);
+			} else {
 //					emailService.sendEmailWithAttachment(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content,
 //							receipt.getReciept_Path(), userEmail);
-					emailService.sendWelcomeLetterMail(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content, userEmail);
-					emailService.sendReceiptWithAttachment(userEmail,donationDto.getOrderId(),receipt);
-					emailService.sendThankyouLatter(userEmail.getEmailId(), userEmail);
-				}
+				emailService.sendWelcomeLetterMail(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content,
+						userEmail);
+				emailService.sendReceiptWithAttachment(userEmail, donationDto.getOrderId(), receipt);
+				emailService.sendThankyouLatter(userEmail.getEmailId(), userEmail);
+			}
 
 			return response;
 		} else if ("online".equalsIgnoreCase(donationDTO.getDonationMode())) {
@@ -181,13 +184,14 @@ public class DonationServiceImpl implements DonationService {
 //		JsonNode userNode = jsonNode.get("user");
 //		JsonNode donationNode = userNode.get("donations");
 //		JsonNode donationString = jsonNode.at("/user/donations/0/recipient");
-		String donationMode = usersDTO.getDonations().get(0).getDonationMode();;
+		String donationMode = usersDTO.getDonations().get(0).getDonationMode();
+		;
 		DonationDTO donationDTO = new DonationDTO();
 
 		Users resulEntity = usersRepository.findByEmailId(usersDTO.getEmailId());
 
-		ofNullable(resulEntity).orElseThrow(() -> new CustomExceptionNodataFound(
-				"User with " + usersDTO.getEmailId() + " is not Registered"));
+		ofNullable(resulEntity).orElseThrow(
+				() -> new CustomExceptionNodataFound("User with " + usersDTO.getEmailId() + " is not Registered"));
 
 		Date newDate = new Date();
 
@@ -226,7 +230,8 @@ public class DonationServiceImpl implements DonationService {
 				donation.setDonationDate(newDate);
 				donation.setDonationCode(commonService.createDonarIDORDonationID("donation"));
 				Donation resultdonation = donationRepository.save(donation);
-				//resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
+				// resultdonation =
+				// donationRepository.getDonationByUserID(resulEntity.getUserId());
 				donationDTO.setDonationId(donation.getDonationId());
 				donationDTO.setCreatedDate(newDate);
 				donationDTO.setCreatedBy(createdBy);
@@ -287,7 +292,8 @@ public class DonationServiceImpl implements DonationService {
 								addressRepository.save(address);
 							}
 
-							if (!isNull(usersDTO.getDonations().get(0).getRecipient()) && !usersDTO.getDonations().get(0).getRecipient().isEmpty()) {
+							if (!isNull(usersDTO.getDonations().get(0).getRecipient())
+									&& !usersDTO.getDonations().get(0).getRecipient().isEmpty()) {
 								for (Recipient recipients : usersDTO.getDonations().get(0).getRecipient()) {
 									String recipientEmail = recipients.getEmailId();
 
@@ -297,12 +303,13 @@ public class DonationServiceImpl implements DonationService {
 
 										continue;
 									}
-									usersServiceImpl.saveUser(toUsersDTO(recipients), donarID, request, true, createdBy, donationMode);
+									usersServiceImpl.saveUser(toUsersDTO(recipients), donarID, request, true, createdBy,
+											donationMode);
 								}
 							}
 						}
 						Users recipientData = usersRepository.findByEmailId(recipient.getEmailId());
-						emailService.sendGiftingLetterEmail(recipientData,donation.getDonationEvent());
+						emailService.sendGiftingLetterEmail(recipientData, donation.getDonationEvent());
 
 					}
 
@@ -311,8 +318,7 @@ public class DonationServiceImpl implements DonationService {
 			}
 		}
 		Donation donation = donationRepository.getById(donationDTO.getDonationId());
-		String paymentStatus = paymentIfoRepository
-				.getPaymentStatusByDonationId(donationDTO.getDonationId());
+		String paymentStatus = paymentIfoRepository.getPaymentStatusByDonationId(donationDTO.getDonationId());
 		if (paymentStatus.equalsIgnoreCase("Completed")) {
 			receiptService.generateReceipt(donation);
 		}
@@ -331,8 +337,7 @@ public class DonationServiceImpl implements DonationService {
 		Users resulEntity = usersRepository.findByEmailId(usersDTO.getEmailId());
 
 		if (resulEntity == null)
-			throw new CustomExceptionNodataFound(
-					"User with " + usersDTO.getEmailId() + " is not Registered");
+			throw new CustomExceptionNodataFound("User with " + usersDTO.getEmailId() + " is not Registered");
 
 		Date newDate = new Date();
 
@@ -369,17 +374,24 @@ public class DonationServiceImpl implements DonationService {
 				donation.setDonationDate(newDate);
 				donation.setDonationCode(commonService.createDonarIDORDonationID("donation"));
 				totalAmount = donation.getTotalAmount();
-				if(usersDTO.getMeconnectId() != "" && usersDTO.getSource() != "") {
-					Base64.Decoder decoder = Base64.getDecoder();
-			        Integer meconnectId = Integer.parseInt(new String(decoder.decode(usersDTO.getMeconnectId())));
-			        String source =new String(decoder.decode(usersDTO.getSource()));
-			        donation.setMeconnectId(meconnectId);
-			        donation.setSource(source);
-			    }
+
+				if (usersDTO.getMeconnectId() != null) {
+					if (!usersDTO.getMeconnectId().isEmpty()) {
+						String str = AES.decrypt(usersDTO.getMeconnectId());
+						String[] parts = str.split("\\|\\|");
+						System.out.println(parts[0] + ":=>" + parts[1]);
+
+						Integer meconnectId = Integer.parseInt(parts[0]);
+						String source = new String(parts[1]);
+						donation.setMeconnectId(meconnectId);
+						donation.setSource(source);
+					}
+				}
 				donation.setApprovalStatus("Pending");
 				donation.setIsApproved(false);
 				donation = donationRepository.save(donation);
-				//Donation resultdonation = donationRepository.getDonationByUserID(resulEntity.getUserId());
+				// Donation resultdonation =
+				// donationRepository.getDonationByUserID(resulEntity.getUserId());
 
 				// set paymentInfo donation wise
 //				if (donation.getPaymentInfo() != null) {
@@ -430,7 +442,8 @@ public class DonationServiceImpl implements DonationService {
 								addressRepository.save(address);
 							}
 
-							if (!isNull(usersDTO.getDonations().get(0).getRecipient()) && !usersDTO.getDonations().get(0).getRecipient().isEmpty()) {
+							if (!isNull(usersDTO.getDonations().get(0).getRecipient())
+									&& !usersDTO.getDonations().get(0).getRecipient().isEmpty()) {
 								for (Recipient recipients : usersDTO.getDonations().get(0).getRecipient()) {
 									String recipientEmail = recipients.getEmailId();
 
@@ -441,7 +454,8 @@ public class DonationServiceImpl implements DonationService {
 										continue;
 									}
 
-									usersServiceImpl.saveUser(toUsersDTO(recipients), donarID, request, true, createdBy, donationMode);
+									usersServiceImpl.saveUser(toUsersDTO(recipients), donarID, request, true, createdBy,
+											donationMode);
 								}
 							}
 						}
@@ -455,7 +469,6 @@ public class DonationServiceImpl implements DonationService {
 			// get payment gateway configuration for CCAVENUE
 			PaymentGatewayConfiguration gatewayConfiguration = gatewayConfigurationDao.findByGatewayName("CCAVENUE");
 
-
 //			Users userPay = new GsonBuilder().create().fromJson(usersRepository.getUserByEmail(user.getEmailId()).toString(), Users.class);
 
 			String queryString = "";
@@ -467,16 +480,18 @@ public class DonationServiceImpl implements DonationService {
 			queryString += "&cancel_url=" + gatewayConfiguration.getRedirectURL();
 			queryString += "&language=EN";
 			queryString += "&billing_name=" + usersDTO.getFirstName() + " " + usersDTO.getLastName();
-			AddressDTO address = ofNullable(usersDTO.getAddress()).stream().filter(addresses -> !addresses.isEmpty()).findFirst().get().get(0);
-			queryString += "&billing_address=" + address.getStreet1() + " " + address.getStreet2() + " "+ address.getStreet3();
+			AddressDTO address = ofNullable(usersDTO.getAddress()).stream().filter(addresses -> !addresses.isEmpty())
+					.findFirst().get().get(0);
+			queryString += "&billing_address=" + address.getStreet1() + " " + address.getStreet2() + " "
+					+ address.getStreet3();
 			queryString += "&billing_city=" + address.getCity();
 			queryString += "&billing_state=" + address.getState();
 			queryString += "&billing_zip=" + address.getPostalCode();
 			queryString += "&billing_country=" + address.getCountry();
 			queryString += "&billing_tel=" + usersDTO.getMobileNo();
 			queryString += "&billing_email=" + usersDTO.getEmailId();
-			AesCryptUtil aesUtil=new AesCryptUtil (gatewayConfiguration.getAccessKey());
-			String encRequest=aesUtil.encrypt(queryString);
+			AesCryptUtil aesUtil = new AesCryptUtil(gatewayConfiguration.getAccessKey());
+			String encRequest = aesUtil.encrypt(queryString);
 			response.setAccessCode(gatewayConfiguration.getAccessCode());
 			response.setEncRequest(encRequest);
 			response.setGatewayURL(gatewayConfiguration.getGatewayURL());
@@ -487,14 +502,13 @@ public class DonationServiceImpl implements DonationService {
 		return response;
 	}
 
-	private UsersDTO toUsersDTO(Recipient recipients){
+	private UsersDTO toUsersDTO(Recipient recipients) {
 		UsersDTO usersDTO = new UsersDTO();
 		usersDTO.setFirstName(recipients.getFirstName());
 		usersDTO.setLastName(recipients.getLastName());
 		usersDTO.setMobileNo(recipients.getMobileNo());
 		usersDTO.setEmailId(recipients.getEmailId());
-		usersDTO.setAddress(ofNullable(recipients.getAddress())
-				.stream()
+		usersDTO.setAddress(ofNullable(recipients.getAddress()).stream()
 				.map(address -> modelMapper.map(address, AddressDTO.class)).collect(Collectors.toList()));
 		return usersDTO;
 	}
@@ -506,22 +520,18 @@ public class DonationServiceImpl implements DonationService {
 				+ "Best regards,\n" + "Hariyai Team";
 
 		ApiResponse<DonationDTO> response = new ApiResponse<>();
-		ofNullable(usersDTO).orElseThrow(()->new CustomException("No data found In User"));
+		ofNullable(usersDTO).orElseThrow(() -> new CustomException("No data found In User"));
 
 		Users resulEntity = usersRepository.findByEmailId(usersDTO.getEmailId());
 
-		ofNullable(resulEntity).orElseThrow(()-> new CustomExceptionNodataFound(
-				"User with " + usersDTO.getEmailId() + " is not Registered"));
-
+		ofNullable(resulEntity).orElseThrow(
+				() -> new CustomExceptionNodataFound("User with " + usersDTO.getEmailId() + " is not Registered"));
 
 		Date newDate = new Date();
 		String token = request.getHeader("Authorization");
 		String userName = jwtHelper.getUsernameFromToken(token.substring(7));
 
-
-		Gson gson = new GsonBuilder()
-	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
-	            .create();
+		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
 		Users user = modelMapper.map(usersDTO, Users.class);
 
 		Users userToken = usersRepository.findByEmailId(userName);
