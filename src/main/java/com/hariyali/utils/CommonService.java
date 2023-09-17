@@ -74,8 +74,8 @@ public class CommonService {
 
 	}
 
-	public String getDonarFileFilePath(String donorId) {
-		String folderName = FILE_PATH + "\\" + donorId;
+	public String getDonarFileFilePath(String emailID) {
+		String folderName = FILE_PATH + "\\" + emailID;
 		// Create the folder
 		Path folder = Paths.get(folderName);
 		System.out.println("folder Path=>" + folder);
