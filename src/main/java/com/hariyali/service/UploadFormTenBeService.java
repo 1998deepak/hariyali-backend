@@ -11,4 +11,5 @@ public interface UploadFormTenBeService {
 
 	void uploadFormTenBe(MultipartFile file, HttpServletRequest request) throws IOException;
 
+
 }
