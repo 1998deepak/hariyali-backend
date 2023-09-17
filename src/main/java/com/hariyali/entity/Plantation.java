@@ -1,19 +1,8 @@
 package com.hariyali.entity;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import javax.persistence.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,21 +17,31 @@ public class Plantation {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "plantation_id")
 	private long id;
-	private String season;
-	private Integer finacialYear;
-	private Long noOfplantsPlanted;
-	private String state;
-	private String district;
-	private String village;
-	private String plot;
-	private LocalDate plantationDate;
-	private Float lattitude;
-	private Float longitude;
-	private String status;
+
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinColumn(name = "plantation_master_id", referencedColumnName = "id")
+	PlantationMaster plantationMaster;
+
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinColumn(name = "donation_id", referencedColumnName = "donation_id")
+	Donation donation;
 
 	@ManyToOne
-	@JoinColumn(name = "user_package_id") // Foreign key column in Plantation table
+	@JoinColumn(name = "user_package_id", referencedColumnName = "package_id")
 	private UserPackages userPackages;
+
+	@Column(name = "no_Of_Plants_Planted")
+	Integer noOfPlantsPlanted;
+
+	@Column(name = "year1_report")
+	Boolean year1Report;
+
+	@Column(name = "year2_report")
+	Boolean year2Report;
+
+	@Column(name = "created_by")
+	String createdBy;
 
 }

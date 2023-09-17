@@ -290,4 +290,5 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	String getLastDonorID();
   
 	Users findByPanCard(String panCard);
+
 }
