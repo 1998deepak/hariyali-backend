@@ -924,7 +924,11 @@ public class UsersServiceImpl implements UsersService {
 					throw new CustomExceptionNodataFound("Please select Dontation Type");
 				}
 				try {
-					String paymentStatus = d.getPaymentInfo().get(0).getPaymentStatus();
+
+					//added bug fix because payment info was getting null
+					String paymentStatus = paymentIfoRepository.getPaymentStatusByDonationId(d.getDonationId());
+//					String paymentStatus = d.getPaymentInfo().get(0).getPaymentStatus();
+
 					if ("Completed".equalsIgnoreCase(paymentStatus) || "Success".equalsIgnoreCase(paymentStatus)) {
 						receiptService.generateReceipt(d);
 						Receipt receipt = receiptRepository.getUserReceipt(user.getUserId());
