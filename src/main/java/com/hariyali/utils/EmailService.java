@@ -28,6 +28,9 @@ public class EmailService {
 
 	@Autowired
 	CCServiceEmailAPI ccServiceEmailAPI;
+	
+	@Autowired
+	private CommonService commonService;
 
 	public void sendSimpleEmail(String toEmail, String subject, String body) {
 		ccServiceEmailAPI.sendCorrespondenceMail(toEmail, subject, body);
@@ -98,8 +101,10 @@ public class EmailService {
 	public void sendThankyouLatter(String to, Users user) {
 		String subject = EnumConstants.thankYouLetterSuject;
 		String body = EnumConstants.thankYouLetterContent;
-		Path path = Paths.get("thankyouletter.jpg");
-		FileSystemResource resource = new FileSystemResource("/src/main/resources/thankyouletter.jpg");
+//		Path path = Paths.get("thankyouletter.jpg");
+		String str=commonService.getFilePath("thankyouletter.jpg");
+		System.out.println("File path=>"+str);
+		FileSystemResource resource = new FileSystemResource(str==null?"":str);
 		File[] files = { resource.getFile() };
 		String mailBody = String.format(body, user.getFirstName());
 		ccServiceEmailAPI.sendCorrespondenceMailwithAttachment(user.getEmailId(), subject, mailBody, files);
