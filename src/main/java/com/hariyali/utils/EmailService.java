@@ -99,7 +99,7 @@ public class EmailService {
 		String subject = EnumConstants.thankYouLetterSuject;
 		String body = EnumConstants.thankYouLetterContent;
 		Path path = Paths.get("thankyouletter.jpg");
-		FileSystemResource resource = new FileSystemResource(path.toString());
+		FileSystemResource resource = new FileSystemResource("/src/main/resources/thankyouletter.jpg");
 		File[] files = { resource.getFile() };
 		String mailBody = String.format(body, user.getFirstName());
 		ccServiceEmailAPI.sendCorrespondenceMailwithAttachment(user.getEmailId(), subject, mailBody, files);
