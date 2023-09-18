@@ -1,6 +1,7 @@
 package com.hariyali.utils;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -98,13 +99,21 @@ public class EmailService {
 				"Project Hariyali –Receipt towards your donation", mailBody, files);
 	}
 
-	public void sendThankyouLatter(String to, Users user) {
+	public void sendThankyouLatter(String to, Users user) throws IOException {
 		String subject = EnumConstants.thankYouLetterSuject;
 		String body = EnumConstants.thankYouLetterContent;
-//		Path path = Paths.get("thankyouletter.jpg");
-		String str=commonService.getFilePath("thankyouletter.jpg");
-		System.out.println("File path=>"+str);
-		FileSystemResource resource = new FileSystemResource(str==null?"":str);
+		Path path1 = Paths.get("/hariyali/src/main/resources/thankyouletter.jpg");
+		System.out.println("first 1=>"+path1.toAbsolutePath());
+		System.out.println("first 2=>"+path1.toRealPath());
+		
+		
+		Path path2 = Paths.get("thankyouletter.jpg");
+		System.out.println("second 1=>"+path2.toAbsolutePath());
+		System.out.println("second 2=>"+path2.toRealPath());
+		Path path3 = Paths.get("hariyali/src/main/resources/thankyouletter.jpg");
+		System.out.println("tired 1=>"+path3.toAbsolutePath());
+		System.out.println("tired 2=>"+path3.toRealPath());
+		FileSystemResource resource = new FileSystemResource("/hariyali/src/main/resources/thankyouletter.jpg");
 		File[] files = { resource.getFile() };
 		String mailBody = String.format(body, user.getFirstName());
 		ccServiceEmailAPI.sendCorrespondenceMailwithAttachment(user.getEmailId(), subject, mailBody, files);
