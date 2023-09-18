@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,8 @@ public class EmailService {
 
 	@Autowired
 	CCServiceEmailAPI ccServiceEmailAPI;
+	@Value("${filepath.thankspath}")
+	String thankpath;
 	
 	@Autowired
 	private CommonService commonService;
@@ -102,33 +105,10 @@ public class EmailService {
 	public void sendThankyouLatter(String to, Users user) {
 		String subject = EnumConstants.thankYouLetterSuject;
 		String body = EnumConstants.thankYouLetterContent;
-		Path path1 = Paths.get("/hariyali/src/main/resources/thankyouletter.jpg");
-		System.out.println("first 1=>"+path1.toAbsolutePath());
-		try {
-			System.out.println("first 2=>"+path1.toRealPath());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	
+		System.out.println("thankpath=>"+thankpath);
 		
-		
-		Path path2 = Paths.get("thankyouletter.jpg");
-		System.out.println("second 1=>"+path2.toAbsolutePath());
-		try {
-			System.out.println("second 2=>"+path2.toRealPath());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		Path path3 = Paths.get("hariyali/src/main/resources/thankyouletter.jpg");
-		System.out.println("tired 1=>"+path3.toAbsolutePath());
-		try {
-			System.out.println("tired 2=>"+path3.toRealPath());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		FileSystemResource resource = new FileSystemResource("///src/main/resources/thankyouletter.jpg");
+		FileSystemResource resource = new FileSystemResource(thankpath+"thankyouletter.jpg");
 		File[] files = { resource.getFile() };
 		String mailBody = String.format(body, user.getFirstName());
 		ccServiceEmailAPI.sendCorrespondenceMailwithAttachment(user.getEmailId(), subject, mailBody, files);

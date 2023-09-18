@@ -90,6 +90,8 @@ gogreen:
     
 cloudStorage:
   - bucket: bkt-modernization-uatx-hariyali
-    mountPath: /DonationReceipt        
+    mountPath: /DonationReceipt   
+filepath:
+          thankspath: ${project.basedir}/src/main/resources/        
         
         
