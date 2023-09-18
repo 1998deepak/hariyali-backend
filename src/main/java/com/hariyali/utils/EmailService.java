@@ -8,6 +8,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 
 import com.hariyali.EnumConstants;
+import com.hariyali.dto.PlantationMasterDTO;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.Receipt;
 import com.hariyali.entity.Users;
@@ -119,5 +120,26 @@ public class EmailService {
 		String mailBody = String.format(content,user.getFirstName(), strDate, donation.getOrderId());
 		ccServiceEmailAPI.sendCorrespondenceMail(user.getEmailId(), subject, mailBody);
 
+	}
+	
+	public void sendPlantationMail(Users user,PlantationMasterDTO plantationMasterDTO) {
+		String subject="Project Hariyali – Plantation Report";
+		String content="Dear %s<br>"
+				+ "Thank you for contributing to Project Hariyali.<br>"
+				+ "For the donation dated,%s,%d plant/s have been planted in %s %s in the village %s, in the state of %s.<br>"
+				+ "&nbsp;&nbsp; We will be taking care of your plants for two years to ensure  its optimum growth and nurturing in the initial years for 100% survival of the sapling.  <br>"
+				+ "	Thanks once again.<br>"
+				+ "<br>"
+				+ "Team Hariyali <br>"
+				+ "Mahindra Foundation<br>"
+				+ "3rd Floor, Cecil Court, Near Regal Cinema,<br>"
+				+ "Mahakavi Bushan Marg, Colaba, <br>"
+				+ "Mumbai, Maharashtra – 400001<br>"
+				+"<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
+				+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
+		SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
+        String year = yearFormat.format(plantationMasterDTO.getPlantationDate());
+		String mailBody = String.format(content,user.getFirstName(),plantationMasterDTO.getPlantationDateString(), plantationMasterDTO.getNoOfPlantsPlanted(), plantationMasterDTO.getSeason(),year,plantationMasterDTO.getVillage(),plantationMasterDTO.getState());
+		ccServiceEmailAPI.sendCorrespondenceMail(user.getEmailId(), subject, mailBody);
 	}
 }
