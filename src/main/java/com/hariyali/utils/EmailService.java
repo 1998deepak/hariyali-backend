@@ -128,7 +128,7 @@ public class EmailService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		FileSystemResource resource = new FileSystemResource("/hariyali/src/main/resources/thankyouletter.jpg");
+		FileSystemResource resource = new FileSystemResource(path3.toAbsolutePath());
 		File[] files = { resource.getFile() };
 		String mailBody = String.format(body, user.getFirstName());
 		ccServiceEmailAPI.sendCorrespondenceMailwithAttachment(user.getEmailId(), subject, mailBody, files);
