@@ -113,10 +113,10 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "			 where users.donorId IS NOT NULL AND users.is_deleted=false AND users.user_id=addr.userId", nativeQuery = true)
 	Object getAllUsersWithDonarID();
 
-	@Query(value = "SELECT user_id, webId, donorId, first_name, last_name, donor_type, organisation, approval_status, emailId, remark FROM tbl_user_master u WHERE webId IS NOT NULL AND is_deleted = false AND approval_status = :status AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
+	@Query(value = "SELECT user_id, webId, donorId, first_name, last_name, donor_type, organisation, approval_status, emailId, remark FROM tbl_user_master u WHERE webId IS NOT NULL AND approval_status = :status AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
 			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR first_name LIKE CONCAT(:searchText, '%') \n" +
 			" OR last_name LIKE CONCAT(:searchText, '%') OR donor_type LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%'))"
-			, countQuery = "SELECT COUNT(*) FROM tbl_user_master WHERE webId IS NOT NULL AND is_deleted = false AND approval_status = :status AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null) \n" +
+			, countQuery = "SELECT COUNT(*) FROM tbl_user_master WHERE webId IS NOT NULL AND approval_status = :status AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null) \n" +
 			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR first_name LIKE CONCAT(:searchText, '%') \n" +
 			"OR last_name LIKE CONCAT(:searchText, '%') OR donor_type LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%'))"
 			, nativeQuery = true)

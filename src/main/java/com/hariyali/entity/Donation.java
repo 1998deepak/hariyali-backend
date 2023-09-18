@@ -106,7 +106,7 @@ public class Donation implements Serializable {
 	private String source;
 
 	@Column(name = "meconnect_id")
-	private int meconnectId;
+	private Integer meconnectId;
 
 	@Column(name = "approval_status")
 	private String approvalStatus;
