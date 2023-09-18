@@ -106,7 +106,6 @@ public class EmailService {
 		String subject = EnumConstants.thankYouLetterSuject;
 		String body = EnumConstants.thankYouLetterContent;
 	
-		System.out.println("thankpath=>"+thankpath);
 		
 		FileSystemResource resource = new FileSystemResource("..\\..\\src\\main\\resources\\thankyouletter.jpg");
 		File[] files = { resource.getFile() };
