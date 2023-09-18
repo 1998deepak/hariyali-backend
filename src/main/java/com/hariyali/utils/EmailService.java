@@ -30,8 +30,8 @@ public class EmailService {
 
 	@Autowired
 	CCServiceEmailAPI ccServiceEmailAPI;
-	@Value("${filepath.thankspath}")
-	String thankpath;
+//	@Value("${filepath.thankspath}")
+//	String thankpath;
 	
 	@Autowired
 	private CommonService commonService;
@@ -108,7 +108,7 @@ public class EmailService {
 	
 		System.out.println("thankpath=>"+thankpath);
 		
-		FileSystemResource resource = new FileSystemResource(thankpath+"thankyouletter.jpg");
+		FileSystemResource resource = new FileSystemResource("..\\..\\src\\main\\resources\\thankyouletter.jpg");
 		File[] files = { resource.getFile() };
 		String mailBody = String.format(body, user.getFirstName());
 		ccServiceEmailAPI.sendCorrespondenceMailwithAttachment(user.getEmailId(), subject, mailBody, files);
