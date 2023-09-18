@@ -102,15 +102,15 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "                                            'organisation',users.organisation,\r\n"
 			+ "                                            'status',users.status,\r\n"
 			+ "												 'citizenship', users.citizenship,\r\n"
-			+ "                                               'country',users.country,\r\n"
+			+ "                                               'country',addr.country,\r\n"
 			+ "											'paymentDate',(select  date(MAX(payment_date)) \r\n"
 			+ "			 										from tbl_donation d\r\n"
 			+ "			 										inner join\r\n"
 			+ "			 										tbl_payment_info p ON d.donation_id=p.donationId\r\n"
 			+ "			 										where d.userId=users.user_id)\r\n"
 			+ "			 							)\r\n" + "			 			)\r\n"
-			+ "			 			 AS 'Result'\r\n" + "			 FROM tbl_user_master as users\r\n"
-			+ "			 where users.donorId IS NOT NULL AND users.is_deleted=false", nativeQuery = true)
+			+ "			 			 AS 'Result'\r\n" + "			 FROM tbl_user_master as users,tbl_address as addr\r\n"
+			+ "			 where users.donorId IS NOT NULL AND users.is_deleted=false AND users.user_id=addr.userId", nativeQuery = true)
 	Object getAllUsersWithDonarID();
 
 	@Query(value = "SELECT user_id, webId, donorId, first_name, last_name, donor_type, organisation, approval_status, emailId, remark FROM tbl_user_master u WHERE webId IS NOT NULL AND is_deleted = false AND approval_status = :status AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
@@ -283,8 +283,15 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	@Query(value ="SELECT r.donorId as donorId FROM tbl_user_master r WHERE r.donorId IS NOT NULL",nativeQuery = true)
 	List<String> getAllDonorId();
 	
+	@Query(value ="SELECT r.emailId as emailId FROM tbl_user_master r WHERE r.emailId IS NOT NULL",nativeQuery = true)
+    List<String> getAllEmailId();
+
+	
 	@Query(value="select * from tbl_user_master as users left join tbl_donation as donation on users.user_id=donation.userId where donation.donation_id=?",nativeQuery=true)
 	public Users getUserByDonationId(int donationId);
+	
+	@Query(value="select donorId from tbl_user_master where emailId=?",nativeQuery = true)
+	public String findDonarIdByEmail(String email);
 
 	@Query(value = "SELECT donorId FROM tbl_user_master ORDER BY donorId DESC LIMIT 1",nativeQuery = true)
 	String getLastDonorID();

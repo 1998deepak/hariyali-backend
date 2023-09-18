@@ -67,6 +67,7 @@ import com.hariyali.repository.UserPackageRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.ReceiptService;
 import com.hariyali.service.UsersService;
+import com.hariyali.utils.AES;
 import com.hariyali.utils.CommonService;
 import com.hariyali.utils.EmailService;
 
@@ -219,6 +220,17 @@ public class UsersServiceImpl implements UsersService {
 
 		of(donationDTO).map(DonationDTO::getDonationMode).filter(mode -> donationMode.equalsIgnoreCase(mode))
 				.orElseThrow(() -> new CustomException("Invalid donation mode"));
+		if (usersDTO.getMeconnectId() != null) {
+			if (!usersDTO.getMeconnectId().isEmpty()) {
+				try {
+					String str = AES.decrypt(usersDTO.getMeconnectId());
+					String[] parts = str.split("\\|\\|");
+					System.out.println(parts[0] + ":=>" + parts[1]);
+				} catch (Exception e) {
+					throw new CustomException("Something went wrong...!");
+				}
+			}
+		}
 
 	}
 
@@ -477,7 +489,9 @@ public class UsersServiceImpl implements UsersService {
 		Object user = usersRepository.getUserPersonalDetailsByEmail(email);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
-		Gson gson = new Gson();
+		Gson gson = new GsonBuilder()
+	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
+	            .create();
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
 
@@ -489,6 +503,8 @@ public class UsersServiceImpl implements UsersService {
 		return response;
 
 	}
+	
+	
 
 	@Override
 	public ApiResponse<UsersDTO> getUserPersonalDetailsByDonorId(String donorId) {
@@ -933,7 +949,11 @@ public class UsersServiceImpl implements UsersService {
 					log.error("Exception = {}", e);
 					throw new CustomException("Payment not perform.");
 				}
+				d.setApprovalDate(new Date());
+				d.setIsApproved(true);
+				d.setApprovalStatus("Approved");
 			}
+			donationRepository.saveAll(donations);
 		}
 
 		return recipientEmail;
@@ -1086,6 +1106,30 @@ public class UsersServiceImpl implements UsersService {
 	@Override
 	public List<String> getAllDonarId() {
 		return usersRepository.getAllDonorId();
+	}
+	
+	@Override
+	public List<String> getAllUserIds(){
+        List<String> userIds = usersRepository.getAllDonorId();
+        userIds.addAll(usersRepository.getAllEmailId());
+        return userIds;
+    }
+
+	
+	@Override
+	public ApiResponse<String> getUserDonarId(String email) {
+		ApiResponse<String> response = new ApiResponse<>();
+		String donarId = usersRepository.findDonarIdByEmail(email);
+		if (donarId == null)
+			throw new CustomExceptionNodataFound("No user found with emailId " + email);
+		if (donarId != null) {
+			response.setData(donarId);
+			response.setStatus(EnumConstants.SUCCESS);
+			response.setStatusCode(HttpStatus.OK.value());
+			response.setMessage("Donar Id found Successfully");
+		}
+		return response;
+
 	}
 
 }
