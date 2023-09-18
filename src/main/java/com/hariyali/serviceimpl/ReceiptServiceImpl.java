@@ -126,7 +126,9 @@ public class ReceiptServiceImpl implements ReceiptService {
 
 			Image logo = null;
 			try {
-				logo = Image.getInstance("src/main/resources/Logo.jpg");
+				//logo = Image.getInstance("src/main/resources/Logo.jpg");
+				Path path = Paths.get("Logo.jpg");
+				logo = Image.getInstance(path.toString());
 				logo.scaleToFit(500, 50); // Adjust the size as needed
 				logo.setAlignment(Element.ALIGN_CENTER);
 			} catch (MalformedURLException e) {
