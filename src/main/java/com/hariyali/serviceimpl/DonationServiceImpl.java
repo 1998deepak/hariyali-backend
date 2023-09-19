@@ -1,14 +1,11 @@
 package com.hariyali.serviceimpl;
 
+import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
-import java.util.Base64;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -484,8 +481,8 @@ public class DonationServiceImpl implements DonationService {
 			queryString += "&cancel_url=" + gatewayConfiguration.getRedirectURL();
 			queryString += "&language=EN";
 			queryString += "&billing_name=" + usersDTO.getFirstName() + " " + usersDTO.getLastName();
-			AddressDTO address = ofNullable(usersDTO.getAddress()).stream().filter(addresses -> !addresses.isEmpty())
-					.findFirst().get().get(0);
+			AddressDTO address = ofNullable(usersDTO.getAddress()).orElse(resulEntity.getAddress().stream().map(addressEntity -> modelMapper.map(addressEntity, AddressDTO.class)).collect(Collectors.toList())).stream()
+					.findFirst().get();
 			queryString += "&billing_address=" + address.getStreet1() + " " + address.getStreet2() + " "
 					+ address.getStreet3();
 			queryString += "&billing_city=" + address.getCity();
