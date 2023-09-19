@@ -150,7 +150,7 @@ public class DonationServiceImpl implements DonationService {
 
 		if ("offline".equalsIgnoreCase(donationDTO.getDonationMode())) {
 			// send email to user
-			response = saveDonationOffline(usersDTO, usersServiceImpl.generateDonorId(), request);
+			response = saveDonationOffline(usersDTO, commonService.createDonarIDORDonationID("user"), request);
 			DonationDTO donationDto = response.getData();
 			Receipt receipt = receiptRepository.getUserReceipt(userEmail.getUserId());
 			int donationCnt = donationRepository.donationCount(userEmail.getEmailId());

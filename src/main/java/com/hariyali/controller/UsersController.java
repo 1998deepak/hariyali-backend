@@ -6,8 +6,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import com.hariyali.dto.*;
-import com.hariyali.exceptions.TooManyRequestException;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +22,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hariyali.EnumConstants;
+import com.hariyali.dto.ApiRequest;
+import com.hariyali.dto.ApiResponse;
+import com.hariyali.dto.DonorListRequestDTO;
+import com.hariyali.dto.LoginRequest;
+import com.hariyali.dto.UsersDTO;
 import com.hariyali.entity.OtpModel;
-import com.hariyali.entity.Users;
 import com.hariyali.exceptions.CustomException;
 import com.hariyali.exceptions.CustomExceptionNodataFound;
 import com.hariyali.repository.OtpRepository;
@@ -33,16 +36,6 @@ import com.hariyali.service.JwtService;
 import com.hariyali.service.UsersService;
 import com.hariyali.serviceimpl.OtpServiceImpl;
 import com.hariyali.utils.EncryptionDecryptionUtil;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -174,23 +167,29 @@ public class UsersController {
 //		return ResponseEntity.ok("OTP verified successfully");
 //	}
 
-	@PostMapping("/forgetPassword")
-	public ResponseEntity<?> forgetPassword(@RequestBody UsersDTO usersDTO, HttpSession session)
+	@PostMapping("/forgetPassword/{donorId}")
+	public ResponseEntity<?> forgetPassword(@PathVariable String donorId, HttpSession session)
 			throws JsonProcessingException {
-//		ApiRequest apiRequest = new ApiRequest(formData);
-		return new ResponseEntity<>(usersService.forgetPassword(usersDTO.getDonorId().toString(), session),
+		return new ResponseEntity<>(usersService.forgetPassword(donorId, session),
 				HttpStatus.OK);
 	}
 
-//	@PostMapping("/verifyOtp")
-//	public ResponseEntity<ApiResponse<String>> verifyOtp(@RequestBody String formData, HttpSession session,
-//			HttpServletRequest request) throws JsonProcessingException {
-//		System.out.println("formData = " + formData);
-//
-//		ApiRequest apiRequest = new ApiRequest(formData);
-//		return new ResponseEntity<>(usersService.verifyOtp(apiRequest.getFormData().toString(), session, request),
-//				HttpStatus.OK);
-//	}
+	@PostMapping("/verifyForgotOtp")
+	public ResponseEntity<ApiResponse<String>> verifyForgotOtp(@RequestBody String formData, HttpSession session,
+			HttpServletRequest request) throws JsonProcessingException {
+		System.out.println("formData = " + formData);
+
+		ApiRequest apiRequest = new ApiRequest(formData);
+		return new ResponseEntity<>(usersService.verifyForgotOtp(apiRequest.getFormData().toString(), session, request),
+				HttpStatus.OK);
+	}
+	
+	@PostMapping("/setUserNewPassword")
+	public ResponseEntity<?> setUserNewPassword(@RequestBody LoginRequest formData, HttpSession session)
+			throws JsonProcessingException {
+		return new ResponseEntity<>(this.usersService.setUserNewPassword(formData, session),
+				HttpStatus.OK);
+	}
 
 	@PostMapping("/accountActivate")
 	public ResponseEntity<ApiResponse<String>> accountActivate(@RequestBody String formData, HttpSession session)
@@ -217,13 +216,7 @@ public class UsersController {
 				HttpStatus.OK);
 	}
 
-	@PostMapping("forgetUserPassword")
-	public ResponseEntity<?> forgetUserPasswordByEmail(@RequestBody LoginRequest formData, HttpSession session)
-			throws JsonProcessingException {
-//		ApiRequest apiRequest = new ApiRequest(formData);
-		return new ResponseEntity<>(this.usersService.forgetUserPassword(formData, session),
-				HttpStatus.OK);
-	}
+	
 
 	@GetMapping("/getUserPersonalDetailsbyEmailOrDonorId")
 	public ResponseEntity<ApiResponse<UsersDTO>> getUserPersonalDetailsbyEmailOrDonorId(
