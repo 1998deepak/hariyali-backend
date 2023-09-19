@@ -30,6 +30,8 @@ public interface EnumConstants {
 	public static final String certificateNumber = "Cert123" + donor;
 
 	public static final String receiptNumber = "txn_23" + donor;
+	
+	public static final String OTHERTHANINDIA = "OTHERTHANINDIA";
 
 	public static final String GIFTING_MSG_BODY ="<p>Dear %s,</p>" 
 			+ "Greetings from Project Hariyali.<br>"

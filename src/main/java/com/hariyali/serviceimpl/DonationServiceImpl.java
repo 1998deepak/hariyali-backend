@@ -180,10 +180,7 @@ public class DonationServiceImpl implements DonationService {
 	private ApiResponse<DonationDTO> saveDonationOffline(UsersDTO usersDTO, String donarID,
 			HttpServletRequest request) {
 		ApiResponse<DonationDTO> response = new ApiResponse<>();
-//		String donationId = null;
-//		JsonNode userNode = jsonNode.get("user");
-//		JsonNode donationNode = userNode.get("donations");
-//		JsonNode donationString = jsonNode.at("/user/donations/0/recipient");
+
 		String donationMode = usersDTO.getDonations().get(0).getDonationMode();
 		;
 		DonationDTO donationDTO = new DonationDTO();
@@ -464,6 +461,13 @@ public class DonationServiceImpl implements DonationService {
 
 			}
 		}
+		if(usersDTO!=null) {
+			if(!usersDTO.getCitizenship().equalsIgnoreCase("INDIA")) {
+				response.setStatus(EnumConstants.OTHERTHANINDIA);
+				response.setGatewayURL("/FcraAccount");
+				return response;
+			}
+		}
 
 		if ("online".equalsIgnoreCase(donationMode)) {
 			// get payment gateway configuration for CCAVENUE
@@ -490,6 +494,7 @@ public class DonationServiceImpl implements DonationService {
 			queryString += "&billing_country=" + address.getCountry();
 			queryString += "&billing_tel=" + usersDTO.getMobileNo();
 			queryString += "&billing_email=" + usersDTO.getEmailId();
+			log.info(queryString);
 			AesCryptUtil aesUtil = new AesCryptUtil(gatewayConfiguration.getAccessKey());
 			String encRequest = aesUtil.encrypt(queryString);
 			response.setAccessCode(gatewayConfiguration.getAccessCode());

@@ -220,15 +220,17 @@ public class UsersServiceImpl implements UsersService {
 
 		of(donationDTO).map(DonationDTO::getDonationMode).filter(mode -> donationMode.equalsIgnoreCase(mode))
 				.orElseThrow(() -> new CustomException("Invalid donation mode"));
-		if(!usersDTO.getMeconnectId().isEmpty()) {
-            try {
-                String str=AES.decrypt(usersDTO.getMeconnectId());
-                String[] parts = str.split("\\|\\|");
-                System.out.println(parts[0]+":=>"+parts[1]);
-            }catch(Exception e) {
-                 throw new CustomException("Something went wrong...!");
-            }
-        }
+		if (usersDTO.getMeconnectId() != null) {
+			if (!usersDTO.getMeconnectId().isEmpty()) {
+				try {
+					String str = AES.decrypt(usersDTO.getMeconnectId());
+					String[] parts = str.split("\\|\\|");
+					System.out.println(parts[0] + ":=>" + parts[1]);
+				} catch (Exception e) {
+					throw new CustomException("Something went wrong...!");
+				}
+			}
+		}
 
 	}
 
@@ -249,6 +251,7 @@ public class UsersServiceImpl implements UsersService {
 		ApiResponse<DonationDTO> apiResponse = donationServiceImpl.saveUserDonations(usersDTO, donarID, request);
 		response.setGatewayURL(apiResponse.getGatewayURL());
 		response.setEncRequest(apiResponse.getEncRequest());
+		response.setStatus(apiResponse.getStatus());
 		response.setAccessCode(apiResponse.getAccessCode());
 		return response;
 
@@ -922,7 +925,11 @@ public class UsersServiceImpl implements UsersService {
 					throw new CustomExceptionNodataFound("Please select Dontation Type");
 				}
 				try {
-					String paymentStatus = d.getPaymentInfo().get(0).getPaymentStatus();
+
+					//added bug fix because payment info was getting null
+					String paymentStatus = paymentIfoRepository.getPaymentStatusByDonationId(d.getDonationId());
+//					String paymentStatus = d.getPaymentInfo().get(0).getPaymentStatus();
+
 					if ("Completed".equalsIgnoreCase(paymentStatus) || "Success".equalsIgnoreCase(paymentStatus)) {
 						receiptService.generateReceipt(d);
 						Receipt receipt = receiptRepository.getUserReceipt(user.getUserId());
