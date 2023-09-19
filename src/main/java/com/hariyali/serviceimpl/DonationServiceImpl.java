@@ -458,10 +458,16 @@ public class DonationServiceImpl implements DonationService {
 						}
 					}
 				}
-
 			}
 		}
-
+		if(usersDTO!=null) {
+			if(!usersDTO.getCitizenship().equalsIgnoreCase("INDIA")) {
+				response.setStatus(EnumConstants.SUCCESS);
+				response.setGatewayURL("https://hariyali-dev.m-devsecops.com/");
+				return response;
+			}
+		}
+		
 		if ("online".equalsIgnoreCase(donationMode)) {
 			// get payment gateway configuration for CCAVENUE
 			PaymentGatewayConfiguration gatewayConfiguration = gatewayConfigurationDao.findByGatewayName("CCAVENUE");
