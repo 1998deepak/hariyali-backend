@@ -1,9 +1,13 @@
 package com.hariyali.utils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +30,11 @@ public class EmailService {
 
 	@Autowired
 	CCServiceEmailAPI ccServiceEmailAPI;
+//	@Value("${filepath.thankspath}")
+//	String thankpath;
+	
+	@Autowired
+	private CommonService commonService;
 
 	public void sendSimpleEmail(String toEmail, String subject, String body) {
 		ccServiceEmailAPI.sendCorrespondenceMail(toEmail, subject, body);
@@ -96,7 +105,9 @@ public class EmailService {
 	public void sendThankyouLatter(String to, Users user) {
 		String subject = EnumConstants.thankYouLetterSuject;
 		String body = EnumConstants.thankYouLetterContent;
-		FileSystemResource resource = new FileSystemResource("src/main/resources/thankyouletter.jpg");
+	
+		
+		FileSystemResource resource = new FileSystemResource("..\\..\\src\\main\\resources\\thankyouletter.jpg");
 		File[] files = { resource.getFile() };
 		String mailBody = String.format(body, user.getFirstName());
 		ccServiceEmailAPI.sendCorrespondenceMailwithAttachment(user.getEmailId(), subject, mailBody, files);

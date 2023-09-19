@@ -156,9 +156,11 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 			}
 			// Call Gogreen API
 			if (paymentInfo.getPaymentStatus().equalsIgnoreCase("SUCCESS")) {
-				if ((donation.getMeconnectId() != 0) && (!donation.getSource().isEmpty())) {
-					String result = updateGogreenDetails(donation);
-					System.out.println("update gogreen=>" + result);
+				if (donation.getMeconnectId() != null && donation.getSource() != null) {
+					if ((donation.getMeconnectId() != 0) && (!donation.getSource().isEmpty())) {
+						String result = updateGogreenDetails(donation);
+						System.out.println("update gogreen=>" + result);
+					}
 				}
 			}
 		}
