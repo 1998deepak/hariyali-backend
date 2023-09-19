@@ -461,6 +461,13 @@ public class DonationServiceImpl implements DonationService {
 
 			}
 		}
+		if(usersDTO!=null) {
+			if(!usersDTO.getCitizenship().equalsIgnoreCase("INDIA")) {
+				response.setStatus(EnumConstants.OTHERTHANINDIA);
+				response.setGatewayURL("/FcraAccount");
+				return response;
+			}
+		}
 
 		if ("online".equalsIgnoreCase(donationMode)) {
 			// get payment gateway configuration for CCAVENUE

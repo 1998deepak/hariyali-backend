@@ -251,6 +251,7 @@ public class UsersServiceImpl implements UsersService {
 		ApiResponse<DonationDTO> apiResponse = donationServiceImpl.saveUserDonations(usersDTO, donarID, request);
 		response.setGatewayURL(apiResponse.getGatewayURL());
 		response.setEncRequest(apiResponse.getEncRequest());
+		response.setStatus(apiResponse.getStatus());
 		response.setAccessCode(apiResponse.getAccessCode());
 		return response;
 
