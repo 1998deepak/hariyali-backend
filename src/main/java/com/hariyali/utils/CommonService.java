@@ -1,6 +1,8 @@
 package com.hariyali.utils;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -119,4 +121,26 @@ public class CommonService {
 		documentRepository.save(document);
 
 	}
+
+	public String getFilePath(String fileName) {
+		ClassLoader classLoader = CommonService.class.getClassLoader();
+		URL resourceUrl = classLoader.getResource(fileName); // Specify the resource path
+
+		if (resourceUrl != null) {
+			// Convert the resource URL to a file
+			File file = new File(resourceUrl.getFile());
+
+			if (file.exists()) {
+				// Now you can work with the file
+				System.out.println("File exists: " + file.getAbsolutePath());
+				return file.getAbsolutePath();
+			} else {
+				System.out.println("File does not exist.");
+			}
+		} else {
+			System.out.println("Resource not found.");
+		}
+		return null;
+	}
+	
 }
