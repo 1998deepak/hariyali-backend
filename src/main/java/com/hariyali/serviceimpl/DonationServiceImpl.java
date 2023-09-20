@@ -458,11 +458,20 @@ public class DonationServiceImpl implements DonationService {
 
 			}
 		}
-		if(usersDTO!=null) {
-			if(!usersDTO.getCitizenship().equalsIgnoreCase("INDIA")) {
-				response.setStatus(EnumConstants.OTHERTHANINDIA);
-				response.setGatewayURL("/FcraAccount");
-				return response;
+		if (usersDTO != null) {
+			Users users = usersRepository.findByUserId(usersDTO.getUserId());
+			if (users != null) {
+				if (!users.getCitizenship().equalsIgnoreCase("INDIA")) {
+					response.setStatus(EnumConstants.OTHERTHANINDIA);
+					response.setGatewayURL("/FcraAccount");
+					return response;
+				}
+			} else {
+				if (!usersDTO.getCitizenship().equalsIgnoreCase("INDIA")) {
+					response.setStatus(EnumConstants.OTHERTHANINDIA);
+					response.setGatewayURL("/FcraAccount");
+					return response;
+				}
 			}
 		}
 
@@ -481,8 +490,9 @@ public class DonationServiceImpl implements DonationService {
 			queryString += "&cancel_url=" + gatewayConfiguration.getRedirectURL();
 			queryString += "&language=EN";
 			queryString += "&billing_name=" + usersDTO.getFirstName() + " " + usersDTO.getLastName();
-			AddressDTO address = ofNullable(usersDTO.getAddress()).orElse(resulEntity.getAddress().stream().map(addressEntity -> modelMapper.map(addressEntity, AddressDTO.class)).collect(Collectors.toList())).stream()
-					.findFirst().get();
+			AddressDTO address = ofNullable(usersDTO.getAddress()).orElse(resulEntity.getAddress().stream()
+					.map(addressEntity -> modelMapper.map(addressEntity, AddressDTO.class))
+					.collect(Collectors.toList())).stream().findFirst().get();
 			queryString += "&billing_address=" + address.getStreet1() + " " + address.getStreet2() + " "
 					+ address.getStreet3();
 			queryString += "&billing_city=" + address.getCity();
