@@ -60,4 +60,7 @@ public class DonationDTO {
 	private String approvalStatus;
 	private String remark;
 	private Boolean isApproved = Boolean.FALSE;
+	
+	private String giftContent;
+
 }

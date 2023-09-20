@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="SpecialDay" pageWidth="830" pageHeight="595" orientation="Landscape" columnWidth="810" leftMargin="10" rightMargin="10" topMargin="10" bottomMargin="10" uuid="bbfc2848-55cc-4188-a883-bdd00c9f68fa">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="RecipientName" class="java.lang.String"/>
+	<parameter name="donarName" class="java.lang.String"/>
+	<parameter name="messageContent" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="575" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<image>
+				<reportElement x="50" y="10" width="690" height="530" uuid="bb6b0a9f-b334-448e-83e2-a60f19357dc3">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<imageExpression><![CDATA["D:/Others/Hariyali 16-09-2023/Report Design/Birthday.jpg"]]></imageExpression>
+			</image>
+			<line>
+				<reportElement x="190" y="210" width="440" height="1" uuid="194fbc6e-b4c5-4025-9595-b976458bc8e4"/>
+			</line>
+			<textField>
+				<reportElement x="200" y="160" width="430" height="50" uuid="0409d223-c81b-4bed-89fd-8a0c475da769"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="26" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Dear " +$P{RecipientName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="110" y="227" width="600" height="100" uuid="3614a2c7-8a91-46a0-83bd-e8d092a4b8e1"/>
+				<textElement textAlignment="Center">
+					<font size="20"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{messageContent}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="110" y="327" width="600" height="62" uuid="02676204-9b7e-4cbf-9ca7-586b8cc80500"/>
+				<textElement textAlignment="Center">
+					<font size="20"/>
+				</textElement>
+				<text><![CDATA[Thanks to this plantation, we are now hopeful of leaving behind a greener & healthier environment for future generations]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="313" y="389" width="180" height="30" uuid="951e8411-a245-40ae-86fd-a194695f8c79"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="20"/>
+				</textElement>
+				<text><![CDATA[By]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="200" y="450" width="410" height="30" uuid="87d732e1-46c0-44f9-94c1-31819a4f9d16"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="20"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{donarName}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>
