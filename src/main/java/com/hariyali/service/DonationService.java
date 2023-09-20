@@ -1,6 +1,7 @@
 package com.hariyali.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,4 +38,7 @@ public interface DonationService {
 	 * @return
 	 */
 	public ApiResponse<List<DonationDTO>> getDonations(DonorListRequestDTO requestDTO);
+	
+	public Map<String,String> generateCertificate(String recipientName ,String messageContent,String donationEvent,String donarName,String emailID);
+
 }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="simpleDonationFinal" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f7b8211f-28c7-4119-8dd3-6e1baa052eaf">
+	<parameter name="FirstName" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="490" splitType="Stretch">
+			<image>
+				<reportElement x="1" y="5" width="800" height="480" uuid="9a49b6de-47d6-4af6-bdc6-56b708a57a9a"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<imageExpression><![CDATA["C:/Users/DELL/Downloads/Picture5.png"]]></imageExpression>
+			</image>
+			<rectangle>
+				<reportElement x="340" y="230" width="330" height="50" uuid="fcca9878-9ee6-498d-b823-70b57e4681df"/>
+			</rectangle>
+			<textField>
+				<reportElement x="350" y="235" width="309" height="40" forecolor="#120303" uuid="5ca7714c-adb3-468d-b8d4-27a911ce251c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="26" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Dear "+$P{FirstName}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>
