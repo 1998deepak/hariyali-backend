@@ -25,8 +25,6 @@ import java.io.IOException;
 public class PaymentIntegrationController {
 
 
-    @Value("${frontend.redirect-url}")
-    String frontendRedirectURL;
 
     @Autowired
     PaymentIntegrationService service;
@@ -34,6 +32,7 @@ public class PaymentIntegrationController {
     @RequestMapping(value = "/api/v1/paymentIntegration", method = RequestMethod.POST)
     public void paymentIntegration(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String encryptedResponse = request.getParameter("encResp");
-        response.sendRedirect(frontendRedirectURL + service.confirmPayment(encryptedResponse).getData());
+
+        response.sendRedirect(service.confirmPayment(encryptedResponse).getData());
     }
 }

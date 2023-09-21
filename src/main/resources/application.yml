@@ -49,6 +49,8 @@ jwt:
 # change this url as deployed environment
 frontend:
         redirect-url: http://localhost:3000/OnlineDonation?orderId=
+        user:
+            redirect-url: http://localhost:3000/user/donation?orderId=
 project.basedir:         
 receipt:
         receiptPath: C:\\Workspace\\DonationReceipt
