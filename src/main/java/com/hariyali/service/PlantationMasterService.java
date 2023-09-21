@@ -43,6 +43,8 @@ public interface PlantationMasterService {
      */
     public ByteArrayInputStream export(PlantationMasterDTO dto);
 
+    public ByteArrayInputStream downloadTemplate();
+
     /**
      * service method to get all years
      * @return
