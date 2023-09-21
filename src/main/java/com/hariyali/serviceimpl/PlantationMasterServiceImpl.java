@@ -138,7 +138,9 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
                     Date approvalDate = cal.getTime();
 
                     List<UserPackages> userPackages = userPackageRepository.findAllPendingPackages(fromDate, toDate, approvalDate);
-                    toPlantations(userPackages, value, userName);
+                    if(!isNull(userPackages) && !userPackages.isEmpty()) {
+                        toPlantations(userPackages, value, userName);
+                    }
                 });
                 response.setStatus("Success");
                 response.setMessage("File uploaded successfully!");
@@ -155,30 +157,32 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
 
     private List<Plantation> toPlantations(List<UserPackages> userPackages, List<PlantationMaster> plantationMasters, String createdBy){
         List<UserPackages> updatedUserPackages = new ArrayList<>();
-        List<Plantation> plantationList = plantationMasters.stream().filter(data -> !userPackages.isEmpty()).map(plantationMaster -> {
+        List<Plantation> plantationList = plantationMasters.stream().map(plantationMaster -> {
             Long noOfPlantsPlanted = plantationMaster.getNoOfPlantsPlanted();
             List<Plantation> plantations = new ArrayList<>();
-            while(noOfPlantsPlanted > 0) {
+//            while(noOfPlantsPlanted > 0) {
                 for (UserPackages packages: userPackages) {
-                    if(ofNullable(packages.getPlantAllocated()).orElse(0) <= ofNullable(packages.getNoOfBouquets()).orElse(0)) {
-                        Integer allocatedPlant = 0;
-                        if (noOfPlantsPlanted - packages.getNoOfBouquets() >= 0) {
-                            allocatedPlant = packages.getNoOfBouquets();
-                            packages.setPlanted(true);
-                            sendMail(packages.getUserDonation().getUsers().getEmailId(), toDateString(plantationMaster.getPlantationDate(), "dd/MM/yyyy"));
-                        } else {
-                            packages.setPlanted(false);
-                            allocatedPlant = noOfPlantsPlanted.intValue();
-                        }
-                        noOfPlantsPlanted -= allocatedPlant;
-                        packages.setPlantAllocated(allocatedPlant);
+                    if(noOfPlantsPlanted > 0) {
+                        if (ofNullable(packages.getPlantAllocated()).orElse(0) <= ofNullable(packages.getNoOfBouquets()).orElse(0) && ofNullable(packages.getNoOfBouquets()).orElse(0) != 0) {
+                            Integer allocatedPlant = ofNullable(packages.getPlantAllocated()).orElse(0);
+                            if ((noOfPlantsPlanted - (packages.getNoOfBouquets() - allocatedPlant)) > 0) {
+                                allocatedPlant = packages.getNoOfBouquets() - allocatedPlant;
+                                packages.setPlanted(true);
+                                sendMail(packages.getUserDonation().getUsers().getEmailId(), toDateString(plantationMaster.getPlantationDate(), "dd/MM/yyyy"));
+                            } else {
+                                packages.setPlanted(false);
+                                allocatedPlant = noOfPlantsPlanted.intValue();
+                            }
+                            noOfPlantsPlanted -= allocatedPlant;
+                            packages.setPlantAllocated(allocatedPlant);
 
-                        updatedUserPackages.add(packages);
-                        plantations.add(toPlantation(packages, plantationMaster, allocatedPlant, createdBy));
-                    }//if
+                            updatedUserPackages.add(packages);
+                            plantations.add(toPlantation(packages, plantationMaster, allocatedPlant, createdBy));
+                        }//if
+                    }
                 }//for
 
-            }//while
+//            }//while
             return plantations;
         }).flatMap(Collection::stream).collect(Collectors.toList());
         if(!updatedUserPackages.isEmpty()) {
@@ -260,7 +264,7 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
         String subject = "Update about plantation";
         String bodyMessage = "your plantation is done \n and plantation date is "+ plantationDate;
         emailService.sendPlantationEmail(mailId, subject, bodyMessage);
-    }//method
+    }//methods
 
     @Override
     public ByteArrayInputStream export(PlantationMasterDTO masterDTO) {
