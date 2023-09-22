@@ -38,7 +38,7 @@ public class UploadFormTenBeServiceImpl implements UploadFormTenBeService {
 	@Value("${spring.file.path}")
 	String FILE_PATH;
 	
-//	String FILE_PATH = "D:\\Form10B\\Mount";
+//	String FILE_PATH = "C:\\Users\\admin\\Desktop\\GCP_MOUNT_AREA";
 
 	@Autowired
 	private CommonService commonService;

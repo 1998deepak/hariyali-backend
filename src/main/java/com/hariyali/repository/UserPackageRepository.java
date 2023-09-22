@@ -19,7 +19,7 @@ public interface UserPackageRepository extends JpaRepository<UserPackages, Integ
 	@Query(value = "select * from tbl_user_packages where donationId=?", nativeQuery = true)
 	public List<UserPackages> findPackageByDonationId(int donationId);
 
-	@Query(value = "SELECT * FROM tbl_user_packages p INNER JOIN tbl_Donation d ON p.donationId = d.donation_Id \n" +
+	@Query(value = "SELECT * FROM tbl_user_packages p INNER JOIN tbl_donation d ON p.donationId = d.donation_Id \n" +
 			"WHERE p.no_of_bouquets > ifNull(plant_allocated, 0) AND d.created_date BETWEEN ?1 AND ?2 AND d.is_approved = true AND d.approval_date <= ?3", nativeQuery = true)
 	public List<UserPackages> findAllPendingPackages(Date fromDate, Date toDate, Date approvalDate);
 

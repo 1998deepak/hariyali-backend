@@ -2,6 +2,7 @@ package com.hariyali.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -34,6 +35,9 @@ public class EmailService {
 //	@Value("${filepath.thankspath}")
 //	String thankpath;
 	
+	@Value("${file.path}")
+	String FILE_PATH;
+
 	@Autowired
 	private CommonService commonService;
 
@@ -106,13 +110,26 @@ public class EmailService {
 	public void sendThankyouLatter(String to, Users user) {
 		String subject = EnumConstants.thankYouLetterSuject;
 		String body = EnumConstants.thankYouLetterContent;
-	
-		
-		FileSystemResource resource = new FileSystemResource("..\\..\\src\\main\\resources\\thankyouletter.jpg");
+
+		FileSystemResource resource = null;
+		try {
+			resource = new FileSystemResource(getFileFromPath("thankyouletter.jpg").toString());
+			System.out.println("Thanks=>"+getFileFromPath("thankyouletter.jpg").toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		File[] files = { resource.getFile() };
 		String mailBody = String.format(body, user.getFirstName());
 		ccServiceEmailAPI.sendCorrespondenceMailwithAttachment(user.getEmailId(), subject, mailBody, files);
 		log.info("Mail Sent...");
+	}
+
+	public Path getFileFromPath(String filename) throws IOException {
+		
+		Path path = Paths.get(FILE_PATH+"/IMAGES/" + filename);
+		System.out.println("Path:" + path);
+		return path;
 	}
 
 	public void sendDonationRejectionMail(Users user) {

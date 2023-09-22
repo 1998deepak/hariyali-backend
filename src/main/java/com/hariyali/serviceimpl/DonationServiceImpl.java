@@ -461,16 +461,18 @@ public class DonationServiceImpl implements DonationService {
 		if (usersDTO != null) {
 			Users users = usersRepository.findByUserId(usersDTO.getUserId());
 			if (users != null) {
-				if (!users.getCitizenship().equalsIgnoreCase("INDIA")) {
+				if (!("INDIA").equalsIgnoreCase(usersDTO.getCitizenship())) {
 					response.setStatus(EnumConstants.OTHERTHANINDIA);
 					response.setGatewayURL("/FcraAccount");
 					return response;
 				}
 			} else {
-				if (!usersDTO.getCitizenship().equalsIgnoreCase("INDIA")) {
-					response.setStatus(EnumConstants.OTHERTHANINDIA);
-					response.setGatewayURL("/FcraAccount");
-					return response;
+				if (usersDTO.getCitizenship() != null) {
+					if (!("INDIA").equalsIgnoreCase(usersDTO.getCitizenship())) {
+						response.setStatus(EnumConstants.OTHERTHANINDIA);
+						response.setGatewayURL("/FcraAccount");
+						return response;
+					}
 				}
 			}
 		}
