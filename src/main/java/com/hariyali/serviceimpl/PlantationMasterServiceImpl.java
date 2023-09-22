@@ -138,7 +138,9 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
                     Date approvalDate = cal.getTime();
 
                     List<UserPackages> userPackages = userPackageRepository.findAllPendingPackages(fromDate, toDate, approvalDate);
-                    toPlantations(userPackages, value, userName);
+                    if(!isNull(userPackages) && !userPackages.isEmpty()) {
+                        toPlantations(userPackages, value, userName);
+                    }
                 });
                 response.setStatus("Success");
                 response.setMessage("File uploaded successfully!");
@@ -155,30 +157,32 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
 
     private List<Plantation> toPlantations(List<UserPackages> userPackages, List<PlantationMaster> plantationMasters, String createdBy){
         List<UserPackages> updatedUserPackages = new ArrayList<>();
-        List<Plantation> plantationList = plantationMasters.stream().filter(data -> !userPackages.isEmpty()).map(plantationMaster -> {
+        List<Plantation> plantationList = plantationMasters.stream().map(plantationMaster -> {
             Long noOfPlantsPlanted = plantationMaster.getNoOfPlantsPlanted();
             List<Plantation> plantations = new ArrayList<>();
-            while(noOfPlantsPlanted > 0) {
+//            while(noOfPlantsPlanted > 0) {
                 for (UserPackages packages: userPackages) {
-                    if(ofNullable(packages.getPlantAllocated()).orElse(0) <= ofNullable(packages.getNoOfBouquets()).orElse(0)) {
-                        Integer allocatedPlant = 0;
-                        if (noOfPlantsPlanted - packages.getNoOfBouquets() >= 0) {
-                            allocatedPlant = packages.getNoOfBouquets();
-                            packages.setPlanted(true);
-                            sendMail(packages.getUserDonation().getUsers().getEmailId(), toDateString(plantationMaster.getPlantationDate(), "dd/MM/yyyy"));
-                        } else {
-                            packages.setPlanted(false);
-                            allocatedPlant = noOfPlantsPlanted.intValue();
-                        }
-                        noOfPlantsPlanted -= allocatedPlant;
-                        packages.setPlantAllocated(allocatedPlant);
+                    if(noOfPlantsPlanted > 0) {
+                        if (ofNullable(packages.getPlantAllocated()).orElse(0) <= ofNullable(packages.getNoOfBouquets()).orElse(0) && ofNullable(packages.getNoOfBouquets()).orElse(0) != 0) {
+                            Integer allocatedPlant = ofNullable(packages.getPlantAllocated()).orElse(0);
+                            if ((noOfPlantsPlanted - (packages.getNoOfBouquets() - allocatedPlant)) > 0) {
+                                allocatedPlant = packages.getNoOfBouquets() - allocatedPlant;
+                                packages.setPlanted(true);
+                                sendMail(packages.getUserDonation().getUsers().getEmailId(), toDateString(plantationMaster.getPlantationDate(), "dd/MM/yyyy"));
+                            } else {
+                                packages.setPlanted(false);
+                                allocatedPlant = noOfPlantsPlanted.intValue();
+                            }
+                            noOfPlantsPlanted -= allocatedPlant;
+                            packages.setPlantAllocated(allocatedPlant);
 
-                        updatedUserPackages.add(packages);
-                        plantations.add(toPlantation(packages, plantationMaster, allocatedPlant, createdBy));
-                    }//if
+                            updatedUserPackages.add(packages);
+                            plantations.add(toPlantation(packages, plantationMaster, allocatedPlant, createdBy));
+                        }//if
+                    }
                 }//for
 
-            }//while
+//            }//while
             return plantations;
         }).flatMap(Collection::stream).collect(Collectors.toList());
         if(!updatedUserPackages.isEmpty()) {
@@ -260,7 +264,7 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
         String subject = "Update about plantation";
         String bodyMessage = "your plantation is done \n and plantation date is "+ plantationDate;
         emailService.sendPlantationEmail(mailId, subject, bodyMessage);
-    }//method
+    }//methods
 
     @Override
     public ByteArrayInputStream export(PlantationMasterDTO masterDTO) {
@@ -395,6 +399,89 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
         }
         return null;
     }//method
+
+    @Override
+    public ByteArrayInputStream downloadTemplate() {
+        Workbook workbook = new SXSSFWorkbook();
+
+        try {
+            Sheet sheet = workbook.createSheet("User Plant Report ");
+
+            Row row = sheet.createRow(0);
+            CellStyle style = workbook.createCellStyle();
+            XSSFFont font = (XSSFFont) workbook.createFont();
+            font.setBold(true);
+            font.setFontHeight(12);
+            style.setFont(font);
+
+            // Set the background color directly (YELLOW)
+            style.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
+            style.setFillPattern((short) FillPatternType.SOLID_FOREGROUND.ordinal());
+
+            Cell cell = row.createCell(0);
+            cell.setCellValue("State");
+            sheet.autoSizeColumn(0);
+            cell.setCellStyle(style);
+
+            cell = row.createCell(1);
+            cell.setCellValue("District");
+            sheet.autoSizeColumn(1);
+            cell.setCellStyle(style);
+
+            cell = row.createCell(2);
+            cell.setCellValue("City");
+            sheet.autoSizeColumn(2);
+            cell.setCellStyle(style);
+
+            cell = row.createCell(3);
+            cell.setCellValue("Season");
+            sheet.autoSizeColumn(3);
+            cell.setCellStyle(style);
+
+            cell = row.createCell(4);
+            cell.setCellValue("Plot");
+            sheet.autoSizeColumn(4);
+            cell.setCellStyle(style);
+
+            cell = row.createCell(5);
+            cell.setCellValue("NoOfPlantsPlanted");
+            sheet.autoSizeColumn(5);
+            cell.setCellStyle(style);
+
+            cell = row.createCell(6);
+            cell.setCellValue("Plantation Date");
+            sheet.autoSizeColumn(6);
+            cell.setCellStyle(style);
+
+            cell = row.createCell(7);
+            cell.setCellValue("Latitude");
+            sheet.autoSizeColumn(7);
+            cell.setCellStyle(style);
+
+            cell = row.createCell(8);
+            cell.setCellValue("Longitude");
+            sheet.autoSizeColumn(8);
+            cell.setCellStyle(style);
+
+            cell = row.createCell(9);
+            cell.setCellValue("Status");
+            sheet.autoSizeColumn(9);
+            cell.setCellStyle(style);
+
+
+            // Auto-size columns
+            for (int i = 0; i <= 9; i++) {
+                sheet.autoSizeColumn(i);
+            }
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            return new ByteArrayInputStream(outputStream.toByteArray());
+
+        } catch (Exception e) {
+            log.error("Exception = "+e);
+        }
+        return null;
+    }//method 
 
     @Override
     public ApiResponse<List<Integer>> findByDistinctYears() {
