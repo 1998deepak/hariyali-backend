@@ -289,7 +289,7 @@ public class UsersServiceImpl implements UsersService {
 		}
 
 		// set user password in encoded format
-		user.setPassword(passwordEncoder.encode(EnumConstants.PASSWORD));
+//		user.setPassword(passwordEncoder.encode(EnumConstants.PASSWORD));
 
 		// set created and updated date
 		user.setCreatedDate(newDate);
@@ -641,13 +641,18 @@ public class UsersServiceImpl implements UsersService {
 
 	@Override
 	public ApiResponse<String> forgetPassword(String donorId, HttpSession session) throws JsonProcessingException {
-		ObjectMapper objectMapper = new ObjectMapper();
-		int otp = random.nextInt(999999);
-//		JsonNode jsonNode = objectMapper.readTree(formData);
-//		String donarID = jsonNode.get("donarID").asText();
+		Random random = new Random();
+		int otpValue = random.nextInt((int) Math.pow(10, 6));
+		String otp = String.format("%0" + 6 + "d", otpValue);
 		Users user = this.usersRepository.findByDonorId(donorId);
-		emailService.sendSimpleEmail(user.getEmailId(), "forgetPassword",
-				"Your OTP is " + otp + ". Use this OTP to activate your account: ");
+		if (user != null) {
+			String body = "Dear Donor,<br><br>" 
+					+ "<br>Please use OTP to set new password - " + otp + "<br><br>-Team Hariyali<br><br>"
+					+ "PS: For any support or queries please reach out to us at <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a>";
+			emailService.sendSimpleEmail(user.getEmailId(), "Project Hariyali - Forgot Password",body);
+		} else {
+			throw new CustomException("User not forund");
+		}
 		session.setAttribute("myotp", otp);
 		session.setAttribute("donarID", donorId);
 
@@ -664,8 +669,9 @@ public class UsersServiceImpl implements UsersService {
 		return response;
 	}
 
+	//verify otp
 	@Override
-	public ApiResponse<String> verifyOtp(String formData, HttpSession session, HttpServletRequest request)
+	public ApiResponse<String> verifyForgotOtp(String formData, HttpSession session, HttpServletRequest request)
 			throws JsonProcessingException {
 
 		ApiResponse<String> response = new ApiResponse<>();
@@ -685,7 +691,7 @@ public class UsersServiceImpl implements UsersService {
 		}
 		long otpTimestamp = Long.parseLong(session.getAttribute("otpTimestamp").toString());
 		long currentTime = System.currentTimeMillis();
-		long timeLimitInMillis = 1 * 60 * 1000; // 1 minute
+		long timeLimitInMillis = 3 * 60 * 1000; // 1 minute
 
 		if (enteredOTP.equals(storedOTP) && (currentTime - otpTimestamp <= timeLimitInMillis)) {
 			response.setStatus(EnumConstants.SUCCESS);
@@ -693,14 +699,6 @@ public class UsersServiceImpl implements UsersService {
 			response.setData(null);
 			response.setMessage("OTP verified successfully");
 
-			// Get the HttpSession object
-			HttpSession sessionExpired = request.getSession(false); // Pass 'false' to avoid creating a new session
-
-			// Invalidate the session
-			if (sessionExpired != null) {
-				sessionExpired.invalidate();
-				System.err.println("session expired");
-			}
 		}
 
 		else {
@@ -713,12 +711,13 @@ public class UsersServiceImpl implements UsersService {
 				throw new CustomExceptionNodataFound("Entered OTP is incorrect");
 			}
 		}
+		session.removeAttribute("myotp");
 		return response;
 	}
 
-	// forget User Password
+	// set new user Password
 	@Override
-	public ApiResponse<String> forgetUserPassword(LoginRequest request, HttpSession session)
+	public ApiResponse<String> setUserNewPassword(LoginRequest request, HttpSession session)
 			throws JsonProcessingException {
 		ApiResponse<String> res = new ApiResponse<>();
 
