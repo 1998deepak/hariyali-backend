@@ -47,11 +47,13 @@ public class EmailService {
 		log.info("Mail send");
 	}
 
-	public void sendGiftingLetterEmail(Users recipientData, String donationEvent) {
+	public void sendGiftingLetterEmail(Users recipientData, String donationEvent,String path) {
+		FileSystemResource resource = new FileSystemResource(path);
+		File[] files = { resource.getFile() };
 		String subject = EnumConstants.GIFTING_MSG_SUBJECT;
 		String body = EnumConstants.GIFTING_MSG_BODY;
 		String mailBody = String.format(body, donationEvent, recipientData.getEmailId(), recipientData.getPassword());
-		ccServiceEmailAPI.sendCorrespondenceMail(recipientData.getEmailId(), subject, mailBody);
+		ccServiceEmailAPI.sendCorrespondenceMailwithAttachment(recipientData.getEmailId(), subject, mailBody, files);
 		log.info("Mail Sent...");
 	}
 

@@ -22,6 +22,7 @@ import javax.transaction.Transactional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -122,9 +123,16 @@ public class DonationServiceImpl implements DonationService {
 
 	@Autowired
 	private PaymentGatewayConfigurationDao gatewayConfigurationDao;
+	
 
 	@Autowired
 	CommonService commonService;
+	
+	@Value("${jasper.filepath}")
+	String jasperFilePath;
+	
+	@Value("${jasper.imagespath}")
+	String jasperImagesPath;
 
 	@Override
 	public ApiResponse<Object> getDonationById(int donationId) {
@@ -327,7 +335,7 @@ public class DonationServiceImpl implements DonationService {
 						commonService.saveDocumentDetails("DOCUMENT",
 								responseCertifiate.get("filePath"),responseCertifiate.get("outputFile"), "PDF",
 								"CERTIFICATE", resulEntity);
-						emailService.sendGiftingLetterEmail(recipientData, donation.getDonationEvent());
+						emailService.sendGiftingLetterEmail(recipientData, donation.getDonationEvent(),responseCertifiate.get("outputFile"));
 
 					}
 
@@ -694,6 +702,7 @@ public class DonationServiceImpl implements DonationService {
 		
 		String filepath=null;
 		String reportName = null;
+		String imagesPathName=null;
 		Map<String,String> response = new HashMap<>();
 		
 		try
@@ -702,22 +711,27 @@ public class DonationServiceImpl implements DonationService {
 			if(donationEvent.equalsIgnoreCase("Special day"))
 			{
 				 reportName="SpecialDay.jrxml";
+				 imagesPathName=jasperImagesPath+"/"+"specialDay.jpg";
 			}
 			else if(donationEvent.equalsIgnoreCase("Festival"))
 			{
 				 reportName="Festival.jrxml";
+				 imagesPathName=jasperImagesPath+"/"+"festival.jpg";
 
 			}else if(donationEvent.equalsIgnoreCase("Achievement"))
 			{
 				 reportName="Achievement.jrxml";
+				 imagesPathName=jasperImagesPath+"/"+"Achievement.jpg";
 
 			}else if (donationEvent.equalsIgnoreCase("Memorial Tribute"))
 			{
 				 reportName="MemorialTribute.jrxml";
+				 imagesPathName=jasperImagesPath+"/"+"memorialTribute.jpg";
 
 			}else if (donationEvent.equalsIgnoreCase("Simple Donation"))
 			{
 				 reportName="SimpleDonation.jrxml";
+				 imagesPathName=jasperImagesPath+"/"+"simpleDonation.jpg";
 
 			}
 			
@@ -729,11 +743,13 @@ public class DonationServiceImpl implements DonationService {
 
 			}
 			
-			filepath = "D:\\Working Krios\\Hariyali Mahindra\\hariyali-backend\\src\\main\\resources\\jasperReports\\" + reportName;
+			
+			filepath =jasperFilePath+ reportName;
 			parameters.put("RecipientName", recipientName);
 			parameters.put("messageContent", messageContent);
 			parameters.put("donarName", donarName);
-
+			parameters.put("ImageParameter",imagesPathName);
+//			filepath="\\hariyali-backend\\src\\main\\resources\\META-INF\\jasperReports\\Festival.jrxml";
 	        JasperReport jasperReport = JasperCompileManager.compileReport(filepath);
 
 	        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
@@ -744,14 +760,10 @@ public class DonationServiceImpl implements DonationService {
 				String pdfFilePath = path + "/" + donationEvent + ".pdf";
 
 				outputFile = new File(pdfFilePath);
-//				FileOutputStream fos = new FileOutputStream(outputFile);
 	            JasperExportManager.exportReportToPdfFile(jasperPrint, pdfFilePath); // Export to PDF
-//	            byte[] pdfByteArray = Files.readAllBytes(Paths.get(pdfFilePath));
-//	            FileCopyUtils.copy(pdfByteArray, fos);
 	            System.err.println(outputFile.getName());
 	        	response.put("filePath", outputFile.getName());
 				response.put("outputFile", outputFile.toString());
-//                fos.close();
 
 			}
 
