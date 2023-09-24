@@ -6,12 +6,16 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.hariyali.EnumConstants;
 import com.hariyali.entity.Document;
 import com.hariyali.entity.Users;
 import com.hariyali.exceptions.CustomException;
@@ -142,5 +146,28 @@ public class CommonService {
 		}
 		return null;
 	}
-	
+
+	public String generatePassword() {
+		SecureRandom random = new SecureRandom();
+		Pattern pattern = Pattern.compile(EnumConstants.PASSWORD_PATTERN);
+
+		String password;
+		Matcher matcher;
+
+		do {
+			StringBuilder passwordBuilder = new StringBuilder(20);
+
+			for (int i = 0; i < 8; i++) {
+				int randomIndex = random.nextInt(EnumConstants.CHARACTERS.length());
+				char randomChar = EnumConstants.CHARACTERS.charAt(randomIndex);
+				passwordBuilder.append(randomChar);
+			}
+
+			password = passwordBuilder.toString();
+			matcher = pattern.matcher(password);
+
+		} while (!matcher.matches());
+
+		return password;
+	}
 }

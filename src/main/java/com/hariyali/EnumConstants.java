@@ -32,7 +32,9 @@ public interface EnumConstants {
 	public static final String receiptNumber = "txn_23" + donor;
 	
 	public static final String OTHERTHANINDIA = "OTHERTHANINDIA";
-
+	
+	 public static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+";
+	 public static final String PASSWORD_PATTERN = "^[a-zA-Z]{4}[@#$%&][0-9]{3}$";
 	public static final String GIFTING_MSG_BODY ="<p>Dear %s,</p>" 
 			+ "Greetings from Project Hariyali.<br>"
 			+ "Thank you for your valuable role in making the planet greener.<br>"

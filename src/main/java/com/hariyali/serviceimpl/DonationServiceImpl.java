@@ -1,11 +1,13 @@
 package com.hariyali.serviceimpl;
 
-import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -130,24 +132,20 @@ public class DonationServiceImpl implements DonationService {
 	@Transactional(rollbackOn = Exception.class)
 	public ApiResponse<DonationDTO> saveUserDonations(UsersDTO usersDTO, String donarID, HttpServletRequest request)
 			throws JsonProcessingException {
-//		JsonNode userNode = jsonNode.get("user");
 		ApiResponse<DonationDTO> response = null;
 
-//		JsonNode donationNode = userNode.get("donations");
 
 		Users userEmail = this.usersRepository.findByEmailId(usersDTO.getEmailId());
 
 		ofNullable(userEmail).orElseThrow(() -> new CustomExceptionNodataFound("Given Email Id doesn't exists"));
 
 		ofNullable(usersDTO.getDonations()).orElseThrow(() -> new CustomException("Donation not found"));
-//		if (donationNode == null) {
-//			throw new CustomException("Donation not found");
-//		}
+
 		DonationDTO donationDTO = Optional.of(usersDTO.getDonations()).filter(donationDTOS -> !donationDTOS.isEmpty())
 				.get().stream().findFirst().get();
 		Optional.of(donationDTO).map(DonationDTO::getDonationMode)
 				.orElseThrow(() -> new CustomException("Donation mode not selected"));
-
+		
 		if ("offline".equalsIgnoreCase(donationDTO.getDonationMode())) {
 			// send email to user
 			response = saveDonationOffline(usersDTO, usersServiceImpl.generateDonorId(), request);
@@ -158,8 +156,7 @@ public class DonationServiceImpl implements DonationService {
 				emailService.sendReceiptWithAttachment(userEmail, donationDto.getOrderId(), receipt);
 				emailService.sendThankyouLatter(userEmail.getEmailId(), userEmail);
 			} else {
-//					emailService.sendEmailWithAttachment(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content,
-//							receipt.getReciept_Path(), userEmail);
+				
 				emailService.sendWelcomeLetterMail(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content,
 						userEmail);
 				emailService.sendReceiptWithAttachment(userEmail, donationDto.getOrderId(), receipt);
@@ -303,6 +300,8 @@ public class DonationServiceImpl implements DonationService {
 							}
 						}
 						Users recipientData = usersRepository.findByEmailId(recipient.getEmailId());
+						emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subject, EnumConstants.content,
+								recipientData);
 						emailService.sendGiftingLetterEmail(recipientData, donation.getDonationEvent());
 
 					}
