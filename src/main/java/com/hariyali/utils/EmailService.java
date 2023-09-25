@@ -8,8 +8,8 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.hariyali.EnumConstants;
@@ -19,6 +19,7 @@ import com.hariyali.entity.Receipt;
 import com.hariyali.entity.Users;
 import com.hariyali.exceptions.EmailNotConfiguredException;
 import com.hariyali.repository.DonationRepository;
+import com.hariyali.repository.UsersRepository;
 import com.hariyali.serviceimpl.CCServiceEmailAPI;
 
 import lombok.extern.slf4j.Slf4j;
@@ -26,17 +27,21 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class EmailService {
+	
+	@Autowired
+	UsersRepository userRepository;
 
 	@Autowired
 	DonationRepository donationRepository;
 
 	@Autowired
 	CCServiceEmailAPI ccServiceEmailAPI;
-//	@Value("${filepath.thankspath}")
-//	String thankpath;
 	
 	@Value("${file.path}")
 	String FILE_PATH;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@Autowired
 	private CommonService commonService;
@@ -54,8 +59,11 @@ public class EmailService {
 	}
 
 	public void sendWelcomeLetterMail(String to, String subject, String text, Users user) {
-		String body = String.format(text, user.getFirstName(), user.getEmailId(),
-				user.getPassword());
+		String password = commonService.generatePassword();
+		user.setPassword(passwordEncoder.encode(password));
+		log.info(password);
+		userRepository.save(user);
+		String body = String.format(text, user.getFirstName(), user.getEmailId(), password);
 		ccServiceEmailAPI.sendCorrespondenceMail(to, subject, body);
 		log.info("Mail send");
 	}
@@ -63,7 +71,7 @@ public class EmailService {
 	public void sendGiftingLetterEmail(Users recipientData, String donationEvent) {
 		String subject = EnumConstants.GIFTING_MSG_SUBJECT;
 		String body = EnumConstants.GIFTING_MSG_BODY;
-		String mailBody = String.format(body, donationEvent, recipientData.getEmailId(), recipientData.getPassword());
+		String mailBody = String.format(body, recipientData.getEmailId());
 		ccServiceEmailAPI.sendCorrespondenceMail(recipientData.getEmailId(), subject, mailBody);
 		log.info("Mail Sent...");
 	}
@@ -103,11 +111,11 @@ public class EmailService {
 				+ "<br>PS : Contact 'support@hariyali.org.in' in case of any query.<br>"
 				+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
 		String mailBody = String.format(text, name, formattedDate, orderId);
-		ccServiceEmailAPI.sendPaymentsMail(user.getEmailId(),
-				"Project Hariyali –Receipt towards your donation", mailBody, files);
+		ccServiceEmailAPI.sendPaymentsMail(user.getEmailId(), "Project Hariyali –Receipt towards your donation",
+				mailBody, files);
 	}
-
-	public void sendThankyouLatter(String to, Users user) {
+  
+public void sendThankyouLatter(String to, Users user) {
 		String subject = EnumConstants.thankYouLetterSuject;
 		String body = EnumConstants.thankYouLetterContent;
 
@@ -139,13 +147,12 @@ public class EmailService {
 		String subject = "Project Hariyali – Donation Failure";
 		String content = "Dear %s,<br><br>" + "<p>Thank you for your interest in Project Hariyali."
 				+ "Unfortunately we cannot proceed with the donation dated %s reference ID %s.</p><br><br>"
-				+ "Thank you.<br>"
-				+ "Team Hariyali<br>" + "Mahindra Foundation<br>"
+				+ "Thank you.<br>" + "Team Hariyali<br>" + "Mahindra Foundation<br>"
 				+ "3rd Floor, Cecil Court,Near Regal Cinema,<br>" + "Mahakavi Bushan Marg,Colaba.<br>"
 				+ "Mumbai, Maharashtra  - 400001<br>"
-				+"<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
+				+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
 				+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
-		String mailBody = String.format(content,user.getFirstName(), strDate, donation.getOrderId());
+		String mailBody = String.format(content, user.getFirstName(), strDate, donation.getOrderId());
 		ccServiceEmailAPI.sendCorrespondenceMail(user.getEmailId(), subject, mailBody);
 
 	}
