@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import com.hariyali.repository.ReceiptRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.ReceiptService;
 import com.hariyali.utils.Conversion;
+import com.hariyali.utils.EmailService;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -59,6 +61,9 @@ public class ReceiptServiceImpl implements ReceiptService {
 
 	@Autowired
 	UsersRepository userRepository;
+	
+	@Autowired
+	EmailService emailService;
 
 	@Value("${receipt.receiptPath}")
 	String receiptPath;
@@ -127,8 +132,9 @@ public class ReceiptServiceImpl implements ReceiptService {
 			Image logo = null;
 			try {
 				//logo = Image.getInstance("src/main/resources/Logo.jpg");
-//				Path path = Paths.get("");
-				logo = Image.getInstance("..\\..\\src\\main\\resources\\Logo.jpg");
+				Path path =emailService.getFileFromPath("Logo.jpg");
+				System.out.println("Logo=>"+path.toString());
+				logo = Image.getInstance(path.toString());
 				logo.scaleToFit(500, 50); // Adjust the size as needed
 				logo.setAlignment(Element.ALIGN_CENTER);
 			} catch (MalformedURLException e) {

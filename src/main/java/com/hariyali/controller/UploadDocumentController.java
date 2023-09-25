@@ -34,6 +34,7 @@ public class UploadDocumentController {
 			return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
 		}
 		formTenbService.uploadFormTenBe(multipartFile,request);
+		map.put("status", "Success");
 		map.put("message", "File uploaded Succcessfully..!");
 		return new ResponseEntity<>(map, HttpStatus.OK);
 	}
