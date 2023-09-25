@@ -40,6 +40,7 @@ import com.hariyali.repository.UserPackageRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.PaymentIntegrationService;
 import com.hariyali.service.ReceiptService;
+import com.hariyali.utils.CommonService;
 import com.hariyali.utils.EmailService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -75,12 +76,18 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 
 	@Autowired
 	EmailService emailService;
+	
+	@Autowired
+	CommonService commonService;
 
 	@Autowired
 	ReceiptRepository receiptRepository;
 
 	@Autowired
 	UserPackageRepository userPackageRepository;
+	
+	@Autowired
+	DonationServiceImpl donationServiceImpl;
 
 	@Value("${gogreen.transaction-update-url}")
 	private String gogreenUpdateurl;
@@ -159,9 +166,14 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 			if (donation.getDonationType().equalsIgnoreCase("gift-donate")) {
 				String recipientEmail = donation.getRecipient().get(0).getEmailId();
 				Users recipientData = userRepository.findByEmailId(recipientEmail);
+				String fullNameOfDonar=recipientData.getFirstName()+" "+recipientData.getLastName();
+				Map<String,String> responseCertifiate =donationServiceImpl.generateCertificate(recipientData.getFirstName(),donation.getGiftContent(),donation.getDonationEvent(),fullNameOfDonar,recipientData.getEmailId());			
+				commonService.saveDocumentDetails("DOCUMENT",
+						responseCertifiate.get("filePath"),responseCertifiate.get("outputFile"), "PDF",
+						"CERTIFICATE", recipientData);
 				emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
 						user);
-				emailService.sendGiftingLetterEmail(recipientData, donation.getDonationEvent());
+				emailService.sendGiftingLetterEmail(recipientData, donation.getDonationEvent(),responseCertifiate.get("outputFile"));
 			}
 			// Call Gogreen API
 			if (paymentInfo.getPaymentStatus().equalsIgnoreCase("SUCCESS")) {

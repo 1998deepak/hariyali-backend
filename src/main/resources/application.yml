@@ -79,9 +79,12 @@ gogreen:
     
 cloudStorage:
   - bucket: bkt-modernization-uatx-hariyali
-    mountPath: /DonationReceipt   
+    mountPath: /DonationReceipt  
+#change paths in dev    
+jasper:  
+    filepath : C:\\Users\\HP\\Downloads\\jasper file\\jasper file\\
+    imagespath: C:/Users/HP/Desktop/jasper images       
        
 file:
      path:  /DonationReceipt               
-        
         

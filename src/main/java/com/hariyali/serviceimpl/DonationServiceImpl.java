@@ -3,10 +3,17 @@ package com.hariyali.serviceimpl;
 import static java.util.Objects.isNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
-
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Base64;
+import net.sf.jasperreports.engine.JREmptyDataSource;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -15,12 +22,14 @@ import javax.transaction.Transactional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 
 import com.ccavenue.security.AesCryptUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -59,6 +68,11 @@ import com.hariyali.utils.CommonService;
 import com.hariyali.utils.EmailService;
 
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
 
 @Service
 @Slf4j
@@ -109,9 +123,16 @@ public class DonationServiceImpl implements DonationService {
 
 	@Autowired
 	private PaymentGatewayConfigurationDao gatewayConfigurationDao;
+	
 
 	@Autowired
 	CommonService commonService;
+	
+	@Value("${jasper.filepath}")
+	String jasperFilePath;
+	
+	@Value("${jasper.imagespath}")
+	String jasperImagesPath;
 
 	@Override
 	public ApiResponse<Object> getDonationById(int donationId) {
@@ -218,6 +239,7 @@ public class DonationServiceImpl implements DonationService {
 				donation.setApprovalStatus("Approved");
 				donation.setApprovalDate(newDate);
 				donation.setIsApproved(true);
+				
 				donation.setDonationDate(newDate);
 				donation.setDonationCode(commonService.createDonarIDORDonationID("donation"));
 				Donation resultdonation = donationRepository.save(donation);
@@ -226,6 +248,7 @@ public class DonationServiceImpl implements DonationService {
 				donationDTO.setDonationId(donation.getDonationId());
 				donationDTO.setCreatedDate(newDate);
 				donationDTO.setCreatedBy(createdBy);
+				donationDTO.setGiftContent(donation.getGiftContent());
 				donationDTO.setDonationEvent(donation.getDonationEvent());
 				donationDTO.setDonationMode(donation.getDonationMode());
 				donationDTO.setTotalAmount(donation.getTotalAmount());
@@ -300,9 +323,17 @@ public class DonationServiceImpl implements DonationService {
 							}
 						}
 						Users recipientData = usersRepository.findByEmailId(recipient.getEmailId());
-						emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subject, EnumConstants.content,
+						String fullNameOfDonar=resulEntity.getFirstName()+" "+resulEntity.getLastName();
+
+						Map<String,String> responseCertifiate = generateCertificate(recipientData.getFirstName(),donationDTO.getGiftContent(),donationDTO.getDonationEvent(),fullNameOfDonar,resulEntity.getEmailId());
+						
+						commonService.saveDocumentDetails("DOCUMENT",
+								responseCertifiate.get("filePath"),responseCertifiate.get("outputFile"), "PDF",
+								"CERTIFICATE", resulEntity);
+            emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subject, EnumConstants.content,
 								recipientData);
-						emailService.sendGiftingLetterEmail(recipientData, donation.getDonationEvent());
+						emailService.sendGiftingLetterEmail(recipientData, donation.getDonationEvent(),responseCertifiate.get("outputFile"));
+						
 
 					}
 
@@ -674,5 +705,88 @@ public class DonationServiceImpl implements DonationService {
 		} else
 			throw new CustomException("No donation found!!");
 	}
+
+	@Override
+	public Map<String, String> generateCertificate(String recipientName, String messageContent, String donationEvent,
+			String donarName, String emailID) {
+		
+		String filepath=null;
+		String reportName = null;
+		String imagesPathName=null;
+		Map<String,String> response = new HashMap<>();
+		
+		try
+		{
+			
+			if(donationEvent.equalsIgnoreCase("Special day"))
+			{
+				 reportName="SpecialDay.jrxml";
+				 imagesPathName=jasperImagesPath+"/"+"specialDay.jpg";
+			}
+			else if(donationEvent.equalsIgnoreCase("Festival"))
+			{
+				 reportName="Festival.jrxml";
+				 imagesPathName=jasperImagesPath+"/"+"festival.jpg";
+
+			}else if(donationEvent.equalsIgnoreCase("Achievement"))
+			{
+				 reportName="Achievement.jrxml";
+				 imagesPathName=jasperImagesPath+"/"+"Achievement.jpg";
+
+			}else if (donationEvent.equalsIgnoreCase("Memorial Tribute"))
+			{
+				 reportName="MemorialTribute.jrxml";
+				 imagesPathName=jasperImagesPath+"/"+"memorialTribute.jpg";
+
+			}else if (donationEvent.equalsIgnoreCase("Simple Donation"))
+			{
+				 reportName="SimpleDonation.jrxml";
+				 imagesPathName=jasperImagesPath+"/"+"simpleDonation.jpg";
+
+			}
+			
+			Map<String,Object> parameters = new HashMap<String,Object>();
+
+			if(donationEvent.equalsIgnoreCase("Simple Donation"))
+			{
+				parameters.put("firstName", donarName);
+
+			}
+			
+			
+			filepath =jasperFilePath+ reportName;
+			parameters.put("RecipientName", recipientName);
+			parameters.put("messageContent", messageContent);
+			parameters.put("donarName", donarName);
+			parameters.put("ImageParameter",imagesPathName);
+//			filepath="\\hariyali-backend\\src\\main\\resources\\META-INF\\jasperReports\\Festival.jrxml";
+	        JasperReport jasperReport = JasperCompileManager.compileReport(filepath);
+
+	        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+	        
+	        File outputFile = null;
+			String path = commonService.getDonarFileFilePath(emailID);
+			if (path != null) {
+				String pdfFilePath = path + "/" + donationEvent + ".pdf";
+
+				outputFile = new File(pdfFilePath);
+	            JasperExportManager.exportReportToPdfFile(jasperPrint, pdfFilePath); // Export to PDF
+	            System.err.println(outputFile.getName());
+	        	response.put("filePath", outputFile.getName());
+				response.put("outputFile", outputFile.toString());
+
+			}
+
+		        	
+		}catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+
+		}
+		
+		return response;
+	}
+	
+	
 
 }

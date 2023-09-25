@@ -150,6 +150,13 @@ public class UsersController {
 		return new ResponseEntity<>(usersService.getUserPersonalDetailsByDonorId(donorId), HttpStatus.OK);
 	}
 
+	@PostMapping("/forgetPassword/{donorId}")
+	public ResponseEntity<?> forgetPassword(@PathVariable String donorId, HttpSession session)
+			throws JsonProcessingException {
+		return new ResponseEntity<>(usersService.forgetPassword(donorId, session),
+				HttpStatus.OK);
+	}
+
 	// forget password api
 	@PostMapping("/forgetPassword/{donorId}")
 	public ResponseEntity<?> forgetPassword(@PathVariable String donorId, HttpSession session)
@@ -220,7 +227,9 @@ public class UsersController {
 	public ResponseEntity<?> approvedOnlineDonationOfUser(@RequestBody UsersDTO formData, HttpServletRequest request)
 			throws JsonProcessingException, MessagingException {
 //		ApiRequest apiRequest = new ApiRequest(formData);
-		return new ResponseEntity<>(this.usersService.approvedOnlineDonationOfUser(formData, request), HttpStatus.OK);
+		return new ResponseEntity<>(
+				this.usersService.approvedOnlineDonationOfUser(formData, request),
+				HttpStatus.OK);
 	}
 
 	@GetMapping("/getUserPersonalDetailsbyEmailOrDonorId")
