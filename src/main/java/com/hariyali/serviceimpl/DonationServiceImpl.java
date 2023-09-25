@@ -153,24 +153,20 @@ public class DonationServiceImpl implements DonationService {
 	@Transactional(rollbackOn = Exception.class)
 	public ApiResponse<DonationDTO> saveUserDonations(UsersDTO usersDTO, String donarID, HttpServletRequest request)
 			throws JsonProcessingException {
-//		JsonNode userNode = jsonNode.get("user");
 		ApiResponse<DonationDTO> response = null;
 
-//		JsonNode donationNode = userNode.get("donations");
 
 		Users userEmail = this.usersRepository.findByEmailId(usersDTO.getEmailId());
 
 		ofNullable(userEmail).orElseThrow(() -> new CustomExceptionNodataFound("Given Email Id doesn't exists"));
 
 		ofNullable(usersDTO.getDonations()).orElseThrow(() -> new CustomException("Donation not found"));
-//		if (donationNode == null) {
-//			throw new CustomException("Donation not found");
-//		}
+
 		DonationDTO donationDTO = Optional.of(usersDTO.getDonations()).filter(donationDTOS -> !donationDTOS.isEmpty())
 				.get().stream().findFirst().get();
 		Optional.of(donationDTO).map(DonationDTO::getDonationMode)
 				.orElseThrow(() -> new CustomException("Donation mode not selected"));
-
+		
 		if ("offline".equalsIgnoreCase(donationDTO.getDonationMode())) {
 			// send email to user
 			response = saveDonationOffline(usersDTO, commonService.createDonarIDORDonationID("user"), request);
@@ -181,8 +177,7 @@ public class DonationServiceImpl implements DonationService {
 				emailService.sendReceiptWithAttachment(userEmail, donationDto.getOrderId(), receipt);
 				emailService.sendThankyouLatter(userEmail.getEmailId(), userEmail);
 			} else {
-//					emailService.sendEmailWithAttachment(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content,
-//							receipt.getReciept_Path(), userEmail);
+				
 				emailService.sendWelcomeLetterMail(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content,
 						userEmail);
 				emailService.sendReceiptWithAttachment(userEmail, donationDto.getOrderId(), receipt);
@@ -335,7 +330,10 @@ public class DonationServiceImpl implements DonationService {
 						commonService.saveDocumentDetails("DOCUMENT",
 								responseCertifiate.get("filePath"),responseCertifiate.get("outputFile"), "PDF",
 								"CERTIFICATE", resulEntity);
+            emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subject, EnumConstants.content,
+								recipientData);
 						emailService.sendGiftingLetterEmail(recipientData, donation.getDonationEvent(),responseCertifiate.get("outputFile"));
+						
 
 					}
 
@@ -490,11 +488,22 @@ public class DonationServiceImpl implements DonationService {
 
 			}
 		}
-		if(usersDTO!=null) {
-			if(!usersDTO.getCitizenship().equalsIgnoreCase("INDIA")) {
-				response.setStatus(EnumConstants.OTHERTHANINDIA);
-				response.setGatewayURL("/FcraAccount");
-				return response;
+		if (usersDTO != null) {
+			Users users = usersRepository.findByUserId(usersDTO.getUserId());
+			if (users != null) {
+				if (!("INDIA").equalsIgnoreCase(usersDTO.getCitizenship())) {
+					response.setStatus(EnumConstants.OTHERTHANINDIA);
+					response.setGatewayURL("/FcraAccount");
+					return response;
+				}
+			} else {
+				if (usersDTO.getCitizenship() != null) {
+					if (!("INDIA").equalsIgnoreCase(usersDTO.getCitizenship())) {
+						response.setStatus(EnumConstants.OTHERTHANINDIA);
+						response.setGatewayURL("/FcraAccount");
+						return response;
+					}
+				}
 			}
 		}
 
@@ -513,8 +522,9 @@ public class DonationServiceImpl implements DonationService {
 			queryString += "&cancel_url=" + gatewayConfiguration.getRedirectURL();
 			queryString += "&language=EN";
 			queryString += "&billing_name=" + usersDTO.getFirstName() + " " + usersDTO.getLastName();
-			AddressDTO address = ofNullable(usersDTO.getAddress()).stream().filter(addresses -> !addresses.isEmpty())
-					.findFirst().get().get(0);
+			AddressDTO address = ofNullable(usersDTO.getAddress()).orElse(resulEntity.getAddress().stream()
+					.map(addressEntity -> modelMapper.map(addressEntity, AddressDTO.class))
+					.collect(Collectors.toList())).stream().findFirst().get();
 			queryString += "&billing_address=" + address.getStreet1() + " " + address.getStreet2() + " "
 					+ address.getStreet3();
 			queryString += "&billing_city=" + address.getCity();

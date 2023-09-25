@@ -289,7 +289,7 @@ public class UsersServiceImpl implements UsersService {
 		}
 
 		// set user password in encoded format
-		user.setPassword(passwordEncoder.encode(EnumConstants.PASSWORD));
+//		user.setPassword(passwordEncoder.encode(EnumConstants.PASSWORD));
 
 		// set created and updated date
 		user.setCreatedDate(newDate);
@@ -665,6 +665,7 @@ public class UsersServiceImpl implements UsersService {
 		return response;
 	}
 
+	//verify otp
 	@Override
 	public ApiResponse<String> verifyForgotOtp(String formData, HttpSession session, HttpServletRequest request)
 			throws JsonProcessingException {
@@ -693,15 +694,6 @@ public class UsersServiceImpl implements UsersService {
 			response.setStatusCode(HttpStatus.OK.value());
 			response.setData(null);
 			response.setMessage("OTP verified successfully");
-
-			// Get the HttpSession object
-//			HttpSession sessionExpired = request.getSession(false); // Pass 'false' to avoid creating a new session
-//
-//			// Invalidate the session
-//			if (sessionExpired != null) {
-//				sessionExpired.invalidate();
-//				System.err.println("session expired");
-//			}
 		}
 
 		else {
@@ -718,7 +710,7 @@ public class UsersServiceImpl implements UsersService {
 		return response;
 	}
 
-	// forget User Password
+	// set new user Password
 	@Override
 	public ApiResponse<String> setUserNewPassword(LoginRequest request, HttpSession session)
 			throws JsonProcessingException {

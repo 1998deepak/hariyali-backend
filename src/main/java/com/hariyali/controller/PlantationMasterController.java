@@ -72,6 +72,29 @@ public class PlantationMasterController {
         }
     }//method
 
+    /**
+     * Rest endpoint to download plantation template
+     *
+     * @param response HttpServletResponse
+     */
+    @GetMapping("/downloadTemplate")
+    public void downloadTemplate(HttpServletResponse response) {
+
+        try {
+            ByteArrayInputStream byteArrayInputStream = service.downloadTemplate();
+            response.setContentType("application/octet-stream");
+
+            // Set the filename based on the seasonType
+            String fileName = "PlantationTemplate.xlsx";
+            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+            IOUtils.copy(byteArrayInputStream, response.getOutputStream());
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("Exception = " + e);
+        }
+    }//method
+
     @GetMapping("/years")
     public ResponseEntity<ApiResponse<List<Integer>>> findByDistinctYears(){
         return new ResponseEntity<>(service.findByDistinctYears(), HttpStatus.OK);

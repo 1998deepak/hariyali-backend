@@ -101,6 +101,12 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 	@Autowired
 	RestTemplate restTemplate;
 
+	@Value("${frontend.redirect-url}")
+	String frontendRedirectURL;
+
+	@Value("${frontend.user.redirect-url}")
+	String frontendUserRedirectURL;
+
 	@Override
 	public ApiResponse<String> confirmPayment(String encryptedResponse) {
 		// get payment gateway configuration for CCAVENUE
@@ -141,13 +147,16 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 //		if(!paymentInfo.getSourceType().isEmpty()) {
 //			callGogreenApi();
 //		}
-
+		String redirectUrl = frontendRedirectURL;
 		Users user = userRepository.getUserByDonationId(donation.getDonationId());
 		if (user.getWebId() == null) {
 			user.setWebId(userService.generateWebId());
 			userRepository.save(user);
 			log.info("user" + user);
+		} else{
+			redirectUrl = frontendUserRedirectURL;
 		}
+
 		if ("Completed".equalsIgnoreCase(paymentInfo.getPaymentStatus())
 				|| "Success".equalsIgnoreCase(paymentInfo.getPaymentStatus())) {
 			if (donation.getDonationType().equalsIgnoreCase("self-donate")) {
@@ -168,14 +177,16 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 			}
 			// Call Gogreen API
 			if (paymentInfo.getPaymentStatus().equalsIgnoreCase("SUCCESS")) {
-				if ((donation.getMeconnectId() != 0) && (!donation.getSource().isEmpty())) {
-					String result = updateGogreenDetails(donation);
-					System.out.println("update gogreen=>" + result);
+				if (donation.getMeconnectId() != null && donation.getSource() != null) {
+					if ((donation.getMeconnectId() != 0) && (!donation.getSource().isEmpty())) {
+						String result = updateGogreenDetails(donation);
+						System.out.println("update gogreen=>" + result);
+					}
 				}
 			}
 		}
 		ApiResponse<String> apiResponse = new ApiResponse<>();
-		apiResponse.setData(paymentInfo.getOrderId());
+		apiResponse.setData(redirectUrl + paymentInfo.getOrderId());
 		return apiResponse;
 	}
 

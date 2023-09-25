@@ -5,7 +5,7 @@ spring:
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
     #    show-sql: true
-    file.path:  /OverseasScolarship/
+
   main:
        lazy-initialization: true
   servlet:
@@ -48,8 +48,12 @@ jwt:
    expireTime : 8
 # change this url as deployed environment
 frontend:
-        redirect-url: http://localhost:3000/OnlineDonation?orderId=
-project.basedir:         
+        # redirect-url: http://localhost:3000/OnlineDonation?orderId=
+        redirect-url: https://hariyali-dev.m-devsecops.com/OnlineDonation?orderId=
+        redirect-gogreen-url: https://hariyali-dev.m-devsecops.com/OnlineDonation
+        user:
+          redirect-url: https://hariyali-dev.m-devsecops.com/user/donation?orderId=
+        
 receipt:
         receiptPath: C:\\Workspace\\DonationReceipt
 request:
@@ -75,8 +79,12 @@ gogreen:
     
 cloudStorage:
   - bucket: bkt-modernization-uatx-hariyali
-    mountPath: /DonationReceipt        
+    mountPath: /DonationReceipt  
+#change paths in dev    
 jasper:  
     filepath : C:\\Users\\HP\\Downloads\\jasper file\\jasper file\\
     imagespath: C:/Users/HP/Desktop/jasper images       
+       
+file:
+     path:  /DonationReceipt               
         

@@ -15,7 +15,7 @@ import java.util.List;
 public interface PlantationMasterRepository extends JpaRepository<PlantationMaster, Long> {
 
     @Query(value = "SELECT * FROM tbl_plantation_master WHERE season = :season AND village IN (:cities) AND district IN (:districts) AND YEAR(plantationDate) = :year",
-            countQuery = "SELECT COUNT(*) FROM tbl_plantation_master WHERE plot IN (:plots) AND village IN (:cities) AND district IN (:districts) AND YEAR(plantationDate) = :year",
+            countQuery = "SELECT COUNT(*) FROM tbl_plantation_master WHERE season = :season AND village IN (:cities) AND district IN (:districts) AND YEAR(plantationDate) = :year",
             nativeQuery = true
     )
     Page<PlantationMaster> findAllByFilter(

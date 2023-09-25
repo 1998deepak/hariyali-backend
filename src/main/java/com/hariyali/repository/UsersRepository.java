@@ -158,11 +158,11 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 
 	@Query(value = "select um.first_name as firstName,um.last_name as lastName,um.phone as userPhone,um.email as userEmail,"
 			+ "um.designation as userDesignation,um.company_name as userCompanyName,um.user_address as userAddress,um.donor_id as donorId,"
-			+ "r.role_name as role from hariyalidbletest.user_master um left join hariyalidbletest.roles r on um.role_id = r.role_id"
+			+ "r.role_name as role from tbl_user_master um left join tbl_roles r on um.role_id = r.role_id"
 			+ " where um.user_id=?", nativeQuery = true)
 	public Map<String, String> getUserDetails(int userId);
 
-	@Query(value = "select count(user_id) as no_of_donors from hariyalidbletest.user_master", nativeQuery = true)
+	@Query(value = "select count(user_id) as no_of_donors from tbl_user_master", nativeQuery = true)
 	public long getDonorCount();
 
 	@Query(value = "SELECT \r\n" + "	            JSON_OBJECT(\r\n"
