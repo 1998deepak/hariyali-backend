@@ -3,12 +3,16 @@ package com.hariyali.serviceimpl;
 import java.util.Date;
 import java.util.Optional;
 
+import com.hariyali.exceptions.ConcurrentSessionException;
+import com.hariyali.exceptions.CustomException;
 import com.hariyali.utils.EncryptionDecryptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,6 +33,8 @@ import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.JwtService;
 import com.hariyali.service.TokenLoginUserService;
 import com.hariyali.utils.EmailService;
+
+import static java.util.Optional.ofNullable;
 
 @Service
 public class JwtServiceImpl implements JwtService {
@@ -172,7 +178,7 @@ public class JwtServiceImpl implements JwtService {
 
 			else {
 
-				userResponse = Optional.ofNullable(this.usersRepository.findByEmailId(request.getUsername()));
+				userResponse = ofNullable(this.usersRepository.findByEmailId(request.getUsername()));
 				if (userResponse.isPresent()) {
 					user = userResponse.get();
 				}
@@ -324,7 +330,7 @@ public class JwtServiceImpl implements JwtService {
 				tokenLoginUserService.updateToken(tokenLoginUser);
 			}
 			if (userResponseDonorId != null) {
-
+				userResponseDonorId.setActiveSession(0);
 				this.userRepository.save(userResponseDonorId);
 				result.setMessage("Logged out successfully");
 				result.setStatus(EnumConstants.SUCCESS);
@@ -384,8 +390,7 @@ public class JwtServiceImpl implements JwtService {
 		request.setPassword(encryptionDecryptionUtil.decrypt(request.getPassword()));
 		if (request.getUsername() != null || request.getPassword() != null) {
 
-			Optional<Users> userResponse = Optional
-					.ofNullable(this.usersRepository.findByDonorId(request.getUsername()));
+			Optional<Users> userResponse = ofNullable(this.usersRepository.findByDonorId(request.getUsername()));
 
 			Users user = null;
 			if (userResponse.isPresent()) {
@@ -403,7 +408,7 @@ public class JwtServiceImpl implements JwtService {
 
 					// is user locked or not
 					boolean isAccountUnlock = (lockTimeSec - timeDiff) > 0 ? false : true;
-					if (isAccountUnlock && user.getAttempts() >= 3) {
+					if (isAccountUnlock && user.getAttempts() >= 3 && ofNullable(user.getActiveSession()).orElse(0) == 0) {
 						user.setAttempts(0);
 						user.setLastloginDate(new Date());
 						userRepository.save(user);
@@ -412,12 +417,14 @@ public class JwtServiceImpl implements JwtService {
 				if (request.getUsername().equals(user.getDonorId())
 						&& this.passwordEncoder.matches(request.getPassword(), user.getPassword())
 						&& (user.getAttempts() < 3)) {
-					// Generate OTP
-					otpService.sendOtpByEmail(user.getEmailId());
-					result.setStatus(EnumConstants.SUCCESS);
-					result.setMessage("Otp Send Successfully");
-					result.setStatusCode(HttpStatus.OK.value());
-					return result;
+					if(ofNullable(user.getActiveSession()).orElse(0) == 0) {
+						// Generate OTP
+						otpService.sendOtpByEmail(user.getEmailId());
+						result.setStatus(EnumConstants.SUCCESS);
+						result.setMessage("Otp Send Successfully");
+						result.setStatusCode(HttpStatus.OK.value());
+						return result;
+					} else throw new ConcurrentSessionException("You cannot login because you have too many session active!");
 				} else {
 					user.setLastloginDate(new Date());
 					user.getModifiedDate();
@@ -445,7 +452,7 @@ public class JwtServiceImpl implements JwtService {
 
 			else {
 
-				userResponse = Optional.ofNullable(this.usersRepository.findByEmailId(request.getUsername()));
+				userResponse = ofNullable(this.usersRepository.findByEmailId(request.getUsername()));
 				if (userResponse.isPresent()) {
 					user = userResponse.get();
 				}
@@ -462,7 +469,7 @@ public class JwtServiceImpl implements JwtService {
 
 					// is user locked or not
 					boolean isAccountUnlock = (lockTimeSec - timeDiff) > 0 ? false : true;
-					if (isAccountUnlock && user.getAttempts() >= 3) {
+					if (isAccountUnlock && user.getAttempts() >= 3 && ofNullable(user.getActiveSession()).orElse(0) == 0) {
 						user.setAttempts(0);
 						user.setLastloginDate(new Date());
 						userRepository.save(user);
@@ -471,11 +478,14 @@ public class JwtServiceImpl implements JwtService {
 				if (request.getUsername().equals(user.getEmailId())
 						&& this.passwordEncoder.matches(request.getPassword(), user.getPassword())
 						&& (user.getAttempts() < 3)) {
-					otpService.sendOtpByEmail(user.getEmailId());
-					result.setStatus(EnumConstants.SUCCESS);
-					result.setMessage("Otp Send Successfully");
-					result.setStatusCode(HttpStatus.OK.value());
-					return result;
+					if(ofNullable(user.getActiveSession()).orElse(0) == 0) {
+						// Generate OTP
+						otpService.sendOtpByEmail(user.getEmailId());
+						result.setStatus(EnumConstants.SUCCESS);
+						result.setMessage("Otp Send Successfully");
+						result.setStatusCode(HttpStatus.OK.value());
+						return result;
+					} else throw new ConcurrentSessionException("You cannot login because you have too many session active!");
 				} else {
 					user.setLastloginDate(new Date());
 					user.getModifiedDate();
@@ -535,6 +545,7 @@ public class JwtServiceImpl implements JwtService {
 
 	    user.setLastloginDate(new Date());
 	    user.setAttempts(0);
+		user.setActiveSession(1);
 //	    user.setOtp(null);
 	    userRepository.save(user);
 

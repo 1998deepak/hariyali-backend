@@ -2,6 +2,7 @@ package com.hariyali.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.hariyali.exceptions.ConcurrentSessionException;
 import com.hariyali.utils.EncryptionDecryptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +86,9 @@ public class JwtController {
 			}
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
+			if(e instanceof ConcurrentSessionException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			}
 			return new ResponseEntity<>("Invalid Username or Password", HttpStatus.BAD_REQUEST);
 		}
 	}
