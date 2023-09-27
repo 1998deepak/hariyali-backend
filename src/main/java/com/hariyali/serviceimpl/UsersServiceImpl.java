@@ -133,6 +133,9 @@ public class UsersServiceImpl implements UsersService {
 
 	@Autowired
 	CommonService commonService;
+	
+	@Autowired
+	JwtServiceImpl jwtService;
 
 	private static final Logger logger = LoggerFactory.getLogger(UsersServiceImpl.class);
 
@@ -640,12 +643,12 @@ public class UsersServiceImpl implements UsersService {
 		Random random = new Random();
 		int otpValue = random.nextInt((int) Math.pow(10, 6));
 		String otp = String.format("%0" + 6 + "d", otpValue);
-		Users user = this.usersRepository.findByDonorId(donorId);
+		Users user = jwtService.findUserByDonorIdOrEmailId(donorId);
 		if (user != null) {
-			String body = "Dear Donor,<br><br>" 
-					+ "<br>Please use OTP to set new password - " + otp + "<br><br>-Team Hariyali<br><br>"
+			String body = "Dear Donor,<br><br>" + "<br>Please use OTP to set new password - " + otp
+					+ "<br><br>-Team Hariyali<br><br>"
 					+ "PS: For any support or queries please reach out to us at <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a>";
-			emailService.sendSimpleEmail(user.getEmailId(), "Project Hariyali - Forgot Password",body);
+			emailService.sendSimpleEmail(user.getEmailId(), "Project Hariyali - Forgot Password", body);
 		} else {
 			throw new CustomException("User not forund");
 		}
