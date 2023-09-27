@@ -182,8 +182,8 @@ public class CCServiceEmailAPI {
 						throw new Exception(errorType);
 					}
 				} catch (Exception e) {
-					log.error("Exception = {}", e);
-					throw new EmailNotConfiguredException(result);
+					log.error("Exception = {}", e.getMessage());
+					throw new EmailNotConfiguredException(e.getMessage());
 				}
 			}
 
