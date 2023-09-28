@@ -6,6 +6,9 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     #    show-sql: true
 
+  session:
+      timeout:
+          seconds:900
   main:
        lazy-initialization: true
   servlet:

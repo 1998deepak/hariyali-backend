@@ -3,6 +3,7 @@ package com.hariyali.controller;
 import javax.servlet.http.HttpServletRequest;
 
 import com.hariyali.exceptions.ConcurrentSessionException;
+import com.hariyali.service.UsersService;
 import com.hariyali.utils.EncryptionDecryptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,9 @@ public class JwtController {
 
 	@Autowired
 	UsersRepository userRepository;
+
+	@Autowired
+	UsersService usersService;
 
 	@Autowired
 	OtpRepository otpRepository;
@@ -166,6 +170,15 @@ public class JwtController {
 		ApiRequest apiRequest = new ApiRequest(formData);
 
 		return new ResponseEntity<>(this.jwtService.resetPassword(apiRequest.getFormData().toString()), HttpStatus.OK);
+
+	}
+	// method to change password
+	@PostMapping("changePassword")
+	public ResponseEntity<ApiResponse<String>> changePassword(@RequestBody LoginRequest loginRequest, HttpServletRequest request) throws JsonProcessingException {
+
+		String token = request.getHeader("Authorization").substring(7);
+
+		return new ResponseEntity<>(usersService.changePassword(loginRequest, token), HttpStatus.OK);
 
 	}
 

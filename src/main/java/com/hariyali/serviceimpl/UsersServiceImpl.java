@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
+import com.hariyali.utils.EncryptionDecryptionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -133,6 +134,9 @@ public class UsersServiceImpl implements UsersService {
 
 	@Autowired
 	CommonService commonService;
+
+	@Autowired
+	private EncryptionDecryptionUtil encryptionDecryptionUtil;
 
 	private static final Logger logger = LoggerFactory.getLogger(UsersServiceImpl.class);
 
@@ -1125,5 +1129,24 @@ public class UsersServiceImpl implements UsersService {
 		return response;
 
 	}
+
+	@Override
+	@Transactional
+	public ApiResponse<String> changePassword(LoginRequest request, String token) {
+		ApiResponse<String> response = new ApiResponse<>();
+		String password = encryptionDecryptionUtil.decrypt(request.getPassword());
+		String userName = jwtHelper.getUsernameFromToken(token);
+
+		Users user = usersRepository.findByEmailId(userName);
+		if(passwordEncoder.matches(password, user.getPassword())){
+			throw new CustomException("New password is same as old password!");
+		}
+
+		user.setPassword(passwordEncoder.encode(password));
+		usersRepository.save(user);
+		response.setStatus("Success");
+		response.setMessage("User password changed successfully!");
+		return response;
+	}//method
 
 }

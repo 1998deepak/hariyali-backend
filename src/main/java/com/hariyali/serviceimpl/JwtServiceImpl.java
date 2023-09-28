@@ -1,22 +1,5 @@
 package com.hariyali.serviceimpl;
 
-import java.util.Date;
-import java.util.Optional;
-
-import com.hariyali.exceptions.ConcurrentSessionException;
-import com.hariyali.exceptions.CustomException;
-import com.hariyali.utils.EncryptionDecryptionUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,11 +11,25 @@ import com.hariyali.dto.LoginRequest;
 import com.hariyali.entity.OtpModel;
 import com.hariyali.entity.TokenLoginUser;
 import com.hariyali.entity.Users;
+import com.hariyali.exceptions.ConcurrentSessionException;
 import com.hariyali.exceptions.CustomExceptionNodataFound;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.JwtService;
 import com.hariyali.service.TokenLoginUserService;
 import com.hariyali.utils.EmailService;
+import com.hariyali.utils.EncryptionDecryptionUtil;
+import io.jsonwebtoken.ExpiredJwtException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 
@@ -305,7 +302,12 @@ public class JwtServiceImpl implements JwtService {
 	public ApiResponse<String> logout(LoginRequest request, String token) {
 		ApiResponse<String> result = new ApiResponse<>();
 		if (token != null) {
-			String userName = jwtHelper.getUsernameFromToken(token);
+			String userName;
+			try {
+				userName = jwtHelper.getUsernameFromToken(token);
+			} catch (ExpiredJwtException e){
+				userName = request.getUsername();
+			}
 			Users userResponseDonorId = this.userRepository.findByDonorId(request.getUsername());
 			if (userResponseDonorId != null) {
 
@@ -417,7 +419,13 @@ public class JwtServiceImpl implements JwtService {
 				if (request.getUsername().equals(user.getDonorId())
 						&& this.passwordEncoder.matches(request.getPassword(), user.getPassword())
 						&& (user.getAttempts() < 3)) {
-					if(ofNullable(user.getActiveSession()).orElse(0) == 0) {
+					boolean tokenExpired = false;
+					try {
+						jwtHelper.getUsernameFromToken(tokenLoginUserService.findByUsernameDonorId(user.getDonorId()).getToken());
+					} catch (Exception e){
+						tokenExpired = true;
+					}
+					if(tokenExpired ||  ofNullable(user.getActiveSession()).orElse(0) == 0) {
 						// Generate OTP
 						otpService.sendOtpByEmail(user.getEmailId());
 						result.setStatus(EnumConstants.SUCCESS);
@@ -478,7 +486,13 @@ public class JwtServiceImpl implements JwtService {
 				if (request.getUsername().equals(user.getEmailId())
 						&& this.passwordEncoder.matches(request.getPassword(), user.getPassword())
 						&& (user.getAttempts() < 3)) {
-					if(ofNullable(user.getActiveSession()).orElse(0) == 0) {
+					boolean tokenExpired = false;
+					try {
+						jwtHelper.getUsernameFromToken(tokenLoginUserService.findByUsernameEmailId(user.getEmailId()).getToken());
+					} catch (Exception e){
+						tokenExpired = true;
+					}
+					if(tokenExpired || ofNullable(user.getActiveSession()).orElse(0) == 0) {
 						// Generate OTP
 						otpService.sendOtpByEmail(user.getEmailId());
 						result.setStatus(EnumConstants.SUCCESS);
