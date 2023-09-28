@@ -95,4 +95,8 @@ public class UsersDTO {
 	private String source;
 	
 	private String meconnectId;
+	
+	private String campaignConsent;
+	
+	private Boolean dataConsent;
 }

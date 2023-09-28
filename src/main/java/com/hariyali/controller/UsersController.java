@@ -149,15 +149,15 @@ public class UsersController {
 		donorId = encryptionDecryptionUtil.decrypt(donorId);
 		return new ResponseEntity<>(usersService.getUserPersonalDetailsByDonorId(donorId), HttpStatus.OK);
 	}
-
-
+  
+	// forget password api
 	@PostMapping("/forgetPassword/{donorId}")
 	public ResponseEntity<?> forgetPassword(@PathVariable String donorId, HttpSession session)
 			throws JsonProcessingException {
-		return new ResponseEntity<>(usersService.forgetPassword(donorId, session),
-				HttpStatus.OK);
+		return new ResponseEntity<>(usersService.forgetPassword(donorId, session), HttpStatus.OK);
 	}
 
+	//verify otp
 	@PostMapping("/verifyForgotOtp")
 	public ResponseEntity<ApiResponse<String>> verifyForgotOtp(@RequestBody String formData, HttpSession session,
 			HttpServletRequest request) throws JsonProcessingException {
@@ -167,13 +167,14 @@ public class UsersController {
 		return new ResponseEntity<>(usersService.verifyForgotOtp(apiRequest.getFormData().toString(), session, request),
 				HttpStatus.OK);
 	}
-	
+
+	// set new password
 	@PostMapping("/setUserNewPassword")
 	public ResponseEntity<?> setUserNewPassword(@RequestBody LoginRequest formData, HttpSession session)
 			throws JsonProcessingException {
-		return new ResponseEntity<>(this.usersService.setUserNewPassword(formData, session),
-				HttpStatus.OK);
-	}
+		return new ResponseEntity<>(this.usersService.setUserNewPassword(formData, session), HttpStatus.OK);
+  }
+
 
 	@PostMapping("/accountActivate")
 	public ResponseEntity<ApiResponse<String>> accountActivate(@RequestBody String formData, HttpSession session)

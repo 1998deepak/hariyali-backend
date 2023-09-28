@@ -103,6 +103,12 @@ public class Users implements Serializable {
 
 	@Column(name = "activity_type")
 	private String activityType;
+	
+	@Column(name = "campaign_consent")
+	private String campaignConsent;
+	
+	@Column(name = "data_consent")
+	private Boolean dataConsent;
 
 	@OneToMany(mappedBy = "users", fetch = FetchType.LAZY)
 //	@JsonManagedReference

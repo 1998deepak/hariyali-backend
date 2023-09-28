@@ -109,43 +109,29 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "			 										tbl_payment_info p ON d.donation_id=p.donationId\r\n"
 			+ "			 										where d.userId=users.user_id)\r\n"
 			+ "			 							)\r\n" + "			 			)\r\n"
-			+ "			 			 AS 'Result'\r\n" + "			 FROM tbl_user_master as users,tbl_address as addr\r\n"
+			+ "			 			 AS 'Result'\r\n"
+			+ "			 FROM tbl_user_master as users,tbl_address as addr\r\n"
 			+ "			 where users.donorId IS NOT NULL AND users.is_deleted=false AND users.user_id=addr.userId", nativeQuery = true)
 	Object getAllUsersWithDonarID();
 
-	@Query(value = "SELECT user_id, webId, donorId, first_name, last_name, donor_type, organisation, approval_status, emailId, remark FROM tbl_user_master u WHERE webId IS NOT NULL AND approval_status = :status AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
-			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR first_name LIKE CONCAT(:searchText, '%') \n" +
-			" OR last_name LIKE CONCAT(:searchText, '%') OR donor_type LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%'))"
-			, countQuery = "SELECT COUNT(*) FROM tbl_user_master WHERE webId IS NOT NULL AND approval_status = :status AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null) \n" +
-			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR first_name LIKE CONCAT(:searchText, '%') \n" +
-			"OR last_name LIKE CONCAT(:searchText, '%') OR donor_type LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%'))"
-			, nativeQuery = true)
-	Page<Object[]> getAllUsersWithWebId(@Param("searchText") String searchText,
-									 @Param("status") String status,
-									 @Param("donorType") String donorType,
-									 Pageable pageable);
+	@Query(value = "SELECT user_id, webId, donorId, first_name, last_name, donor_type, organisation, approval_status, emailId, remark FROM tbl_user_master u WHERE webId IS NOT NULL AND approval_status = :status AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n"
+			+ " AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR first_name LIKE CONCAT(:searchText, '%') \n"
+			+ " OR last_name LIKE CONCAT(:searchText, '%') OR donor_type LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%'))", countQuery = "SELECT COUNT(*) FROM tbl_user_master WHERE webId IS NOT NULL AND approval_status = :status AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null) \n"
+					+ " AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR first_name LIKE CONCAT(:searchText, '%') \n"
+					+ "OR last_name LIKE CONCAT(:searchText, '%') OR donor_type LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%'))", nativeQuery = true)
+	Page<Object[]> getAllUsersWithWebId(@Param("searchText") String searchText, @Param("status") String status,
+			@Param("donorType") String donorType, Pageable pageable);
 
-	@Query(value = "SELECT JSON_ARRAYAGG( " +
-	        "JSON_OBJECT( " +
-	        "'donationId', d.donation_id, " +
-	        "'donationCode', d.donation_code, " +
-	        "'donationType', d.donation_type, " + // Add this line for donation type
-	        "'paymentInfo', JSON_OBJECT( " +
-	        "'paymentInfoId', p.paymentInfo_id, " +
-	        "'paymentDate', DATE(p.payment_date), " +
-	        "'paymentStatus', p.payment_status " +
-	        "), " +
-	        "'donorId', u.donorId, " +
-	        "'firstName', u.first_name, " +
-	        "'lastName', u.last_name " +
-	        ") " +
-	        ") AS 'Result' " +
-	        "FROM tbl_donation d " +
-	        "INNER JOIN tbl_payment_info p ON d.donation_id=p.donationId " +
-	        "INNER JOIN tbl_user_master u ON u.user_id = d.userId " +
-	        "WHERE u.emailId = ?1 AND u.is_deleted=false " +
-	        "ORDER BY p.payment_date DESC", nativeQuery = true)
-	
+	@Query(value = "SELECT JSON_ARRAYAGG( " + "JSON_OBJECT( " + "'donationId', d.donation_id, "
+			+ "'donationCode', d.donation_code, " + "'donationType', d.donation_type, " + // Add this line for donation
+																							// type
+			"'paymentInfo', JSON_OBJECT( " + "'paymentInfoId', p.paymentInfo_id, "
+			+ "'paymentDate', DATE(p.payment_date), " + "'paymentStatus', p.payment_status " + "), "
+			+ "'donorId', u.donorId, " + "'firstName', u.first_name, " + "'lastName', u.last_name " + ") "
+			+ ") AS 'Result' " + "FROM tbl_donation d " + "INNER JOIN tbl_payment_info p ON d.donation_id=p.donationId "
+			+ "INNER JOIN tbl_user_master u ON u.user_id = d.userId " + "WHERE u.emailId = ?1 AND u.is_deleted=false "
+			+ "ORDER BY p.payment_date DESC", nativeQuery = true)
+
 	Object getAllDonationOfSpecificUser(String email);
 
 	Users findByUserId(Integer userId);
@@ -174,6 +160,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "	                 'prefix', users.prefix,\r\n"
 			+ "	                 'organisation', users.organisation,\r\n"
 			+ "	                 'activityType', users.activity_type,\r\n"
+			+ "'campaignConsent',users.campaign_consent,\r\n" + "'dataConsent',CASE WHEN users.data_consent = 1 THEN 'true' ELSE 'false' END,\r\n"
 			+ "                     'panCard',users.pan_card,\r\n" + "	                 'address', (\r\n"
 			+ "	                     SELECT JSON_ARRAYAGG(\r\n" + "	                         JSON_OBJECT(\r\n"
 			+ "	                             'addressId',address.address_id,\r\n"
@@ -214,7 +201,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "			 	             ) AS Result  	          FROM tbl_user_master AS users\r\n"
 			+ "			 	          WHERE users.donorId =? AND users.is_deleted=false", nativeQuery = true)
 	Object getUserPersonalDetailsByDonorId(String donorId);
-	
+
 	@Query(value = "SELECT   	            JSON_OBJECT(\r\n"
 			+ "			 	                 'userId', users.user_id,  	                 'firstName', users.first_name,\r\n"
 			+ "			 	                 'lastName', users.last_name,\r\n"
@@ -246,56 +233,41 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	@Query(value = "SELECT * from tbl_user_master where pan_card=?1", nativeQuery = true)
 	Users getUserByPancard(String pancard);
 
-	@Query(value = "select \r\n"
-			+ "    tum.user_id AS user,\r\n"
-			+ "    td.donation_id AS donation,\r\n"
-			+ "    tup.package_id AS packages,\r\n"
-			+ "    tum.emailId AS userName,\r\n"
-			+ "    tup.package_name AS packageName, \r\n"
-			+ "    tup.amount AS amount,\r\n"
-			+ "    td.donation_type AS donationType,\r\n"
-			+ "    tum.donorId AS donarId,\r\n"
-			+ "     CASE\r\n"
-			+ "        WHEN td.donation_type = 'Gift-Donate' THEN recpt.recipient_id\r\n"
-			+ "        ELSE NULL\r\n"
-			+ "    END AS recipientId,\r\n"
-			+ "    CASE\r\n"
-			+ "        WHEN td.donation_type = 'Gift-Donate' THEN recpt.first_name\r\n"
-			+ "        ELSE NULL\r\n"
-			+ "    END AS firstName\r\n"
-			+ "FROM\r\n"
-			+ "    tbl_user_master tum\r\n"
-			+ "INNER JOIN\r\n"
-			+ "    tbl_donation td ON tum.user_id = td.userId\r\n"
-			+ "INNER JOIN\r\n"
-			+ "    tbl_user_packages tup ON tup.donationId = td.donation_id\r\n"
-			+ "    LEFT JOIN\r\n"
+	@Query(value = "select \r\n" + "    tum.user_id AS user,\r\n" + "    td.donation_id AS donation,\r\n"
+			+ "    tup.package_id AS packages,\r\n" + "    tum.emailId AS userName,\r\n"
+			+ "    tup.package_name AS packageName, \r\n" + "    tup.amount AS amount,\r\n"
+			+ "    td.donation_type AS donationType,\r\n" + "    tum.donorId AS donarId,\r\n" + "     CASE\r\n"
+			+ "        WHEN td.donation_type = 'Gift-Donate' THEN recpt.recipient_id\r\n" + "        ELSE NULL\r\n"
+			+ "    END AS recipientId,\r\n" + "    CASE\r\n"
+			+ "        WHEN td.donation_type = 'Gift-Donate' THEN recpt.first_name\r\n" + "        ELSE NULL\r\n"
+			+ "    END AS firstName\r\n" + "FROM\r\n" + "    tbl_user_master tum\r\n" + "INNER JOIN\r\n"
+			+ "    tbl_donation td ON tum.user_id = td.userId\r\n" + "INNER JOIN\r\n"
+			+ "    tbl_user_packages tup ON tup.donationId = td.donation_id\r\n" + "    LEFT JOIN\r\n"
 			+ "    tbl_recipient recpt ON recpt.donationId = td.donation_id AND td.donation_type = 'Gift-Donate'\r\n"
 			+ "    where   td.donation_type = ?1 AND tup.package_name = ?2 AND tum.planted=false", nativeQuery = true)
-	List<Map<String, Object>> getUserPlantExportExcel(String donationType,String packageName);
-	
-	@Query(value="select * from tbl_user_master as users left join tbl_donation as donation on users.user_id=donation.userId where donation.donation_id=?",nativeQuery=true)
-	public List<Users> getUserDataByDonationId(int donationId);
-	
-	@Query(value="Select * from tbl_user_master where emailId=?",nativeQuery = true)
-	Users findByEmailIdForDeletedUser(String email);
-	
-	@Query(value ="SELECT r.donorId as donorId FROM tbl_user_master r WHERE r.donorId IS NOT NULL",nativeQuery = true)
-	List<String> getAllDonorId();
-	
-	@Query(value ="SELECT r.emailId as emailId FROM tbl_user_master r WHERE r.emailId IS NOT NULL",nativeQuery = true)
-    List<String> getAllEmailId();
+	List<Map<String, Object>> getUserPlantExportExcel(String donationType, String packageName);
 
-	
-	@Query(value="select * from tbl_user_master as users left join tbl_donation as donation on users.user_id=donation.userId where donation.donation_id=?",nativeQuery=true)
+	@Query(value = "select * from tbl_user_master as users left join tbl_donation as donation on users.user_id=donation.userId where donation.donation_id=?", nativeQuery = true)
+	public List<Users> getUserDataByDonationId(int donationId);
+
+	@Query(value = "Select * from tbl_user_master where emailId=?", nativeQuery = true)
+	Users findByEmailIdForDeletedUser(String email);
+
+	@Query(value = "SELECT r.donorId as donorId FROM tbl_user_master r WHERE r.donorId IS NOT NULL", nativeQuery = true)
+	List<String> getAllDonorId();
+
+	@Query(value = "SELECT r.emailId as emailId FROM tbl_user_master r WHERE r.emailId IS NOT NULL", nativeQuery = true)
+	List<String> getAllEmailId();
+
+	@Query(value = "select * from tbl_user_master as users left join tbl_donation as donation on users.user_id=donation.userId where donation.donation_id=?", nativeQuery = true)
 	public Users getUserByDonationId(int donationId);
-	
-	@Query(value="select donorId from tbl_user_master where emailId=?",nativeQuery = true)
+
+	@Query(value = "select donorId from tbl_user_master where emailId=?", nativeQuery = true)
 	public String findDonarIdByEmail(String email);
 
-	@Query(value = "SELECT donorId FROM tbl_user_master ORDER BY donorId DESC LIMIT 1",nativeQuery = true)
+	@Query(value = "SELECT donorId FROM tbl_user_master ORDER BY donorId DESC LIMIT 1", nativeQuery = true)
 	String getLastDonorID();
-  
+
 	Users findByPanCard(String panCard);
 
 }
