@@ -92,10 +92,7 @@ public class JwtController {
 			}
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
-			if(e instanceof ConcurrentSessionException){
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-			}
-			return new ResponseEntity<>(new CustomException(e.getMessage()), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
 
