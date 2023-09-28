@@ -149,7 +149,7 @@ public class UsersController {
 		donorId = encryptionDecryptionUtil.decrypt(donorId);
 		return new ResponseEntity<>(usersService.getUserPersonalDetailsByDonorId(donorId), HttpStatus.OK);
 	}
-
+  
 	// forget password api
 	@PostMapping("/forgetPassword/{donorId}")
 	public ResponseEntity<?> forgetPassword(@PathVariable String donorId, HttpSession session)
@@ -174,6 +174,7 @@ public class UsersController {
 			throws JsonProcessingException {
 		return new ResponseEntity<>(this.usersService.setUserNewPassword(formData, session), HttpStatus.OK);
   }
+
 
 	@PostMapping("/accountActivate")
 	public ResponseEntity<ApiResponse<String>> accountActivate(@RequestBody String formData, HttpSession session)

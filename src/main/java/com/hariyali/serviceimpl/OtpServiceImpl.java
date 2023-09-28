@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import com.hariyali.entity.OtpModel;
@@ -58,8 +56,7 @@ public class OtpServiceImpl {
 		try {
 			ccServiceEmailAPI.sendCorrespondenceMail(toEmail, "Login Otp", body);
 		} catch (EmailNotConfiguredException e) {
-			e.printStackTrace();
-			System.out.println("Exception:" + e.getMessage());
+			throw new EmailNotConfiguredException(e.getMessage());
 		}
 	}
 
