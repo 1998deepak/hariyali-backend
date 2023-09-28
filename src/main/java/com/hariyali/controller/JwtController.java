@@ -3,6 +3,7 @@ package com.hariyali.controller;
 import javax.servlet.http.HttpServletRequest;
 
 import com.hariyali.exceptions.ConcurrentSessionException;
+import com.hariyali.exceptions.CustomException;
 import com.hariyali.service.UsersService;
 import com.hariyali.utils.EncryptionDecryptionUtil;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.LoginRequest;
 import com.hariyali.entity.OtpModel;
 import com.hariyali.entity.Users;
+import com.hariyali.exceptions.CustomException;
 import com.hariyali.exceptions.CustomExceptionNodataFound;
 import com.hariyali.repository.OtpRepository;
 import com.hariyali.repository.UsersRepository;
@@ -93,7 +95,7 @@ public class JwtController {
 			if(e instanceof ConcurrentSessionException){
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 			}
-			return new ResponseEntity<>("Invalid Username or Password", HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(new CustomException(e.getMessage()), HttpStatus.BAD_REQUEST);
 		}
 	}
 

@@ -16,7 +16,6 @@ import com.hariyali.EnumConstants;
 import com.hariyali.dto.PlantationMasterDTO;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.Receipt;
-import com.hariyali.entity.UserPackages;
 import com.hariyali.entity.Users;
 import com.hariyali.exceptions.EmailNotConfiguredException;
 import com.hariyali.repository.DonationRepository;
@@ -28,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class EmailService {
-	
+
 	@Autowired
 	UsersRepository userRepository;
 
@@ -37,7 +36,7 @@ public class EmailService {
 
 	@Autowired
 	CCServiceEmailAPI ccServiceEmailAPI;
-	
+
 	@Value("${file.path}")
 	String FILE_PATH;
 
@@ -69,15 +68,17 @@ public class EmailService {
 		log.info("Mail send");
 	}
 
-	public void sendGiftingLetterEmail(Donation donation,Users recipientData, String donationEvent,String path) {
-		int noOfPlant=donationRepository.getNoOfPlants(donation.getDonationId());
+	public void sendGiftingLetterEmail(Donation donation, Users recipientData, String donationEvent, String path) {
+		int noOfPlant = donationRepository.getNoOfPlants(donation.getDonationId());
+		String giftorMail = userRepository.getGiftorNameByDonation(donation.getDonationId());
+		String giftorName = userRepository.getGiftorEmailByDonation(donation.getDonationId());
 		FileSystemResource resource = new FileSystemResource(path);
 		File[] files = { resource.getFile() };
 		String subject = EnumConstants.GIFTING_MSG_SUBJECT;
 		String body = EnumConstants.GIFTING_MSG_BODY;
-
-		String mailBody = String.format(body, recipientData.getEmailId());
-		ccServiceEmailAPI.sendCorrespondenceMail(recipientData.getEmailId(), subject, mailBody);
+		String mailBody = String.format(body, recipientData.getFirstName(), noOfPlant, giftorName);
+		ccServiceEmailAPI.sendCorrespondenceMailForGift(recipientData.getEmailId(), subject, mailBody, giftorMail,
+				files);
 		log.info("Mail Sent...");
 	}
 
@@ -119,15 +120,15 @@ public class EmailService {
 		ccServiceEmailAPI.sendPaymentsMail(user.getEmailId(), "Project Hariyali –Receipt towards your donation",
 				mailBody, files);
 	}
-  
-public void sendThankyouLatter(String to, Users user) {
+
+	public void sendThankyouLatter(String to, Users user) {
 		String subject = EnumConstants.thankYouLetterSuject;
 		String body = EnumConstants.thankYouLetterContent;
 
 		FileSystemResource resource = null;
 		try {
 			resource = new FileSystemResource(getFileFromPath("thankyouletter.jpg").toString());
-			System.out.println("Thanks=>"+getFileFromPath("thankyouletter.jpg").toString());
+			System.out.println("Thanks=>" + getFileFromPath("thankyouletter.jpg").toString());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -139,8 +140,8 @@ public void sendThankyouLatter(String to, Users user) {
 	}
 
 	public Path getFileFromPath(String filename) throws IOException {
-		
-		Path path = Paths.get(FILE_PATH+"/IMAGES/" + filename);
+
+		Path path = Paths.get(FILE_PATH + "/IMAGES/" + filename);
 		System.out.println("Path:" + path);
 		return path;
 	}
@@ -161,61 +162,48 @@ public void sendThankyouLatter(String to, Users user) {
 		ccServiceEmailAPI.sendCorrespondenceMail(user.getEmailId(), subject, mailBody);
 
 	}
-	
-	public void sendPlantationMail(Users user,PlantationMasterDTO plantationMasterDTO) {
-		String subject="Project Hariyali – Plantation Report";
-		String content="Dear %s<br>"
-				+ "Thank you for contributing to Project Hariyali.<br>"
+
+	public void sendPlantationMail(Users user, PlantationMasterDTO plantationMasterDTO) {
+		String subject = "Project Hariyali – Plantation Report";
+		String content = "Dear %s<br>" + "Thank you for contributing to Project Hariyali.<br>"
 				+ "For the donation dated,%s,%d plant/s have been planted in %s %s in the village %s, in the state of %s.<br>"
 				+ "&nbsp;&nbsp; We will be taking care of your plants for two years to ensure  its optimum growth and nurturing in the initial years for 100% survival of the sapling.  <br>"
-				+ "Thanks once again.<br>"
-				+ "<br>"
-				+ "Team Hariyali <br>"
-				+ "Mahindra Foundation<br>"
-				+ "3rd Floor, Cecil Court, Near Regal Cinema,<br>"
-				+ "Mahakavi Bushan Marg, Colaba, <br>"
+				+ "Thanks once again.<br>" + "<br>" + "Team Hariyali <br>" + "Mahindra Foundation<br>"
+				+ "3rd Floor, Cecil Court, Near Regal Cinema,<br>" + "Mahakavi Bushan Marg, Colaba, <br>"
 				+ "Mumbai, Maharashtra – 400001<br>"
-				+"<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
+				+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
 				+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
 		SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
-        String year = yearFormat.format(plantationMasterDTO.getPlantationDate());
-		String mailBody = String.format(content,user.getFirstName(),plantationMasterDTO.getPlantationDateString(), plantationMasterDTO.getNoOfPlantsPlanted(), plantationMasterDTO.getSeason(),year,plantationMasterDTO.getVillage(),plantationMasterDTO.getState());
+		String year = yearFormat.format(plantationMasterDTO.getPlantationDate());
+		String mailBody = String.format(content, user.getFirstName(), plantationMasterDTO.getPlantationDateString(),
+				plantationMasterDTO.getNoOfPlantsPlanted(), plantationMasterDTO.getSeason(), year,
+				plantationMasterDTO.getVillage(), plantationMasterDTO.getState());
 		ccServiceEmailAPI.sendCorrespondenceMail(user.getEmailId(), subject, mailBody);
 	}
-	
-	public void sendFirstAnnualPlantationMail(Users user,PlantationMasterDTO plantationMasterDTO) {
-		String subject="Project Hariyali – 1st Annual Report";
-		String content="Dear %s<br>"
-				+ "Thank you for contributing to Project Hariyali.	<br>"
+
+	public void sendFirstAnnualPlantationMail(Users user, PlantationMasterDTO plantationMasterDTO) {
+		String subject = "Project Hariyali – 1st Annual Report";
+		String content = "Dear %s<br>" + "Thank you for contributing to Project Hariyali.	<br>"
 				+ "For the donations dated – __<DD-MON-YYYY>__,  we are happy to report that <number of 	plants> plants are healthy and growing well.<br>"
-				+ "&nbsp;&nbsp;We thank you once again for your contribution to our planet earth.<br>"
-				+ "<br>"
-				+ "Team Hariyali <br>"
-				+ "Mahindra Foundation<br>"
-				+ "3rd Floor, Cecil Court, Near Regal Cinema,<br>"
-				+ "Mahakavi Bushan Marg, Colaba, <br>"
-				+ "Mumbai, Maharashtra – 400001<br>"
-				+"<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
+				+ "&nbsp;&nbsp;We thank you once again for your contribution to our planet earth.<br>" + "<br>"
+				+ "Team Hariyali <br>" + "Mahindra Foundation<br>" + "3rd Floor, Cecil Court, Near Regal Cinema,<br>"
+				+ "Mahakavi Bushan Marg, Colaba, <br>" + "Mumbai, Maharashtra – 400001<br>"
+				+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
 				+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
-		String mailBody = String.format(content,user.getFirstName());
+		String mailBody = String.format(content, user.getFirstName());
 		ccServiceEmailAPI.sendCorrespondenceMail(user.getEmailId(), subject, mailBody);
 	}
-	
-	public void sendSecondAnnualPlantationMail(Users user,PlantationMasterDTO plantationMasterDTO) {
-		String subject="Project Hariyali – 2nd Annual Report";
-		String content="Dear %s<br>"
-				+ "Thank you for contributing to Project Hariyali.	<br>"
+
+	public void sendSecondAnnualPlantationMail(Users user, PlantationMasterDTO plantationMasterDTO) {
+		String subject = "Project Hariyali – 2nd Annual Report";
+		String content = "Dear %s<br>" + "Thank you for contributing to Project Hariyali.	<br>"
 				+ "For the donations dated – __<DD-MON-YYYY>__,  we are happy to report that <number of 	plants> plants are healthy and growing well.<br>"
-				+ "&nbsp;&nbsp;We thank you once again for your contribution to our planet earth.<br>"
-				+ "<br>"
-				+ "Team Hariyali <br>"
-				+ "Mahindra Foundation<br>"
-				+ "3rd Floor, Cecil Court, Near Regal Cinema,<br>"
-				+ "Mahakavi Bushan Marg, Colaba, <br>"
-				+ "Mumbai, Maharashtra – 400001<br>"
-				+"<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
+				+ "&nbsp;&nbsp;We thank you once again for your contribution to our planet earth.<br>" + "<br>"
+				+ "Team Hariyali <br>" + "Mahindra Foundation<br>" + "3rd Floor, Cecil Court, Near Regal Cinema,<br>"
+				+ "Mahakavi Bushan Marg, Colaba, <br>" + "Mumbai, Maharashtra – 400001<br>"
+				+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
 				+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
-		String mailBody = String.format(content,user.getFirstName());
+		String mailBody = String.format(content, user.getFirstName());
 		ccServiceEmailAPI.sendCorrespondenceMail(user.getEmailId(), subject, mailBody);
 	}
 }
