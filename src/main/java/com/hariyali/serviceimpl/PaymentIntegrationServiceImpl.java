@@ -173,7 +173,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 						"CERTIFICATE", recipientData);
 				emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
 						user);
-				emailService.sendGiftingLetterEmail(recipientData, donation.getDonationEvent(),responseCertifiate.get("outputFile"));
+				emailService.sendGiftingLetterEmail(donation,recipientData, donation.getDonationEvent(),responseCertifiate.get("outputFile"));
 			}
 			// Call Gogreen API
 			if (paymentInfo.getPaymentStatus().equalsIgnoreCase("SUCCESS")) {

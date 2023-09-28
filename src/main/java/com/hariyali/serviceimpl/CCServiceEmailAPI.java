@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -70,6 +69,22 @@ public class CCServiceEmailAPI {
 		log.info("toUser:" + Arrays.asList(toUser.split(",")));
 		try {
 			sendEmail(emailContentDto, null);
+		} catch (IOException e) {
+			log.info(e.getMessage());
+			throw new RuntimeException(e);			
+		}
+
+	}
+	
+	public void sendCorrespondenceMailForGift(String toUser, String subject, String emailContent,String ccMail, File[] files)
+			throws EmailNotConfiguredException {
+		String mailBody = ("<!DOCTYPE html>\n" + "<html>\n" + "<head>\n" + "</head>\n" + "<body>\n" + emailContent
+				+ "</body>\n" + "</html>");
+		EmailContentDto emailContentDto = new EmailContentDto("correspondence@hariyali.org.in",
+				Arrays.asList(toUser.split(",")), Arrays.asList(ccMail.split(",")), null, subject, mailBody, null, null, true, null);
+		log.info("toUser:" + Arrays.asList(toUser.split(",")));
+		try {
+			sendEmail(emailContentDto, files);
 		} catch (IOException e) {
 			log.info(e.getMessage());
 			throw new RuntimeException(e);			

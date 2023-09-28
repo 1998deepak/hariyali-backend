@@ -201,4 +201,7 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 	
 	@Query(value = "SELECT * FROM tbl_donation where userId in(select user_id from tbl_user_master where pan_card=?1 )",nativeQuery = true)
 	public Donation findByUserPan(String panCard);
+	
+	@Query(value="select no_of_bouquets from tbl_user_packages where donationId=?",nativeQuery = true)
+	public int getNoOfPlants(int donationId);
 }

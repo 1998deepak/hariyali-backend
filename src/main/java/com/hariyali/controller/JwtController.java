@@ -23,6 +23,7 @@ import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.LoginRequest;
 import com.hariyali.entity.OtpModel;
 import com.hariyali.entity.Users;
+import com.hariyali.exceptions.CustomException;
 import com.hariyali.exceptions.CustomExceptionNodataFound;
 import com.hariyali.repository.OtpRepository;
 import com.hariyali.repository.UsersRepository;
@@ -85,7 +86,7 @@ public class JwtController {
 			}
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
-			return new ResponseEntity<>("Invalid Username or Password", HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(new CustomException(e.getMessage()), HttpStatus.BAD_REQUEST);
 		}
 	}
 
