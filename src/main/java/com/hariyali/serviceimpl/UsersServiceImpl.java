@@ -134,6 +134,9 @@ public class UsersServiceImpl implements UsersService {
 
 	@Autowired
 	CommonService commonService;
+	
+	@Autowired
+	JwtServiceImpl jwtService;
 
 	@Autowired
 	private EncryptionDecryptionUtil encryptionDecryptionUtil;
@@ -644,12 +647,12 @@ public class UsersServiceImpl implements UsersService {
 		Random random = new Random();
 		int otpValue = random.nextInt((int) Math.pow(10, 6));
 		String otp = String.format("%0" + 6 + "d", otpValue);
-		Users user = this.usersRepository.findByDonorId(donorId);
+		Users user = jwtService.findUserByDonorIdOrEmailId(donorId);
 		if (user != null) {
-			String body = "Dear Donor,<br><br>" 
-					+ "<br>Please use OTP to set new password - " + otp + "<br><br>-Team Hariyali<br><br>"
+			String body = "Dear Donor,<br><br>" + "<br>Please use OTP to set new password - " + otp
+					+ "<br><br>-Team Hariyali<br><br>"
 					+ "PS: For any support or queries please reach out to us at <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a>";
-			emailService.sendSimpleEmail(user.getEmailId(), "Project Hariyali - Forgot Password",body);
+			emailService.sendSimpleEmail(user.getEmailId(), "Project Hariyali - Forgot Password", body);
 		} else {
 			throw new CustomException("User not forund");
 		}
@@ -933,7 +936,7 @@ public class UsersServiceImpl implements UsersService {
 						if (d.getDonationType().equalsIgnoreCase("gift-donate")) {
 							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
 									EnumConstants.content, user);
-							emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
+							emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent(),null);
 							emailService.sendReceiptWithAttachment(user, d.getOrderId(), receipt);
 
 						}

@@ -39,9 +39,12 @@ public class CommonService {
 	private DocumentRepository documentRepository;
 
 	String FILE_PATH = "C:\\Users\\admin\\Desktop\\GCP_MOUNT_AREA";
+	
+//	String FILE_PATH1="C:\\Users\\DELL\\Desktop\\New folder";
 
 	// method to generate new donor or donation id
 	public String createDonarIDORDonationID(String idForEntity) {
+		System.err.println(idForEntity);
 		LocalDate currentDate = LocalDate.now();
 		int year = currentDate.getYear();
 		int month = currentDate.getMonthValue();
@@ -102,26 +105,29 @@ public class CommonService {
 
 	public void saveDocumentDetails(String idForEntity, String fileName, String filePath, String fileType,
 			String docType, Users users) {
+		System.err.println("idForEntity"+idForEntity);
 		LocalDate currentDate = LocalDate.now();
 		int year = currentDate.getYear();
 		Document document = new Document();
 		document.setDocId(createDonarIDORDonationID(idForEntity));
+		System.err.println(createDonarIDORDonationID(idForEntity));
 		document.setFileName(fileName);
 		document.setFilePath(filePath);
 		document.setFileType(fileType);
 		document.setDocType(docType);
 		document.setCreatedDate(new Date());
 		document.setUpdatedDate(new Date());
+		document.setUsers(users);
 		if (users != null) {
 			document.setCreatedBy(users.getCreatedBy() == null ? "" : users.getCreatedBy());
 			document.setModifiedBy(users.getModifiedBy() == null ? "" : users.getModifiedBy());
 		}
 		document.setYear(year);
-		Document document2 = documentRepository.findByYearAndDocType(year, docType);
-		if (document2 != null) {
-			document.setId(document2.getId());
-			documentRepository.save(document);
-		}
+//		Document document2 = documentRepository.findByYearAndDocTypeAndUsers(year, docType,users);
+//		if (document2 != null) {
+//			document.setId(document2.getId());
+//			documentRepository.save(document);
+//		}
 		documentRepository.save(document);
 
 	}

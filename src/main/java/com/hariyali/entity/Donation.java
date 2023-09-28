@@ -119,5 +119,8 @@ public class Donation implements Serializable {
 
 	@Column(name = "approval_date")
 	private Date approvalDate;
+	
+	@Column(name = "content")
+	private String giftContent;
 
 }

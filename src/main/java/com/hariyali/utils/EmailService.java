@@ -2,12 +2,12 @@ package com.hariyali.utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +16,7 @@ import com.hariyali.EnumConstants;
 import com.hariyali.dto.PlantationMasterDTO;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.Receipt;
+import com.hariyali.entity.UserPackages;
 import com.hariyali.entity.Users;
 import com.hariyali.exceptions.EmailNotConfiguredException;
 import com.hariyali.repository.DonationRepository;
@@ -61,16 +62,20 @@ public class EmailService {
 	public void sendWelcomeLetterMail(String to, String subject, String text, Users user) {
 		String password = commonService.generatePassword();
 		user.setPassword(passwordEncoder.encode(password));
-		log.info(password);
 		userRepository.save(user);
+		log.info("Password set");
 		String body = String.format(text, user.getFirstName(), user.getEmailId(), password);
 		ccServiceEmailAPI.sendCorrespondenceMail(to, subject, body);
 		log.info("Mail send");
 	}
 
-	public void sendGiftingLetterEmail(Users recipientData, String donationEvent) {
+	public void sendGiftingLetterEmail(Donation donation,Users recipientData, String donationEvent,String path) {
+		int noOfPlant=donationRepository.getNoOfPlants(donation.getDonationId());
+		FileSystemResource resource = new FileSystemResource(path);
+		File[] files = { resource.getFile() };
 		String subject = EnumConstants.GIFTING_MSG_SUBJECT;
 		String body = EnumConstants.GIFTING_MSG_BODY;
+
 		String mailBody = String.format(body, recipientData.getEmailId());
 		ccServiceEmailAPI.sendCorrespondenceMail(recipientData.getEmailId(), subject, mailBody);
 		log.info("Mail Sent...");

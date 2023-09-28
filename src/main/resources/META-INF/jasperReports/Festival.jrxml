@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Festival" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="43b513db-242e-4f5c-ad8d-43780cbf7651">
+	<parameter name="RecipientName" class="java.lang.String"/>
+	<parameter name="donarName" class="java.lang.String"/>
+	<parameter name="messageContent" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="555" splitType="Stretch">
+			<image>
+				<reportElement x="50" y="10" width="676" height="530" uuid="e2741409-ab54-40a0-baf1-b14bfba28f7f"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<imageExpression><![CDATA["D:/Others/Hariyali 16-09-2023/Report Design/Image20230916191731.jpg"]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement x="200" y="160" width="430" height="50" uuid="9572cecd-e58a-4450-85a9-b12d0171f1f7"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="26" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Dear " +$P{RecipientName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="110" y="227" width="600" height="100" uuid="6cc945c7-de44-4cb6-b288-f03e39394c74"/>
+				<textElement textAlignment="Center">
+					<font size="20"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{messageContent}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="110" y="327" width="600" height="62" uuid="14783cf3-2a2f-447c-a2fa-587739ce986c"/>
+				<textElement textAlignment="Center">
+					<font size="20"/>
+				</textElement>
+				<text><![CDATA[Thanks to this plantation, we are now hopeful of leaving behind a greener & healthier environment for future generations]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="313" y="389" width="180" height="30" uuid="eba194dc-9f60-4fde-afe9-1c9d23e96ac4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="20"/>
+				</textElement>
+				<text><![CDATA[By]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="200" y="450" width="410" height="30" uuid="236846fa-4519-4f92-9dd8-7a5f20124c6e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="20"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{donarName}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>
