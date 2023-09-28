@@ -144,4 +144,7 @@ public class Users implements Serializable {
 	@Column(name = "remark")
 	private String remark;
 
+	@Column(name = "active_session")
+	private Integer activeSession = 0;
+
 }

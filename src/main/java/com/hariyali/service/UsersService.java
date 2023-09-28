@@ -70,6 +70,7 @@ public interface UsersService {
 	public List<String> getAllDonarId();
 
 	ApiResponse<String> getUserDonarId(String email);
+	ApiResponse<String> changePassword(LoginRequest request, String token);
 
 	List<String> getAllUserIds();
 
