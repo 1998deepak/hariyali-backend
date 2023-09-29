@@ -709,6 +709,7 @@ public class DonationServiceImpl implements DonationService {
 					.map(data -> modelMapper.map(data, DonationDTO.class)).collect(Collectors.toList());
 			response.setData(donationDTOS);
 			response.setTotalPages(result.getTotalPages());
+			response.setTotalRecords(result.getTotalElements());
 			response.setStatus(EnumConstants.SUCCESS);
 			response.setStatusCode(HttpStatus.OK.value());
 			response.setMessage("Data fetched successfully..!!");
