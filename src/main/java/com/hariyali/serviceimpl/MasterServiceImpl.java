@@ -32,9 +32,9 @@ public class MasterServiceImpl implements MasterService {
 	}
 
 	@Override
-	public List<State> getAllStateByCountryId(long countryId) {
+	public List<State> getAllStateByCountryId(String countryCode) {
 
-		return stateRepository.findByCountryId(countryId);
+		return stateRepository.findByCountryCode(countryCode);
 	}
 
 	@Override

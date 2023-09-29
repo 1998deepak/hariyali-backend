@@ -12,4 +12,6 @@ public interface StateRepository extends JpaRepository<State, Long> {
 
 	List<State> findByCountryId(long countryId);
 
+	List<State> findByCountryCode(String countryCode);
+
 }

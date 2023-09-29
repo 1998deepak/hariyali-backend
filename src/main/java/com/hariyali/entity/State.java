@@ -1,7 +1,5 @@
 package com.hariyali.entity;
 
-import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -24,9 +22,9 @@ public class State {
 	private Long id;
 	@Column(name="created_by")
 	private String createdBy;
-	
+		
 	@Column(name="created_date")
-	private Date createdDate;
+	private String createdDate;
 	
 	@Column(name="is_active")
 	private Boolean isActive;
@@ -35,7 +33,7 @@ public class State {
 	private String updatedBy;
 	
 	@Column(name="updated_date")
-	private Date updatedDate;
+	private String updatedDate;
 	
 	@Column(name="country_code")
 	private String countryCode;
