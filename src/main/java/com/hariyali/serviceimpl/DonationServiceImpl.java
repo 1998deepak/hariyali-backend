@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -516,7 +517,9 @@ public class DonationServiceImpl implements DonationService {
 			queryString += "&redirect_url=" + gatewayConfiguration.getRedirectURL();
 			queryString += "&cancel_url=" + gatewayConfiguration.getRedirectURL();
 			queryString += "&language=EN";
-			queryString += "&billing_name=" + usersDTO.getFirstName() + " " + usersDTO.getLastName();
+			queryString += "&billing_name=" + ofNullable(usersDTO.getFirstName()).filter(StringUtils::isNotEmpty)
+					.orElse(resulEntity.getFirstName()) + " " + ofNullable(usersDTO.getLastName())
+					.filter(StringUtils::isNotEmpty).orElse(usersDTO.getLastName());
 			AddressDTO address = ofNullable(usersDTO.getAddress()).orElse(resulEntity.getAddress().stream()
 					.map(addressEntity -> modelMapper.map(addressEntity, AddressDTO.class))
 					.collect(Collectors.toList())).stream().findFirst().get();
@@ -526,8 +529,8 @@ public class DonationServiceImpl implements DonationService {
 			queryString += "&billing_state=" + address.getState();
 			queryString += "&billing_zip=" + address.getPostalCode();
 			queryString += "&billing_country=" + address.getCountry();
-			queryString += "&billing_tel=" + usersDTO.getMobileNo();
-			queryString += "&billing_email=" + usersDTO.getEmailId();
+			queryString += "&billing_tel=" + ofNullable(usersDTO.getMobileNo()).filter(StringUtils::isNotEmpty).orElse(resulEntity.getMobileNo());
+			queryString += "&billing_email=" + ofNullable(usersDTO.getEmailId()).filter(StringUtils::isNotEmpty).orElse(resulEntity.getEmailId());
 			log.info(queryString);
 			AesCryptUtil aesUtil = new AesCryptUtil(gatewayConfiguration.getAccessKey());
 			String encRequest = aesUtil.encrypt(queryString);
