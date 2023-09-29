@@ -3,8 +3,12 @@ package com.hariyali.serviceimpl;
 import static java.util.Objects.isNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
-
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Base64;
+import net.sf.jasperreports.engine.JREmptyDataSource;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,6 +30,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 
 import com.ccavenue.security.AesCryptUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -490,6 +495,10 @@ public class DonationServiceImpl implements DonationService {
 				if (!("INDIA").equalsIgnoreCase(usersDTO.getCitizenship())) {
 					response.setStatus(EnumConstants.OTHERTHANINDIA);
 					response.setGatewayURL("/FcraAccount");
+					DonationDTO donationDTO = new DonationDTO();
+					Double amount=usersDTO.getDonations().stream().map(d->d.getUserPackage()).findFirst().get().stream().map(u->u.getAmount()).findFirst().get();
+					donationDTO.setTotalAmount(amount);
+					response.setData(donationDTO);
 					return response;
 				}
 			} else {
@@ -497,6 +506,10 @@ public class DonationServiceImpl implements DonationService {
 					if (!("INDIA").equalsIgnoreCase(usersDTO.getCitizenship())) {
 						response.setStatus(EnumConstants.OTHERTHANINDIA);
 						response.setGatewayURL("/FcraAccount");
+						DonationDTO donationDTO = new DonationDTO();
+						Double amount=usersDTO.getDonations().stream().map(d->d.getUserPackage()).findFirst().get().stream().map(u->u.getAmount()).findFirst().get();
+						donationDTO.setTotalAmount(amount);
+						response.setData(donationDTO);
 						return response;
 					}
 				}
@@ -717,22 +730,22 @@ public class DonationServiceImpl implements DonationService {
 
 			if (donationEvent.equalsIgnoreCase("Special day")) {
 				reportName = "SpecialDay.jrxml";
-				imagesPathName = jasperImagesPath + "/" + "specialDay.jpg";
+				imagesPathName = jasperImagesPath + File.separator + "specialDay.jpg";
 			} else if (donationEvent.equalsIgnoreCase("Festival")) {
 				reportName = "Festival.jrxml";
-				imagesPathName = jasperImagesPath + "/" + "festival.jpg";
+				imagesPathName = jasperImagesPath + File.separator + "festival.jpg";
 
 			} else if (donationEvent.equalsIgnoreCase("Achievement")) {
 				reportName = "Achievement.jrxml";
-				imagesPathName = jasperImagesPath + "/" + "Achievement.jpg";
+				imagesPathName = jasperImagesPath + File.separator + "Achievement.jpg";
 
 			} else if (donationEvent.equalsIgnoreCase("Memorial Tribute")) {
 				reportName = "MemorialTribute.jrxml";
-				imagesPathName = jasperImagesPath + "/" + "memorialTribute.jpg";
+				imagesPathName = jasperImagesPath + File.separator + "memorialTribute.jpg";
 
 			} else if (donationEvent.equalsIgnoreCase("Simple Donation")) {
 				reportName = "SimpleDonation.jrxml";
-				imagesPathName = jasperImagesPath + "/" + "simpleDonation.jpg";
+				imagesPathName = jasperImagesPath + File.separator + "simpleDonation.jpg";
 
 			}
 
@@ -756,8 +769,8 @@ public class DonationServiceImpl implements DonationService {
 			File outputFile = null;
 			String path = commonService.getDonarFileFilePath(emailID);
 			if (path != null) {
-				String pdfFilePath = path + "/" + donationEvent + ".pdf";
-
+				String pdfFilePath = path + File.separator + donationEvent + ".pdf";
+				log.info("Pdf file path=>" + pdfFilePath);
 				outputFile = new File(pdfFilePath);
 				JasperExportManager.exportReportToPdfFile(jasperPrint, pdfFilePath); // Export to PDF
 				System.err.println(outputFile.getName());

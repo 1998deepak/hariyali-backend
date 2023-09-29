@@ -1,7 +1,5 @@
 package com.hariyali.entity;
 
-import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -17,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tbl_citzenship")
+@Table(name = "tbl_citizenship")
 public class Citzenship {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +25,7 @@ public class Citzenship {
 	private String createdBy;
 
 	@Column(name = "created_date")
-	private Date createdDate;
+	private String createdDate;
 
 	@Column(name = "is_active")
 	private Boolean isActive;
@@ -36,7 +34,7 @@ public class Citzenship {
 	private String updatedBy;
 
 	@Column(name = "updated_date")
-	private Date updatedDate;
+	private String updatedDate;
 	
 	@Column(name = "citizenship_name")
 	private String citizenshipName;

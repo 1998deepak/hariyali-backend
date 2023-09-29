@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hariyali.entity.Citzenship;
@@ -25,10 +26,10 @@ public class MasterController {
 		
 		return masterService.getAllCountry();
 	}
-	@GetMapping("/getAllStateByCountryId/{countryId}")
-	public List<State> getAllStateByCountryId(@PathVariable long countryId) {
+	@GetMapping("/getAllStateByCountryId")
+	public List<State> getAllStateByCountryId(@RequestParam String countryCode) {
 		
-		return masterService.getAllStateByCountryId(countryId);
+		return masterService.getAllStateByCountryId(countryCode.trim());
 	}
 	@GetMapping("/getAllCitizensip")
 	public List<Citzenship> getAllCitizensip() {

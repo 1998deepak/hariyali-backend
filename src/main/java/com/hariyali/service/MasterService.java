@@ -10,7 +10,7 @@ public interface MasterService {
 
 	public List<Country> getAllCountry();
 
-	public List<State> getAllStateByCountryId(long countryId);
+	public List<State> getAllStateByCountryId(String countryCode);
 
 	public List<Citzenship> getAllCitizensip();
 

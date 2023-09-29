@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -260,6 +261,12 @@ public class UsersServiceImpl implements UsersService {
 		response.setEncRequest(apiResponse.getEncRequest());
 		response.setStatus(apiResponse.getStatus());
 		response.setAccessCode(apiResponse.getAccessCode());
+		if(("OTHERTHANINDIA").equalsIgnoreCase(apiResponse.getStatus())) {
+			UsersDTO usersDTO2=new UsersDTO();
+			usersDTO2.setDonations(Arrays.asList(apiResponse.getData()));
+			response.setData(usersDTO2);
+		}
+		
 		return response;
 
 	}
