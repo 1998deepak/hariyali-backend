@@ -429,14 +429,13 @@ public class UsersServiceImpl implements UsersService {
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
 			if (entity.getDonorId() != null && entity.getWebId() == null) {
-				response.setMessage("Donor with " + entity.getEmailId()
-						+ " is already registered, Kindly do click here to login or click on proceed button to continue your donation!");
-			} else{
-				response.setMessage("User found Successfully");
+				throw new CustomExceptionDataAlreadyExists("Donor with " + entity.getEmailId()
+						+ " is already registered, Kindly do click here to login and continue your donation!");
 			}
 			response.setData(modelMapper.map(entity, UsersDTO.class));
 			response.setStatus(EnumConstants.SUCCESS);
 			response.setStatusCode(HttpStatus.OK.value());
+			response.setMessage("User found Successfully");
 		} else
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
 		return response;
