@@ -166,7 +166,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 			if (donation.getDonationType().equalsIgnoreCase("gift-donate")) {
 				String recipientEmail = donation.getRecipient().get(0).getEmailId();
 				Users recipientData = userRepository.findByEmailId(recipientEmail);
-				String fullNameOfDonar=recipientData.getFirstName()+" "+recipientData.getLastName();
+				String fullNameOfDonar=user.getFirstName()+" "+user.getLastName();
 				Map<String,String> responseCertifiate =donationServiceImpl.generateCertificate(recipientData.getFirstName(),donation.getGiftContent(),donation.getDonationEvent(),fullNameOfDonar,recipientData.getEmailId());			
 				commonService.saveDocumentDetails("DOCUMENT",
 						responseCertifiate.get("filePath"),responseCertifiate.get("outputFile"), "PDF",
