@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,13 +23,14 @@ import com.hariyali.exceptions.EmailNotConfiguredException;
 import com.hariyali.repository.DonationRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.serviceimpl.CCServiceEmailAPI;
+import com.hariyali.serviceimpl.DonationServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 public class EmailService {
-	
+
 	@Autowired
 	UsersRepository userRepository;
 
@@ -37,7 +39,7 @@ public class EmailService {
 
 	@Autowired
 	CCServiceEmailAPI ccServiceEmailAPI;
-	
+
 	@Value("${file.path}")
 	String FILE_PATH;
 
@@ -46,6 +48,9 @@ public class EmailService {
 
 	@Autowired
 	private CommonService commonService;
+
+	@Autowired
+	DonationServiceImpl donationServiceImpl;
 
 	public void sendSimpleEmail(String toEmail, String subject, String body) {
 		ccServiceEmailAPI.sendCorrespondenceMail(toEmail, subject, body);
@@ -126,19 +131,16 @@ public class EmailService {
 	public void sendThankyouLatter(String to, Users user) {
 		String subject = EnumConstants.thankYouLetterSuject;
 		String body = EnumConstants.thankYouLetterContent;
-
 		FileSystemResource resource = null;
-		try {
-			resource = new FileSystemResource(getFileFromPath("thankyouletter.jpg").toString());
-			System.out.println("Thanks=>" + getFileFromPath("thankyouletter.jpg").toString());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		File[] files = { resource.getFile() };
-		String mailBody = String.format(body, user.getFirstName());
-		ccServiceEmailAPI.sendCorrespondenceMailwithAttachment(user.getEmailId(), subject, mailBody, files);
-		log.info("Mail Sent...");
+			Map<String, String> responseCertifiate = donationServiceImpl
+					.generateCertificateForThankYou(user.getFirstName(), user.getEmailId());
+			commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
+					responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", user);
+			resource = new FileSystemResource(responseCertifiate.get("outputFile"));
+			File[] files = { resource.getFile() };
+			String mailBody = String.format(body, user.getFirstName());
+			ccServiceEmailAPI.sendCorrespondenceMailwithAttachment(user.getEmailId(), subject, mailBody, files);
+			log.info("Mail Sent...");
 	}
 
 	public Path getFileFromPath(String filename) throws IOException {

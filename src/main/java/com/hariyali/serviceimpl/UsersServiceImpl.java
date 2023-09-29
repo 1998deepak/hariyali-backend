@@ -941,8 +941,8 @@ public class UsersServiceImpl implements UsersService {
 						Receipt receipt = receiptRepository.getUserReceipt(user.getUserId());
 						Users recipientData = usersRepository.findByEmailId(recipientEmail.getEmailId());
 						if (d.getDonationType().equalsIgnoreCase("gift-donate")) {
-							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
-									EnumConstants.content, user);
+							// emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
+							// 		EnumConstants.content, user);
 							emailService.sendGiftingLetterEmail(d,recipientData, d.getDonationEvent(),null);
 							emailService.sendReceiptWithAttachment(user, d.getOrderId(), receipt);
 
