@@ -732,11 +732,11 @@ public class DonationServiceImpl implements DonationService {
 			if (donationEvent.equalsIgnoreCase("Special day")) {
 				reportName = "SpecialDay.jrxml";
 				imagesPathName = jasperImagesPath + File.separator + "specialDay.jpg";
-			} else if (donationEvent.equalsIgnoreCase("Festival")) {
+			} else if (donationEvent.equalsIgnoreCase("Festivals")) {
 				reportName = "Festival.jrxml";
 				imagesPathName = jasperImagesPath + File.separator + "festival.jpg";
 
-			} else if (donationEvent.equalsIgnoreCase("Achievement")) {
+			} else if (donationEvent.equalsIgnoreCase("Achievements")) {
 				reportName = "Achievement.jrxml";
 				imagesPathName = jasperImagesPath + File.separator + "Achievement.jpg";
 
