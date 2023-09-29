@@ -719,49 +719,6 @@ public class DonationServiceImpl implements DonationService {
 	}
 
 	@Override
-	public Map<String, String> generateCertificateForThankYou(String donarName, String emailID) {
-
-		String filepath = null;
-		String reportName = null;
-		String imagesPathName = null;
-		Map<String, String> response = new HashMap<>();
-
-		try {
-			reportName = "SimpleDonation.jrxml";
-			imagesPathName = jasperImagesPath + File.separator + "simpleDonation.png";
-
-			Map<String, Object> parameters = new HashMap<String, Object>();
-			filepath = jasperFilePath + reportName;
-			parameters.put("donarName", donarName);
-			parameters.put("ImageParameter", imagesPathName);
-//			filepath="\\hariyali-backend\\src\\main\\resources\\META-INF\\jasperReports\\Festival.jrxml";
-			JasperReport jasperReport = JasperCompileManager.compileReport(filepath);
-
-			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
-
-			File outputFile = null;
-			String path = commonService.getDonarFileFilePath(emailID);
-			if (path != null) {
-				String pdfFilePath = path + File.separator + "ThankYou" + ".pdf";
-				log.info("Pdf file path=>" + pdfFilePath);
-				outputFile = new File(pdfFilePath);
-				JasperExportManager.exportReportToPdfFile(jasperPrint, pdfFilePath); // Export to PDF
-				System.err.println(outputFile.getName());
-				response.put("filePath", outputFile.getName());
-				response.put("outputFile", outputFile.toString());
-
-			}
-
-		} catch (Exception e) {
-			log.info(e.getMessage());
-			throw new CustomException(e.getMessage());
-
-		}
-
-		return response;
-	}
-
-	@Override
 	public Map<String, String> generateCertificate(String recipientName, String messageContent, String donationEvent,
 			String donarName, String emailID) {
 

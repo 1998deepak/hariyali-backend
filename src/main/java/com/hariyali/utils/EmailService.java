@@ -6,8 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Map;
 
+import com.hariyali.exceptions.CustomException;
+import net.sf.jasperreports.engine.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -43,14 +46,17 @@ public class EmailService {
 	@Value("${file.path}")
 	String FILE_PATH;
 
+	@Value("${jasper.filepath}")
+	String jasperFilePath;
+
+	@Value("${jasper.imagespath}")
+	String jasperImagesPath;
+
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
 	@Autowired
 	private CommonService commonService;
-
-	@Autowired
-	DonationServiceImpl donationServiceImpl;
 
 	public void sendSimpleEmail(String toEmail, String subject, String body) {
 		ccServiceEmailAPI.sendCorrespondenceMail(toEmail, subject, body);
@@ -132,8 +138,7 @@ public class EmailService {
 		String subject = EnumConstants.thankYouLetterSuject;
 		String body = EnumConstants.thankYouLetterContent;
 		FileSystemResource resource = null;
-			Map<String, String> responseCertifiate = donationServiceImpl
-					.generateCertificateForThankYou(user.getFirstName(), user.getEmailId());
+			Map<String, String> responseCertifiate = generateCertificateForThankYou(user.getFirstName(), user.getEmailId());
 			commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
 					responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", user);
 			resource = new FileSystemResource(responseCertifiate.get("outputFile"));
@@ -210,4 +215,47 @@ public class EmailService {
 		String mailBody = String.format(content, user.getFirstName());
 		ccServiceEmailAPI.sendCorrespondenceMail(user.getEmailId(), subject, mailBody);
 	}
+
+	public Map<String, String> generateCertificateForThankYou(String donarName, String emailID) {
+
+		String filepath = null;
+		String reportName = null;
+		String imagesPathName = null;
+		Map<String, String> response = new HashMap<>();
+
+		try {
+			reportName = "SimpleDonation.jrxml";
+			imagesPathName = jasperImagesPath + File.separator + "simpleDonation.png";
+
+			Map<String, Object> parameters = new HashMap<String, Object>();
+			filepath = jasperFilePath + reportName;
+			parameters.put("donarName", donarName);
+			parameters.put("ImageParameter", imagesPathName);
+//			filepath="\\hariyali-backend\\src\\main\\resources\\META-INF\\jasperReports\\Festival.jrxml";
+			JasperReport jasperReport = JasperCompileManager.compileReport(filepath);
+
+			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+
+			File outputFile = null;
+			String path = commonService.getDonarFileFilePath(emailID);
+			if (path != null) {
+				String pdfFilePath = path + File.separator + "ThankYou" + ".pdf";
+				log.info("Pdf file path=>" + pdfFilePath);
+				outputFile = new File(pdfFilePath);
+				JasperExportManager.exportReportToPdfFile(jasperPrint, pdfFilePath); // Export to PDF
+				System.err.println(outputFile.getName());
+				response.put("filePath", outputFile.getName());
+				response.put("outputFile", outputFile.toString());
+
+			}
+
+		} catch (Exception e) {
+			log.info(e.getMessage());
+			throw new CustomException(e.getMessage());
+
+		}
+
+		return response;
+	}
+
 }

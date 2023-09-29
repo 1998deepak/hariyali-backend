@@ -41,6 +41,4 @@ public interface DonationService {
 	
 	public Map<String,String> generateCertificate(String recipientName ,String messageContent,String donationEvent,String donarName,String emailID);
 
-	Map<String, String> generateCertificateForThankYou(String donarName, String emailID);
-
 }
