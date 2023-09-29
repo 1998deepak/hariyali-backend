@@ -745,7 +745,7 @@ public class DonationServiceImpl implements DonationService {
 
 			} else if (donationEvent.equalsIgnoreCase("Simple Donation")) {
 				reportName = "SimpleDonation.jrxml";
-				imagesPathName = jasperImagesPath + File.separator + "simpleDonation.jpg";
+				imagesPathName = jasperImagesPath + File.separator + "simpleDonation.png";
 
 			}
 
