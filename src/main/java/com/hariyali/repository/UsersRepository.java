@@ -111,7 +111,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "			 							)\r\n" + "			 			)\r\n"
 			+ "			 			 AS 'Result'\r\n"
 			+ "			 FROM tbl_user_master as users,tbl_address as addr\r\n"
-			+ "			 where users.donorId IS NOT NULL AND users.is_deleted=false AND users.user_id=addr.userId", nativeQuery = true)
+			+ "			 where users.is_deleted=false AND users.user_id=addr.userId", nativeQuery = true)
 	Object getAllUsersWithDonarID();
 
 	@Query(value = "SELECT user_id, webId, donorId, first_name, last_name, donor_type, organisation, approval_status, emailId, remark FROM tbl_user_master u WHERE webId IS NOT NULL AND approval_status = :status AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n"
