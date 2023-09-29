@@ -2,6 +2,7 @@ package com.hariyali.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -27,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class EmailService {
-
+	
 	@Autowired
 	UsersRepository userRepository;
 
@@ -36,7 +37,7 @@ public class EmailService {
 
 	@Autowired
 	CCServiceEmailAPI ccServiceEmailAPI;
-
+	
 	@Value("${file.path}")
 	String FILE_PATH;
 
@@ -61,6 +62,7 @@ public class EmailService {
 	public void sendWelcomeLetterMail(String to, String subject, String text, Users user) {
 		String password = commonService.generatePassword();
 		user.setPassword(passwordEncoder.encode(password));
+		log.info(password);
 		userRepository.save(user);
 		log.info("Password set");
 		String body = String.format(text, user.getFirstName(), user.getEmailId(), password);

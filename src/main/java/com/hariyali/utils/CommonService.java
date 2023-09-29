@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.hariyali.EnumConstants;
@@ -38,7 +39,8 @@ public class CommonService {
 	@Autowired
 	private DocumentRepository documentRepository;
 
-	String FILE_PATH = "C:\\Users\\admin\\Desktop\\GCP_MOUNT_AREA";
+	@Value("${file.path}")
+	String FILE_PATH ;
 	
 //	String FILE_PATH1="C:\\Users\\DELL\\Desktop\\New folder";
 
@@ -84,20 +86,20 @@ public class CommonService {
 	}
 
 	public String getDonarFileFilePath(String emailID) {
-		String folderName = FILE_PATH + "\\" + emailID;
+		String folderName = FILE_PATH +File.separator + emailID;
 		// Create the folder
 		Path folder = Paths.get(folderName);
-		System.out.println("folder Path=>" + folder);
+		log.info("folder Path=>" + folderName);
 		if (!Files.exists(folder)) {
 			try {
 				Files.createDirectory(folder);
-				System.out.println("Folder created successfully.");
+				log.info(folderName+"=Folder created successfully.");
 
 			} catch (IOException e) {
 				System.err.println("Failed to create folder: " + e.getMessage());
 			}
 		} else {
-			System.out.println("Folder already exists.");
+			log.info("Folder already exists.");
 		}
 		return folderName;
 
@@ -142,13 +144,13 @@ public class CommonService {
 
 			if (file.exists()) {
 				// Now you can work with the file
-				System.out.println("File exists: " + file.getAbsolutePath());
+				log.info("File exists: " + file.getAbsolutePath());
 				return file.getAbsolutePath();
 			} else {
-				System.out.println("File does not exist.");
+				log.info("File does not exist.");
 			}
 		} else {
-			System.out.println("Resource not found.");
+			log.info("Resource not found.");
 		}
 		return null;
 	}
