@@ -48,8 +48,9 @@ public class MasterServiceImpl implements MasterService {
 	@Override
 	public List<Citzenship> getAllCitizensip() {
 
-		return citizenshipRepository.findByIsActive(true).stream().map(c -> new Citzenship(c.getId(),
-				c.getCitizenshipName().toUpperCase(), null, c.getIsActive(), null, null, null))
+		return citizenshipRepository.findByIsActive(true).stream()
+				.map(c -> new Citzenship(c.getId(), c.getCreatedBy(), c.getCreatedDate(), c.getIsActive(),
+						c.getUpdatedBy(), c.getUpdatedDate(), c.getCitizenshipName().toUpperCase()))
 				.collect(Collectors.toList());
 
 	}

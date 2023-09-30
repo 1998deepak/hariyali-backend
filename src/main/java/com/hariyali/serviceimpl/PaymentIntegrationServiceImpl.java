@@ -170,7 +170,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 				Map<String,String> responseCertifiate =donationServiceImpl.generateCertificate(recipientData.getFirstName(),donation.getGiftContent(),donation.getDonationEvent(),fullNameOfDonar,recipientData.getEmailId());			
 				commonService.saveDocumentDetails("DOCUMENT",
 						responseCertifiate.get("filePath"),responseCertifiate.get("outputFile"), "PDF",
-						"CERTIFICATE", recipientData);
+						"CERTIFICATE", donation);
 				emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
 						user);
 				emailService.sendGiftingLetterEmail(donation,recipientData, donation.getDonationEvent(),responseCertifiate.get("outputFile"));

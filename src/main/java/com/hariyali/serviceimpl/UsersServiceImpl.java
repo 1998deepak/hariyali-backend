@@ -50,6 +50,7 @@ import com.hariyali.dto.DonorListRequestDTO;
 import com.hariyali.dto.LoginRequest;
 import com.hariyali.dto.UsersDTO;
 import com.hariyali.entity.Address;
+import com.hariyali.entity.Document;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.PaymentInfo;
 import com.hariyali.entity.Receipt;
@@ -61,6 +62,7 @@ import com.hariyali.exceptions.CustomException;
 import com.hariyali.exceptions.CustomExceptionDataAlreadyExists;
 import com.hariyali.exceptions.CustomExceptionNodataFound;
 import com.hariyali.repository.AddressRepository;
+import com.hariyali.repository.DocumentRepository;
 import com.hariyali.repository.DonationRepository;
 import com.hariyali.repository.PaymentInfoRepository;
 import com.hariyali.repository.ReceiptRepository;
@@ -135,9 +137,12 @@ public class UsersServiceImpl implements UsersService {
 
 	@Autowired
 	CommonService commonService;
-	
+
 	@Autowired
 	JwtServiceImpl jwtService;
+
+	@Autowired
+	DocumentRepository documentRepository;
 
 	@Autowired
 	private EncryptionDecryptionUtil encryptionDecryptionUtil;
@@ -261,12 +266,12 @@ public class UsersServiceImpl implements UsersService {
 		response.setEncRequest(apiResponse.getEncRequest());
 		response.setStatus(apiResponse.getStatus());
 		response.setAccessCode(apiResponse.getAccessCode());
-		if(("OTHERTHANINDIA").equalsIgnoreCase(apiResponse.getStatus())) {
-			UsersDTO usersDTO2=new UsersDTO();
+		if (("OTHERTHANINDIA").equalsIgnoreCase(apiResponse.getStatus())) {
+			UsersDTO usersDTO2 = new UsersDTO();
 			usersDTO2.setDonations(Arrays.asList(apiResponse.getData()));
 			response.setData(usersDTO2);
 		}
-		
+
 		return response;
 
 	}
@@ -429,13 +434,14 @@ public class UsersServiceImpl implements UsersService {
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
 			if (entity.getDonorId() != null && entity.getWebId() == null) {
-				throw new CustomExceptionDataAlreadyExists("Donor with " + entity.getEmailId()
-						+ " is already registered, Kindly do click here to login and continue your donation!");
+				response.setMessage("Donor with " + entity.getEmailId()
+						+ " is already registered, Kindly do click here to login or click on proceed button to continue your donation!");
+			} else {
+				response.setMessage("User found Successfully");
 			}
 			response.setData(modelMapper.map(entity, UsersDTO.class));
 			response.setStatus(EnumConstants.SUCCESS);
 			response.setStatusCode(HttpStatus.OK.value());
-			response.setMessage("User found Successfully");
 		} else
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
 		return response;
@@ -679,7 +685,7 @@ public class UsersServiceImpl implements UsersService {
 		return response;
 	}
 
-	//verify otp
+	// verify otp
 	@Override
 	public ApiResponse<String> verifyForgotOtp(String formData, HttpSession session, HttpServletRequest request)
 			throws JsonProcessingException {
@@ -942,8 +948,10 @@ public class UsersServiceImpl implements UsersService {
 						Users recipientData = usersRepository.findByEmailId(recipientEmail.getEmailId());
 						if (d.getDonationType().equalsIgnoreCase("gift-donate")) {
 							// emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
-							// 		EnumConstants.content, user);
-							emailService.sendGiftingLetterEmail(d,recipientData, d.getDonationEvent(),null);
+							// EnumConstants.content, user);
+							Document document = documentRepository.findByYearAndDocTypeAndDonation(
+									Calendar.getInstance().get(Calendar.YEAR), "CERTIFICATE", d);
+							emailService.sendGiftingLetterEmail(d, recipientData, d.getDonationEvent(), document.getFilePath());
 							emailService.sendReceiptWithAttachment(user, d.getOrderId(), receipt);
 
 						}

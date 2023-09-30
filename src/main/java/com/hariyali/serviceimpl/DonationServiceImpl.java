@@ -330,7 +330,7 @@ public class DonationServiceImpl implements DonationService {
 								resulEntity.getEmailId());
 
 						commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
-								responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", resulEntity);
+								responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
 						emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subject,
 								EnumConstants.content, recipientData);
 						emailService.sendGiftingLetterEmail(donation,recipientData, donation.getDonationEvent(),
