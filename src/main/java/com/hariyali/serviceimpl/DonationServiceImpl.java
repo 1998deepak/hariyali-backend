@@ -545,7 +545,7 @@ public class DonationServiceImpl implements DonationService {
 			queryString += "&billing_city=" + address.getCity();
 			queryString += "&billing_state=" + address.getState();
 			queryString += "&billing_zip=" + address.getPostalCode();
-			queryString += "&billing_country=" + address.getCountry();
+			queryString += "&billing_country=" + StringUtils.capitalize(ofNullable(address.getCountry()).orElse("").toLowerCase());
 			queryString += "&billing_tel=" + ofNullable(usersDTO.getMobileNo()).filter(StringUtils::isNotEmpty).orElse(resulEntity.getMobileNo());
 			queryString += "&billing_email=" + ofNullable(usersDTO.getEmailId()).filter(StringUtils::isNotEmpty).orElse(resulEntity.getEmailId());
 			log.info(queryString);
