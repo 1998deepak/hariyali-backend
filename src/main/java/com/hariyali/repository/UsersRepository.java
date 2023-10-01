@@ -267,7 +267,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	@Query(value = "select donorId from tbl_user_master where emailId=?", nativeQuery = true)
 	public String findDonarIdByEmail(String email);
 
-	@Query(value = "SELECT donorId FROM tbl_user_master ORDER BY donorId DESC LIMIT 1", nativeQuery = true)
+	@Query(value = "SELECT donorId FROM tbl_user_master WHERE donorId IS NOT NULL AND donorId !='' ORDER BY donorId DESC LIMIT 1", nativeQuery = true)
 	String getLastDonorID();
 
 	Users findByPanCard(String panCard);

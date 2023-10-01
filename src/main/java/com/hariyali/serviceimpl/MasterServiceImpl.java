@@ -1,5 +1,6 @@
 package com.hariyali.serviceimpl;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,29 +30,33 @@ public class MasterServiceImpl implements MasterService {
 	@Override
 	public List<Country> getAllCountry() {
 
-		return countryRepository.findByIsActive(true).stream()
+		List<Country> countrylist = countryRepository.findByIsActive(true).stream()
 				.map(c -> new Country(c.getId(), c.getCreatedBy(), c.getCreatedDate(), c.getIsActive(),
 						c.getUpdatedBy(), c.getUpdatedDate(), c.getCountryCode(), c.getCountryName().toUpperCase()))
 				.collect(Collectors.toList());
+
+		return countrylist.stream().sorted(Comparator.comparing(Country::getCountryName)).collect(Collectors.toList());
 	}
 
 	@Override
 	public List<State> getAllStateByCountryId(String countryCode) {
 
-		return stateRepository.findByCountryCode(countryCode).stream()
+		List<State> stateList= stateRepository.findByCountryCode(countryCode).stream()
 				.map(s -> new State(s.getId(), s.getCreatedBy(), s.getCreatedDate(), s.getIsActive(), s.getUpdatedBy(),
 						s.getUpdatedDate(), s.getCountryCode(), s.getCountryName(), s.getCountryId(), s.getStateCode(),
 						s.getStateName()))
 				.collect(Collectors.toList());
+		return stateList.stream().sorted(Comparator.comparing(State::getStateName)).collect(Collectors.toList());
 	}
 
 	@Override
 	public List<Citzenship> getAllCitizensip() {
 
-		return citizenshipRepository.findByIsActive(true).stream()
+		List<Citzenship> citizenshipList= citizenshipRepository.findByIsActive(true).stream()
 				.map(c -> new Citzenship(c.getId(), c.getCreatedBy(), c.getCreatedDate(), c.getIsActive(),
 						c.getUpdatedBy(), c.getUpdatedDate(), c.getCitizenshipName().toUpperCase()))
 				.collect(Collectors.toList());
+		return citizenshipList.stream().sorted(Comparator.comparing(Citzenship::getCitizenshipName)).collect(Collectors.toList());
 
 	}
 
