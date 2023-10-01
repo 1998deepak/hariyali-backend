@@ -40,8 +40,10 @@ public interface UsersService {
 	    
 	public ApiResponse<UsersDTO> updateUser(UsersDTO usersDTO, String emailId,HttpServletRequest request);
 
-	public ApiResponse<String> verifyForgotOtp(String string, HttpSession session, HttpServletRequest request) throws JsonMappingException, JsonProcessingException;
+//	public ApiResponse<String> verifyForgotOtp(String string, HttpSession session, HttpServletRequest request) throws JsonMappingException, JsonProcessingException;
 
+	public ApiResponse<String> verifyForgotOtp(String email, String otp);
+	
 	public ApiResponse<String> activateAccount(String formData, HttpSession session) throws JsonMappingException, JsonProcessingException;
 
 	String getOtp(String donorId);
