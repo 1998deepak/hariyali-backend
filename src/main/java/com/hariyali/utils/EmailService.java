@@ -83,18 +83,18 @@ public class EmailService {
 
 	public void sendGiftingLetterEmail(Donation donation, Users recipientData, String donationEvent, String path) {
 		int noOfPlant = donationRepository.getNoOfPlants(donation.getDonationId());
-		String giftorMail = userRepository.getGiftorNameByDonation(donation.getDonationId());
-		String giftorName = userRepository.getGiftorEmailByDonation(donation.getDonationId());
+		String giftorMail = userRepository.getGiftorEmailByDonation(donation.getDonationId());
+		String giftorFirstName = userRepository.getGiftorFirstNameByDonation(donation.getDonationId());
+		String giftorLastName=userRepository.getGiftorLastNameByDonation(donation.getDonationId());
 		FileSystemResource resource = new FileSystemResource(path);
 		File[] files = { resource.getFile() };
 		String subject = EnumConstants.GIFTING_MSG_SUBJECT;
 		String body = EnumConstants.GIFTING_MSG_BODY;
-		String mailBody = String.format(body, recipientData.getFirstName(), noOfPlant, giftorName);
+		String mailBody = String.format(body, recipientData.getFirstName(), noOfPlant, giftorFirstName+" "+giftorLastName);
 		ccServiceEmailAPI.sendCorrespondenceMailForGift(recipientData.getEmailId(), subject, mailBody, giftorMail,
 				files);
 		log.info("Mail Sent...");
 	}
-
 	public void sendWebIdEmail(String toEmail, Users user) {
 		String body = "Dear Sponsor,<br> <p>Welcome to Project Hariyali.</p>"
 				+ "The Mahindra Foundation and Naandi Foundation would like to thank you for your donation."
@@ -125,12 +125,13 @@ public class EmailService {
 		String text = "Dear %s,<br>" + "We thank you for your donation dated %s ,ref no %s<br>"
 				+ "Please find a PDF version of the receipt attached herewith.<br>"
 				+ "Thanking you for your support to Project Hariyali.<br><br>"
-				+ "Team Hariyali<br>Naandi Foundation<br>" + "502, Trendset Towers,<br>"
-				+ "Road No 2, Banjara Hills,<br>" + "Hyderabad, Telangana - 500 034<br>"
-				+ "<br>PS : Contact 'support@hariyali.org.in' in case of any query.<br>"
+				+ "Team Hariyali<br>"
+				+ "3rd Floor, Cecil Court,"
+				+ "Near Regal Cinema,<br>" + "Mahakavi Bhushan Marg," + "Mumbai 400001<br>"
+				+ "PS : Contact 'support@hariyali.org.in' in case of any query.<br>"
 				+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
 		String mailBody = String.format(text, name, formattedDate, orderId);
-		ccServiceEmailAPI.sendPaymentsMail(user.getEmailId(), "Project Hariyali –Receipt towards your donation",
+		ccServiceEmailAPI.sendPaymentsMail(user.getEmailId(), "Project Hariyali – Receipt towards your donation",
 				mailBody, files);
 	}
 

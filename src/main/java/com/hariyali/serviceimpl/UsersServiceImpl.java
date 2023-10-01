@@ -825,7 +825,7 @@ public class UsersServiceImpl implements UsersService {
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Donation Rejected By " + userName);
 			result.setStatusCode(HttpStatus.FORBIDDEN.value());
-			sendRejectDonationEmails(user.getEmailId());
+			sendRejectDonationEmails(user);
 		} else if ("Approved".equalsIgnoreCase(usersDTO.getApprovalStatus())) {
 			recipientEmail = handleDonationApproval(user, donation, userName);
 			result.setStatus(EnumConstants.SUCCESS);
@@ -877,22 +877,22 @@ public class UsersServiceImpl implements UsersService {
 		}
 	}
 
-	private void sendRejectDonationEmails(String emailId) {
+	private void sendRejectDonationEmails(Users user) {
 		// Construct the email subject and content
 
-		Users user = this.usersRepository.findByEmailIdForDeletedUser(emailId);
 		if (user != null)
 
 		{
-			String subject = "Reject Donation";
-			String content = "Dear Sponsor,<br>" + "<p>Donation made by you has been rejected.</p>"
-					+ "<p>Thanking you for your support to Project Hariyali.</p>" + "Mahindra Foundation<br>"
-					+ "Sheetal Mehta<br>" + "Trustee & Executive Director<br>" + "K.C. Mahindra Education Trust,<br>"
-					+ "3rd Floor, Cecil Court,<br>" + "Near Regal Cinema,<br>" + "Mahakavi Bushan Marg,<br>"
-					+ "Mumbai 400001<br>"
-					+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>";
-
-			emailService.sendSimpleEmail(user.getEmailId(), subject, content);
+			String subject = "Project Hariyali: Donation Failure";
+			String content = "Dear %s,<br>"
+					+ "Thank you for your interest in Project Hariyali. Unfortunately we are unable to process your transaction. Please reach out to us at"
+					+ "<a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> for any queries"
+					+ "Thank You<br>" + "Team Hariyali<br>" + "Mahindra Foundation<br>" + "3rd Floor, Cecil Court,<br>"
+					+ "Near Regal Cinema,<br>" + "Mahakavi Bhushan Marg,<br>" + "Mumbai 400001<br>"
+					+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
+					+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
+			String mailBody = String.format(content, user.getFirstName(), content);
+			emailService.sendSimpleEmail(user.getEmailId(), subject, mailBody);
 		}
 	}
 
@@ -951,7 +951,8 @@ public class UsersServiceImpl implements UsersService {
 							// EnumConstants.content, user);
 							Document document = documentRepository.findByYearAndDocTypeAndDonation(
 									Calendar.getInstance().get(Calendar.YEAR), "CERTIFICATE", d);
-							emailService.sendGiftingLetterEmail(d, recipientData, d.getDonationEvent(), document.getFilePath());
+							emailService.sendGiftingLetterEmail(d, recipientData, d.getDonationEvent(),
+									document.getFilePath());
 							emailService.sendReceiptWithAttachment(user, d.getOrderId(), receipt);
 
 						}
@@ -961,7 +962,7 @@ public class UsersServiceImpl implements UsersService {
 						emailService.sendThankyouLatter(user.getEmailId(), user);
 
 					} else {
-						sendRejectDonationEmails(user.getEmailId());
+						sendRejectDonationEmails(user);
 					}
 				} catch (Exception e) {
 					log.error("Exception = {}", e);
@@ -1156,7 +1157,7 @@ public class UsersServiceImpl implements UsersService {
 		String userName = jwtHelper.getUsernameFromToken(token);
 
 		Users user = usersRepository.findByEmailId(userName);
-		if(passwordEncoder.matches(password, user.getPassword())){
+		if (passwordEncoder.matches(password, user.getPassword())) {
 			throw new CustomException("New password is same as old password!");
 		}
 
@@ -1165,6 +1166,6 @@ public class UsersServiceImpl implements UsersService {
 		response.setStatus("Success");
 		response.setMessage("User password changed successfully!");
 		return response;
-	}//method
+	}// method
 
 }

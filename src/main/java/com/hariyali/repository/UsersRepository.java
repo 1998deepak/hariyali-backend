@@ -273,10 +273,15 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	Users findByPanCard(String panCard);
 	
 	@Query(value="select u.first_name from tbl_user_master as u, tbl_donation as d where u.user_id=d.userId and d.donation_id=?;",nativeQuery = true)
-	String getGiftorEmailByDonation(int donationId);
+	String getGiftorFirstNameByDonation(int donationId);
+	
+	@Query(value="select u.last_name from tbl_user_master as u, tbl_donation as d where u.user_id=d.userId and d.donation_id=?;",nativeQuery = true)
+	String getGiftorLastNameByDonation(int donationId);
 	
 	@Query(value="select u.emailId from tbl_user_master as u, tbl_donation as d where u.user_id=d.userId and d.donation_id=?;",nativeQuery = true)
-	String getGiftorNameByDonation(int donationId);
+	String getGiftorEmailByDonation(int donationId);
+	
+	
 	
 
 }
