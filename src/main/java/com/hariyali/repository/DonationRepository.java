@@ -144,12 +144,12 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 			+ "						 			             )\r\n"
 			+ "						 			             FROM tbl_donation AS donations\r\n"
 			+ "						 			             JOIN tbl_user_master AS users ON users.user_id = donations.userId\r\n"
-			+ "						 			             WHERE donations.donation_id = ?1 AND donations.deleted = false\r\n"
+			+ "						 			             WHERE donations.donation_id = ?1 AND IFNULL(donations.deleted, false)= false\r\n"
 			+ "						 			         )\r\n" + "						 			     ) \r\n"
 			+ "						 			     )AS Result\r\n"
 			+ "						 			 FROM tbl_donation AS donations\r\n"
 			+ "						 			 JOIN tbl_user_master AS users ON users.user_id = donations.userId\r\n"
-			+ "						 			 WHERE donations.donation_id = ?1 AND donations.deleted = false", nativeQuery = true)
+			+ "						 			 WHERE donations.donation_id = ?1 AND IFNULL(donations.deleted, false) = false", nativeQuery = true)
 
 	Object getSpecificDonationById(int donationId);
 
