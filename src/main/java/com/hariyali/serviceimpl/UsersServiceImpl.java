@@ -225,7 +225,7 @@ public class UsersServiceImpl implements UsersService {
 			throws JsonProcessingException {
 
 		validateDonation(usersDTO, "online");
-		return save(usersDTO, commonService.createDonarIDORDonationID("user"), null);
+		return save(usersDTO, null, null);
 //		return null;
 	}
 
@@ -297,7 +297,11 @@ public class UsersServiceImpl implements UsersService {
 		Users existingUser = usersRepository.findByEmailId(user.getEmailId());
 
 		if (existingUser != null) {
-			throw new CustomException("Email " + existingUser.getEmailId() + " already exists");
+			if(existingUser.getWebId() != null) {
+				throw new CustomException("Email " + existingUser.getEmailId() + " already exists");
+			} else{
+				user.setUserId(existingUser.getUserId());
+			}
 		}
 
 		Date newDate = new Date();
@@ -434,18 +438,18 @@ public class UsersServiceImpl implements UsersService {
 	@Override
 	public ApiResponse<UsersDTO> getUserByEmail(String email) {
 		ApiResponse<UsersDTO> response = new ApiResponse<>();
-		Object user = usersRepository.getUserByEmail(email);
+		Users user = usersRepository.findByEmailId(email);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
 		// Gson gson = new Gson();
-		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
-		Users entity = gson.fromJson(user.toString(), Users.class);
-		if (entity.getEmailId() != null) {
-			if (entity.getDonorId() != null && entity.getWebId() == null) {
-				throw new CustomExceptionDataAlreadyExists("Donor with " + entity.getEmailId()
+//		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
+//		Users entity = gson.fromJson(user.toString(), Users.class);
+		if (user.getEmailId() != null) {
+			if (user.getDonorId() != null && user.getWebId() != null) {
+				throw new CustomExceptionDataAlreadyExists("Donor with " + user.getEmailId()
 						+ " is already registered, Kindly do click here to login and continue your donation!");
 			}
-			response.setData(modelMapper.map(entity, UsersDTO.class));
+			response.setData(modelMapper.map(user, UsersDTO.class));
 			response.setStatus(EnumConstants.SUCCESS);
 			response.setStatusCode(HttpStatus.OK.value());
 		} else

@@ -149,16 +149,18 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 //		}
 		String redirectUrl = frontendRedirectURL;
 		Users user = userRepository.getUserByDonationId(donation.getDonationId());
-		if (user.getWebId() == null) {
-			user.setWebId(userService.generateWebId());
-			userRepository.save(user);
-			log.info("user" + user);
-		} else {
-			redirectUrl = frontendUserRedirectURL;
-		}
+
 
 		if ("Completed".equalsIgnoreCase(paymentInfo.getPaymentStatus())
 				|| "Success".equalsIgnoreCase(paymentInfo.getPaymentStatus())) {
+			if (user.getWebId() == null) {
+				user.setWebId(userService.generateWebId());
+				user.setDonorId(commonService.createDonarIDORDonationID("user"));
+				userRepository.save(user);
+				log.info("user" + user);
+			} else {
+				redirectUrl = frontendUserRedirectURL;
+			}
 			int donationCnt = donationRepository.donationCount(user.getEmailId());
 			if (donationCnt == 1) {
 				if (donation.getDonationType().equalsIgnoreCase("self-donate")) {
