@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.hariyali.EnumConstants;
 import com.hariyali.entity.Document;
+import com.hariyali.entity.Donation;
 import com.hariyali.entity.Users;
 import com.hariyali.exceptions.CustomException;
 import com.hariyali.repository.DocumentRepository;
@@ -106,7 +107,35 @@ public class CommonService {
 	}
 
 	public void saveDocumentDetails(String idForEntity, String fileName, String filePath, String fileType,
-			String docType, Users users) {
+			String docType, Donation donation) {
+		System.err.println("idForEntity"+idForEntity);
+		LocalDate currentDate = LocalDate.now();
+		int year = currentDate.getYear();
+		Document document = new Document();
+		document.setDocId(createDonarIDORDonationID(idForEntity));
+		System.err.println(createDonarIDORDonationID(idForEntity));
+		document.setFileName(fileName);
+		document.setFilePath(filePath);
+		document.setFileType(fileType);
+		document.setDocType(docType);
+		document.setCreatedDate(new Date());
+		document.setUpdatedDate(new Date());
+		document.setDonation(donation);
+		if (donation != null) {
+			document.setCreatedBy(donation.getCreatedBy() == null ? "" : donation.getCreatedBy());
+			document.setModifiedBy(donation.getModifiedBy() == null ? "" : donation.getModifiedBy());
+		}
+		document.setYear(year);
+//		Document document2 = documentRepository.findByYearAndDocTypeAndUsers(year, docType,users);
+//		if (document2 != null) {
+//			document.setId(document2.getId());
+//			documentRepository.save(document);
+//		}
+		documentRepository.save(document);
+
+	}
+	public void saveDocumentDetails(String idForEntity, String fileName, String filePath, String fileType,
+			String docType,Users users) {
 		System.err.println("idForEntity"+idForEntity);
 		LocalDate currentDate = LocalDate.now();
 		int year = currentDate.getYear();
@@ -133,6 +162,7 @@ public class CommonService {
 		documentRepository.save(document);
 
 	}
+
 
 	public String getFilePath(String fileName) {
 		ClassLoader classLoader = CommonService.class.getClassLoader();

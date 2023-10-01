@@ -61,7 +61,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
 	@Autowired
 	UsersRepository userRepository;
-	
+
 	@Autowired
 	EmailService emailService;
 
@@ -104,8 +104,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 	public String generateReceipt(Donation donation) {
 		String receiptNo = getReceiptNumber();
 		Users users = userRepository.getUserByDonationId(donation.getDonationId());
-		String userFolder = receiptPath + "\\" + users.getDonorId() + "_" + users.getFirstName() + "_"
-				+ users.getLastName() + "\\";
+		String userFolder = receiptPath + "\\" + users.getEmailId() + "\\";
 		File directory = new File(userFolder);
 		if (!directory.exists()) {
 			directory.mkdirs();
@@ -122,29 +121,21 @@ public class ReceiptServiceImpl implements ReceiptService {
 		try {
 			Font normal = new Font(Font.FontFamily.HELVETICA, 10);
 			writer = PdfWriter.getInstance(document, new FileOutputStream(fullPath));
-			Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
-			Font courierFontItalic = new Font(Font.FontFamily.COURIER, 20, Font.ITALIC);
 			document.open();
-//			Paragraph p = new Paragraph("Hariyali", courierFontItalic);
-//			p.setAlignment(Element.ALIGN_CENTER);
-//			document.add(p);
 
 			Image logo = null;
 			try {
-				//logo = Image.getInstance("src/main/resources/Logo.jpg");
-				Path path =emailService.getFileFromPath("Logo.jpg");
-				System.out.println("Logo=>"+path.toString());
+//				logo = Image.getInstance("src/main/resources/Logo.png");
+				Path path = emailService.getFileFromPath("Logo.png");
+				System.out.println("Logo=>" + path.toString());
 				logo = Image.getInstance(path.toString());
-				logo.scaleToFit(500, 50); // Adjust the size as needed
+				logo.scaleToFit(600, 50); // Adjust the size as needed
 				logo.setAlignment(Element.ALIGN_CENTER);
 			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
 
 			// Create a Paragraph to hold the logo
 			Paragraph logoParagraph = new Paragraph();
@@ -194,32 +185,50 @@ public class ReceiptServiceImpl implements ReceiptService {
 			document.add(donorDetails);
 			document.add(new Paragraph("\n"));
 			document.add(new Paragraph("\n"));
-//			************
-			Chunk c1 = new Chunk("INR. " + donation.getTotalAmount(), boldFont);
-			Paragraph lastPara1 = new Paragraph();
-			lastPara1.add(c1);
-			lastPara1.setAlignment(Element.ALIGN_LEFT);
-			Paragraph lastPara2 = new Paragraph("Naandi Foundation", boldFont);
-			lastPara2.setAlignment(Element.ALIGN_RIGHT);
-			lastPara2.setSpacingAfter(50f);
-			Chunk c2 = new Chunk("(Authorized Signatory)", normal);
+//*******************************
+			Image logoSeal = null;
+			try {
+				Path path = emailService.getFileFromPath("sealLogo.jpg");
+				System.out.println("Logo=>" + path.toString());
+				logoSeal = Image.getInstance(path.toString());
+				logoSeal.scaleToFit(500, 50);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			PdfPTable receiptTable1 = new PdfPTable(3);
+			receiptTable1.setWidthPercentage(100);
+
+			PdfPCell leftCell2 = new PdfPCell(new Phrase("INR. " + donation.getTotalAmount(), boldFont));
+			leftCell2.setBorder(Rectangle.NO_BORDER);
+			receiptTable1.addCell(leftCell2);
+			PdfPCell centerCell1 = new PdfPCell(logoSeal);
+			centerCell1.setBorder(Rectangle.NO_BORDER);
+			centerCell1.setHorizontalAlignment(Element.ALIGN_CENTER);
+			receiptTable1.addCell(centerCell1);
+
+			PdfPCell rightCell2 = new PdfPCell(new Phrase("Naandi Foundation", boldFont));
+			rightCell2.setBorder(Rectangle.NO_BORDER);
+			rightCell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+			receiptTable1.addCell(rightCell2);
+
+			document.add(receiptTable1);
+			Chunk c2 = new Chunk("(This is a computer-generated receipt, signature not required)", normal);
 			Paragraph lastPara3 = new Paragraph();
 			lastPara3.add(c2);
-			lastPara3.setAlignment(Element.ALIGN_RIGHT);
+			lastPara3.setAlignment(Element.ALIGN_CENTER);
 			lastPara3.setSpacingAfter(25f);
 			lastPara3.setSpacingBefore(10f);
-			document.add(lastPara1);
-			document.add(lastPara2);
 			document.add(lastPara3);
-
-			document.add(new Paragraph("\n"));
-			document.add(new Paragraph("\n"));
-
 			LineSeparator line = new LineSeparator();
 			document.add(line);
 			Paragraph additionalText = new Paragraph(
-					"Income Tax Exemption U/S 80-G Granted Vide Certificate Number AAATK0315QF2021401 dated 28th May 2021 containing Approval Number AAATK0315QF20214 valid from 01st April 2021 to 31st March 2026. PAN - "
-							+ pancard,normal);
+					"Donation made to Naandi Foundation qualifies for deduction U/s. 80G (G)(5)(i) of Income Tax Act, 1961 vide Provisional "
+							+ "Approval Order granted with reference number AAATN2405LF20214 dated 31-05-2021 and"
+							+ "Document Identification Number AAATN2405LF2021401" + "PAN : AAATN2405L\r\n"
+							+ "This receipt is issued for accounting purpose only"
+							+ "We shall issue Form 10BE after completion of the financial year as per CBDT notification no 19/2021 dated 26.03.2021",
+					normal);
 			additionalText.setAlignment(Element.ALIGN_LEFT);
 			document.add(additionalText);
 			Paragraph note = new Paragraph("*Note-\n"

@@ -239,7 +239,7 @@ public class DonationServiceImpl implements DonationService {
 				donation.setApprovalStatus("Approved");
 				donation.setApprovalDate(newDate);
 				donation.setIsApproved(true);
-
+				donation.setIsDeleted(false);
 				donation.setDonationDate(newDate);
 				donation.setDonationCode(commonService.createDonarIDORDonationID("donation"));
 				Donation resultdonation = donationRepository.save(donation);
@@ -330,9 +330,9 @@ public class DonationServiceImpl implements DonationService {
 								resulEntity.getEmailId());
 
 						commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
-								responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", resulEntity);
-						emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subject,
-								EnumConstants.content, recipientData);
+								responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
+						emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subjectGiftee,
+								EnumConstants.contentGiftee, recipientData);
 						emailService.sendGiftingLetterEmail(donation,recipientData, donation.getDonationEvent(),
 								responseCertifiate.get("outputFile"));
 
@@ -414,6 +414,7 @@ public class DonationServiceImpl implements DonationService {
 				}
 				donation.setApprovalStatus("Pending");
 				donation.setIsApproved(false);
+				donation.setIsDeleted(false);
 				donation = donationRepository.save(donation);
 				// Donation resultdonation =
 				// donationRepository.getDonationByUserID(resulEntity.getUserId());
@@ -498,6 +499,7 @@ public class DonationServiceImpl implements DonationService {
 					DonationDTO donationDTO = new DonationDTO();
 					Double amount=usersDTO.getDonations().stream().map(d->d.getUserPackage()).findFirst().get().stream().map(u->u.getAmount()).findFirst().get();
 					donationDTO.setTotalAmount(amount);
+					donationDTO.setCreatedBy(usersDTO.getCitizenship());
 					response.setData(donationDTO);
 					return response;
 				}
@@ -509,7 +511,9 @@ public class DonationServiceImpl implements DonationService {
 						DonationDTO donationDTO = new DonationDTO();
 						Double amount=usersDTO.getDonations().stream().map(d->d.getUserPackage()).findFirst().get().stream().map(u->u.getAmount()).findFirst().get();
 						donationDTO.setTotalAmount(amount);
+						donationDTO.setCreatedBy(usersDTO.getCitizenship());
 						response.setData(donationDTO);
+						
 						return response;
 					}
 				}

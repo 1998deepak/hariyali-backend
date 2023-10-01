@@ -153,27 +153,49 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 			user.setWebId(userService.generateWebId());
 			userRepository.save(user);
 			log.info("user" + user);
-		} else{
+		} else {
 			redirectUrl = frontendUserRedirectURL;
 		}
 
 		if ("Completed".equalsIgnoreCase(paymentInfo.getPaymentStatus())
 				|| "Success".equalsIgnoreCase(paymentInfo.getPaymentStatus())) {
-			if (donation.getDonationType().equalsIgnoreCase("self-donate")) {
-				emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
-						user);
-			}
-			if (donation.getDonationType().equalsIgnoreCase("gift-donate")) {
-				String recipientEmail = donation.getRecipient().get(0).getEmailId();
-				Users recipientData = userRepository.findByEmailId(recipientEmail);
-				String fullNameOfDonar=user.getFirstName()+" "+user.getLastName();
-				Map<String,String> responseCertifiate =donationServiceImpl.generateCertificate(recipientData.getFirstName(),donation.getGiftContent(),donation.getDonationEvent(),fullNameOfDonar,recipientData.getEmailId());			
-				commonService.saveDocumentDetails("DOCUMENT",
-						responseCertifiate.get("filePath"),responseCertifiate.get("outputFile"), "PDF",
-						"CERTIFICATE", recipientData);
-				emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
-						user);
-				emailService.sendGiftingLetterEmail(donation,recipientData, donation.getDonationEvent(),responseCertifiate.get("outputFile"));
+			int donationCnt = donationRepository.donationCount(user.getEmailId());
+			if (donationCnt == 1) {
+				if (donation.getDonationType().equalsIgnoreCase("self-donate")) {
+					emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
+							user);
+				}
+				if (donation.getDonationType().equalsIgnoreCase("gift-donate")) {
+					String recipientEmail = donation.getRecipient().get(0).getEmailId();
+					Users recipientData = userRepository.findByEmailId(recipientEmail);
+					String fullNameOfDonar = user.getFirstName() + " " + user.getLastName();
+					Map<String, String> responseCertifiate = donationServiceImpl.generateCertificate(
+							recipientData.getFirstName(), donation.getGiftContent(), donation.getDonationEvent(),
+							fullNameOfDonar, recipientData.getEmailId());
+					commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
+							responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
+					emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
+							user);
+					emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subjectGiftee,
+							EnumConstants.contentGiftee, recipientData);
+					emailService.sendGiftingLetterEmail(donation, recipientData, donation.getDonationEvent(),
+							responseCertifiate.get("outputFile"));
+				}
+			} else {
+				if (donation.getDonationType().equalsIgnoreCase("gift-donate")) {
+					String recipientEmail = donation.getRecipient().get(0).getEmailId();
+					Users recipientData = userRepository.findByEmailId(recipientEmail);
+					String fullNameOfDonar = user.getFirstName() + " " + user.getLastName();
+					Map<String, String> responseCertifiate = donationServiceImpl.generateCertificate(
+							recipientData.getFirstName(), donation.getGiftContent(), donation.getDonationEvent(),
+							fullNameOfDonar, recipientData.getEmailId());
+					commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
+							responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
+					emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subjectGiftee,
+							EnumConstants.contentGiftee, recipientData);
+					emailService.sendGiftingLetterEmail(donation, recipientData, donation.getDonationEvent(),
+							responseCertifiate.get("outputFile"));
+				}
 			}
 			// Call Gogreen API
 			if (paymentInfo.getPaymentStatus().equalsIgnoreCase("SUCCESS")) {

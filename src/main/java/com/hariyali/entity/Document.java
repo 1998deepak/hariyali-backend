@@ -63,10 +63,14 @@ public class Document {
 	private Date createdDate;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "donationId",referencedColumnName = "donation_id")
+	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "donationId")
+	private Donation donation;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "userId",referencedColumnName = "user_id")
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userId")
 	private Users users;
-	
 	
 	
 	
