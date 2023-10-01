@@ -925,10 +925,10 @@ public class UsersServiceImpl implements UsersService {
 						if (d.getDonationType().equalsIgnoreCase("gift-donate")) {
 							// emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
 							// EnumConstants.content, user);
-							Document document = documentRepository.findByYearAndDocTypeAndDonation(
-									Calendar.getInstance().get(Calendar.YEAR), "CERTIFICATE", d);
-							emailService.sendGiftingLetterEmail(d, recipientData, d.getDonationEvent(),
-									document.getFilePath());
+//							Document document = documentRepository.findByYearAndDocTypeAndDonation(
+//									Calendar.getInstance().get(Calendar.YEAR), "CERTIFICATE", d);
+//							emailService.sendGiftingLetterEmail(d, recipientData, d.getDonationEvent(),
+//									document.getFilePath());
 							emailService.sendReceiptWithAttachment(user, d.getOrderId(), receipt);
 
 						}
