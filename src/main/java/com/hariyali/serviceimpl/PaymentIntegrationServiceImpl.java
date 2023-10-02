@@ -248,7 +248,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 		ApiResponse<PaymentInfoDTO> response = new ApiResponse<>();
 		PaymentInfo info = paymentInfoRepository.findByOrderId(orderId);
 		PaymentInfoDTO dto = new PaymentInfoDTO();
-		if(isNull(info)) {
+		if(!isNull(info)) {
 			dto.setBankPaymentRefNo(info.getBankPaymentRefNo());
 			dto.setPaymentStatus(info.getPaymentStatus());
 			dto.setRemark(info.getRemark());
