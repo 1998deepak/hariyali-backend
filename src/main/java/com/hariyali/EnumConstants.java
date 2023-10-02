@@ -48,12 +48,12 @@ public interface EnumConstants {
 	public static final String GIFTING_MSG_SUBJECT = "Project Hariyali – Your thoughtful gift is here";
 
 	public static final String subject = "Welcome to Project Hariyali";
-	public static final String content="<p>Dear %s</p>"+
+	public static final String content="<p>Dear %s,</p>"+
 			"<p>Welcome to Project Hariyali.</p>" +
 			"<p>The Mahindra Foundation and Naandi Foundation would like to thank you for your donation."
 			+"<p>You can login to your account on our website <a href='http://www.hariyali.org.in'>www.hariyali.org.in</a> with following login details.</p>"
-			+"<p>Email ID :%s<br>"
-			+"Password :%s</p>"
+			+"<p>Email ID : <b>%s<b><br>"
+			+"Password: <b>%s</b></p>"
 			+"You can view details of your plantation activities here.<br>"
 			+"Your contribution will reduce carbon footprint, support livelihood of small holding farmer families and mitigate climate change."
 			+ "<br>"
@@ -62,7 +62,7 @@ public interface EnumConstants {
 			+"<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>";
 
 	public static final String thankYouLetterSuject = "Project Hariyali – Certification of Appreciation";
-	public static final String thankYouLetterContent="Dear %s<br>"
+	public static final String thankYouLetterContent="Dear %s,<br>"
 			+ "Greetings from Project Hariyali.<br>"
 			+ "Thank you for your valuable role in making the planet greener.<br>"
 			+ "As a token of appreciation, we are happy to present to you a certificate towards your contribution.<br><br>"			
@@ -73,11 +73,11 @@ public interface EnumConstants {
 			+"<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
 			+"<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
 	public static final String subjectGiftee = "Welcome to Project Hariyali";
-	public static final String contentGiftee="<p>Dear %s</p>"+
+	public static final String contentGiftee="<p>Dear %s,</p>"+
 			"<p>Welcome to Project Hariyali.</p>" 
 			+"<p>You can login to your account on our website <a href='http://www.hariyali.org.in'>www.hariyali.org.in</a> with following login details.</p>"
-			+"<p>Email ID :%s<br>"
-			+"Password :%s</p>"
+			+"<p>Email ID : <b>%s<b><br>"
+			+"Password: <b>%s</b></p>"
 			+"You can view details of your plantation activities there.<br><br>"
 			+"<p>Thank you.</p>"+ "Team Hariyali<br>"+ "Mahindra Foundation<br> 3rd Floor, Cecil Court,"
 			+ "Near Regal Cinema,<br>" + "Mahakavi Bhushan Marg," + "Mumbai 400001<br>"
