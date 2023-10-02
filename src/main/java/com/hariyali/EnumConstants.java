@@ -56,7 +56,7 @@ public interface EnumConstants {
 			+"Password: <b>%s</b></p>"
 			+"You can view details of your plantation activities here.<br>"
 			+"Your contribution will reduce carbon footprint, support livelihood of small holding farmer families and mitigate climate change."
-			+ "<br>"
+			+ "<br><br>"
 			+"<p>Thank you.</p>"+ "Team Hariyali<br>"+ "Mahindra Foundation<br> 3rd Floor, Cecil Court,"
 			+ "Near Regal Cinema,<br>" + "Mahakavi Bhushan Marg," + "Mumbai 400001<br>"
 			+"<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>";

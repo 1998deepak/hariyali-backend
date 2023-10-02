@@ -148,7 +148,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 			PdfPTable receiptTable = new PdfPTable(3);
 			receiptTable.setWidthPercentage(100);
 
-			PdfPCell leftCell = new PdfPCell(new Phrase("NO:" + donation.getOrderId()));
+			PdfPCell leftCell = new PdfPCell(new Phrase("Transaction NO:" + donation.getOrderId()));
 			leftCell.setBorder(Rectangle.NO_BORDER);
 			receiptTable.addCell(leftCell);
 
