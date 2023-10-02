@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.hariyali.utils.EncryptionDecryptionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -100,6 +101,9 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 	@Lazy
 	@Autowired
 	RestTemplate restTemplate;
+
+	@Autowired
+	EncryptionDecryptionUtil encryptionDecryptionUtil;
 
 	@Value("${frontend.redirect-url}")
 	String frontendRedirectURL;
@@ -210,7 +214,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 			}
 		}
 		ApiResponse<String> apiResponse = new ApiResponse<>();
-		apiResponse.setData(redirectUrl + paymentInfo.getOrderId());
+		apiResponse.setData(redirectUrl + encryptionDecryptionUtil.encrypt(paymentInfo.getOrderId()));
 		return apiResponse;
 	}
 
