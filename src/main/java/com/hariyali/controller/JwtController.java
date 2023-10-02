@@ -125,7 +125,7 @@ public class JwtController {
 	public ResponseEntity<?> reSendOtp(@RequestParam String donarIdOrEmail) throws Exception {
 		ApiResponse<?> result = new ApiResponse<>();
 		try {
-			otpService.sendOtpByEmail(donarIdOrEmail);
+			otpService.resendOtpByEmail(donarIdOrEmail);
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Otp Send Successfully");
 			result.setStatusCode(HttpStatus.OK.value());
