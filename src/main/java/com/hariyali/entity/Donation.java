@@ -106,7 +106,7 @@ public class Donation implements Serializable {
 	private String source;
 
 	@Column(name = "meconnect_id")
-	private int meconnectId;
+	private Integer meconnectId;
 
 	@Column(name = "approval_status")
 	private String approvalStatus;
@@ -119,5 +119,8 @@ public class Donation implements Serializable {
 
 	@Column(name = "approval_date")
 	private Date approvalDate;
+	
+	@Column(name = "content")
+	private String giftContent;
 
 }

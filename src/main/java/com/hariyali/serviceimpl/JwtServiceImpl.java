@@ -1,18 +1,5 @@
 package com.hariyali.serviceimpl;
 
-import java.util.Date;
-import java.util.Optional;
-
-import com.hariyali.utils.EncryptionDecryptionUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,12 +11,31 @@ import com.hariyali.dto.LoginRequest;
 import com.hariyali.entity.OtpModel;
 import com.hariyali.entity.TokenLoginUser;
 import com.hariyali.entity.Users;
+import com.hariyali.exceptions.ConcurrentSessionException;
 import com.hariyali.exceptions.CustomExceptionNodataFound;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.JwtService;
 import com.hariyali.service.TokenLoginUserService;
 import com.hariyali.utils.EmailService;
+import com.hariyali.utils.EncryptionDecryptionUtil;
+import io.jsonwebtoken.ExpiredJwtException;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.util.Date;
+import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
+
+@Slf4j
 @Service
 public class JwtServiceImpl implements JwtService {
 
@@ -62,7 +68,6 @@ public class JwtServiceImpl implements JwtService {
 	@Autowired
 	private EncryptionDecryptionUtil encryptionDecryptionUtil;
 
-	private static final Logger logger = LoggerFactory.getLogger(JwtServiceImpl.class);
 
 	@Value("${user.account.locktime}")
 	private Integer lockTime;
@@ -73,15 +78,14 @@ public class JwtServiceImpl implements JwtService {
 
 		if (request.getUsername() != null || request.getPassword() != null) {
 
-			Optional<Users> userResponse = Optional
-					.ofNullable(this.usersRepository.findByDonorId(request.getUsername()));
+			Optional<Users> userResponse = ofNullable(this.usersRepository.findByDonorId(request.getUsername()));
 
 			Users user = null;
 			if (userResponse.isPresent()) {
 				user = userResponse.get();
 
 				System.err.println("user" + user);
-				logger.debug("User found - {}", user.getDonorId());
+				log.debug("User found - {}", user.getDonorId());
 				if (user.getLastloginDate() != null) {
 					Date dt = user.getLastloginDate();
 					long updatedDate = dt.getTime();
@@ -161,7 +165,7 @@ public class JwtServiceImpl implements JwtService {
 					}
 					userRepository.save(user);
 					Integer remaining = 4 - (user.getAttempts());
-					logger.debug("User with {} not found", request.getUsername());
+					log.debug("User with {} not found", request.getUsername());
 					result.setStatus(EnumConstants.ERROR);
 					result.setMessage("Incorrect credentials entered.Remaining attemp is: " + remaining);
 					result.setStatusCode(HttpStatus.BAD_REQUEST.value());
@@ -172,13 +176,13 @@ public class JwtServiceImpl implements JwtService {
 
 			else {
 
-				userResponse = Optional.ofNullable(this.usersRepository.findByEmailId(request.getUsername()));
+				userResponse = ofNullable(this.usersRepository.findByEmailId(request.getUsername()));
 				if (userResponse.isPresent()) {
 					user = userResponse.get();
 				}
 
 				System.err.println("user" + user);
-				logger.debug("User found - {}", user.getEmailId());
+				log.debug("User found - {}", user.getEmailId());
 				if (user.getLastloginDate() != null) {
 					Date dt = user.getLastloginDate();
 					long updatedDate = dt.getTime();
@@ -257,7 +261,7 @@ public class JwtServiceImpl implements JwtService {
 					}
 					userRepository.save(user);
 					Integer remaining = 4 - (user.getAttempts());
-					logger.debug("User with {} not found", request.getUsername());
+					log.debug("User with {} not found", request.getUsername());
 					throw new CustomExceptionNodataFound(
 							"Incorrect credentials entered.Remaining attemp is: " + remaining);
 				}
@@ -295,11 +299,16 @@ public class JwtServiceImpl implements JwtService {
 
 	// logout
 	@Override
-
+	@Transactional
 	public ApiResponse<String> logout(LoginRequest request, String token) {
 		ApiResponse<String> result = new ApiResponse<>();
 		if (token != null) {
-			String userName = jwtHelper.getUsernameFromToken(token);
+			String userName;
+			try {
+				userName = jwtHelper.getUsernameFromToken(token);
+			} catch (ExpiredJwtException e){
+				userName = request.getUsername();
+			}
 			Users userResponseDonorId = this.userRepository.findByDonorId(request.getUsername());
 			if (userResponseDonorId != null) {
 
@@ -310,7 +319,7 @@ public class JwtServiceImpl implements JwtService {
 			} else {
 				userResponseDonorId = this.userRepository.findByEmailId(request.getUsername());
 
-				if (request.getUsername().equals(userName)) {
+				if (request.getUsername().equalsIgnoreCase(userName)) {
 					this.customUserDetailService.loadUserByUsername(userName);
 				}
 			}
@@ -324,7 +333,7 @@ public class JwtServiceImpl implements JwtService {
 				tokenLoginUserService.updateToken(tokenLoginUser);
 			}
 			if (userResponseDonorId != null) {
-
+				userResponseDonorId.setActiveSession(0);
 				this.userRepository.save(userResponseDonorId);
 				result.setMessage("Logged out successfully");
 				result.setStatus(EnumConstants.SUCCESS);
@@ -384,125 +393,77 @@ public class JwtServiceImpl implements JwtService {
 		request.setPassword(encryptionDecryptionUtil.decrypt(request.getPassword()));
 		if (request.getUsername() != null || request.getPassword() != null) {
 
-			Optional<Users> userResponse = Optional
-					.ofNullable(this.usersRepository.findByDonorId(request.getUsername()));
+			Optional<Users> userResponse = ofNullable(this.usersRepository.findByDonorId(request.getUsername()));
 
-			Users user = null;
-			if (userResponse.isPresent()) {
-				user = userResponse.get();
+	        Users user = null;
+	        if (userResponse.isPresent()) {
+	            user = userResponse.get();
+	            System.err.println("user" + user);
+	            log.debug("User found - {}", user.getDonorId());
 
-				System.err.println("user" + user);
-				logger.debug("User found - {}", user.getDonorId());
-				if (user.getLastloginDate() != null) {
-					Date dt = user.getLastloginDate();
-					long updatedDate = dt.getTime();
-					long currentDate = new Date().getTime();
-					long timeDiff = currentDate - updatedDate;
-					timeDiff = timeDiff / 1000; // time difference in sec
-					long lockTimeSec = lockTime * 60; // lockTime in sec
-
-					// is user locked or not
-					boolean isAccountUnlock = (lockTimeSec - timeDiff) > 0 ? false : true;
-					if (isAccountUnlock && user.getAttempts() >= 3) {
-						user.setAttempts(0);
-						user.setLastloginDate(new Date());
-						userRepository.save(user);
+	            if (request.getUsername().equals(user.getDonorId())
+	                    && this.passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+					boolean tokenExpired = false;
+					try {
+						jwtHelper.getUsernameFromToken(tokenLoginUserService.findByUsernameDonorId(user.getDonorId()).getToken());
+					} catch (Exception e){
+						tokenExpired = true;
 					}
-				}
-				if (request.getUsername().equals(user.getDonorId())
-						&& this.passwordEncoder.matches(request.getPassword(), user.getPassword())
-						&& (user.getAttempts() < 3)) {
-					// Generate OTP
-					otpService.sendOtpByEmail(user.getEmailId());
-					result.setStatus(EnumConstants.SUCCESS);
-					result.setMessage("Otp Send Successfully");
-					result.setStatusCode(HttpStatus.OK.value());
-					return result;
-				} else {
-					user.setLastloginDate(new Date());
-					user.getModifiedDate();
-					Integer userAttempt = user.getAttempts();
-					if (userAttempt < 3) {
-						user.setAttempts(userAttempt + 1);
-					} else {
-						result.setMessage(
-								"Your account is locked due to 3 incorrect attempt. Please contact admin or wait for "
-										+ lockTime + " minuits");
-						result.setStatusCode(HttpStatus.LOCKED.value());
-						result.setStatus(EnumConstants.ERROR);
+					if(tokenExpired ||  ofNullable(user.getActiveSession()).orElse(0) == 0) {
+						// Generate OTP
+						otpService.sendOtpByEmail(user.getEmailId());
+						result.setStatus(EnumConstants.SUCCESS);
+						result.setMessage("Otp Send Successfully");
+						result.setStatusCode(HttpStatus.OK.value());
 						return result;
-					}
-					userRepository.save(user);
-					Integer remaining = 4 - (user.getAttempts());
-					logger.debug("User with {} not found", request.getUsername());
-					result.setStatus(EnumConstants.ERROR);
-					result.setMessage("Incorrect credentials entered.Remaining attemp is: " + remaining);
-					result.setStatusCode(HttpStatus.BAD_REQUEST.value());
-					return result;
-				}
+					} else throw new ConcurrentSessionException("You cannot login because you have too many session active!");
 
-			}
-
-			else {
-
-				userResponse = Optional.ofNullable(this.usersRepository.findByEmailId(request.getUsername()));
-				if (userResponse.isPresent()) {
-					user = userResponse.get();
-				}
-
-				System.err.println("user" + user);
-				logger.debug("User found - {}", user.getEmailId());
-				if (user.getLastloginDate() != null) {
-					Date dt = user.getLastloginDate();
-					long updatedDate = dt.getTime();
-					long currentDate = new Date().getTime();
-					long timeDiff = currentDate - updatedDate;
-					timeDiff = timeDiff / 1000; // time difference in sec
-					long lockTimeSec = lockTime * 60; // lockTime in sec
-
-					// is user locked or not
-					boolean isAccountUnlock = (lockTimeSec - timeDiff) > 0 ? false : true;
-					if (isAccountUnlock && user.getAttempts() >= 3) {
-						user.setAttempts(0);
-						user.setLastloginDate(new Date());
-						userRepository.save(user);
-					}
-				}
-				if (request.getUsername().equals(user.getEmailId())
-						&& this.passwordEncoder.matches(request.getPassword(), user.getPassword())
-						&& (user.getAttempts() < 3)) {
-					otpService.sendOtpByEmail(user.getEmailId());
-					result.setStatus(EnumConstants.SUCCESS);
-					result.setMessage("Otp Send Successfully");
-					result.setStatusCode(HttpStatus.OK.value());
-					return result;
 				} else {
-					user.setLastloginDate(new Date());
-					user.getModifiedDate();
-					Integer userAttempt = user.getAttempts();
-					if (userAttempt < 3) {
-						user.setAttempts(userAttempt + 1);
-					} else {
-						result.setMessage(
-								"Your account is locked due to 3 incorrect attempt. Please contact admin or wait for "
-										+ lockTime + " minuits");
-						result.setStatusCode(HttpStatus.LOCKED.value());
-						result.setStatus(EnumConstants.ERROR);
-						return result;
+	                user.setLastloginDate(new Date());
+	                user.getModifiedDate();
+	                userRepository.save(user);
+	                log.debug("User with {} not found", request.getUsername());
+	                result.setStatus(EnumConstants.ERROR);
+	                result.setMessage("Incorrect credentials entered.");
+	                result.setStatusCode(HttpStatus.BAD_REQUEST.value());
+	                return result;
+	            }
+	        } else {
+	            userResponse = Optional.ofNullable(this.usersRepository.findByEmailId(request.getUsername().toUpperCase()));
+	            if (userResponse.isPresent()) {
+	                user = userResponse.get();
+	            }
+	            System.err.println("user" + user);
+	            log.debug("User found - {}", user.getEmailId().toUpperCase());
+
+	            if (request.getUsername().equalsIgnoreCase(user.getEmailId())
+	                    && this.passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+					boolean tokenExpired = false;
+					try {
+						jwtHelper.getUsernameFromToken(tokenLoginUserService.findByUsernameEmailId(user.getEmailId()).getToken());
+					} catch (Exception e){
+						tokenExpired = true;
 					}
-					userRepository.save(user);
-					Integer remaining = 4 - (user.getAttempts());
-					logger.debug("User with {} not found", request.getUsername());
-					throw new CustomExceptionNodataFound(
-							"Incorrect credentials entered.Remaining attemp is: " + remaining);
-				}
+					if(tokenExpired || ofNullable(user.getActiveSession()).orElse(0) == 0) {
+						// Generate OTP
+						otpService.sendOtpByEmail(user.getEmailId());
+						result.setStatus(EnumConstants.SUCCESS);
+						result.setMessage("Otp Send Successfully");
+						result.setStatusCode(HttpStatus.OK.value());
+						return result;
+					} else throw new ConcurrentSessionException("You cannot login because you have too many session active!");
 
-			}
-
-		} else {
-			throw new CustomExceptionNodataFound("UserName or Password Should not be Null");
-		}
-
+				} else {
+	                user.setLastloginDate(new Date());
+	                user.getModifiedDate();
+	                userRepository.save(user);
+	                log.debug("User with {} not found", request.getUsername());
+	                throw new CustomExceptionNodataFound("Incorrect credentials entered.");
+	            }
+	        }
+	    } else {
+	        throw new CustomExceptionNodataFound("UserName or Password Should not be Null");
+	    }
 	}
 	
 	public ApiResponse<String> verifyOtp(String email, String otp) {
@@ -535,6 +496,7 @@ public class JwtServiceImpl implements JwtService {
 
 	    user.setLastloginDate(new Date());
 	    user.setAttempts(0);
+		user.setActiveSession(1);
 //	    user.setOtp(null);
 	    userRepository.save(user);
 

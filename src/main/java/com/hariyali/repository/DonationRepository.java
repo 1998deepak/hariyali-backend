@@ -98,19 +98,43 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 			+ "						 			                         SELECT JSON_ARRAYAGG(\r\n"
 			+ "						 			                             JSON_OBJECT(\r\n"
 			+ "						 			                                 'paymentInfoId', paymentInfo.paymentInfo_id,\r\n"
-			+ "						 			                                 'paymentMode', paymentInfo.payment_mode,\r\n"
-			+ "						 			                                 'bankName', paymentInfo.bank_name,\r\n"
-			+ "						 			                                 'chqORddNo', paymentInfo.chq_OR_dd_no,\r\n"
-			+ "						 			                                 'chqORddDate', DATE_FORMAT(paymentInfo.chq_OR_dd_date, '%Y-%m-%d'),\r\n"
-			+ "						 			                                 'paymentDate', DATE_FORMAT(paymentInfo.payment_date, '%Y-%m-%d'),\r\n"
-			+ "						 			                                 'amount', paymentInfo.amount,\r\n"
-			+ "						                                              'paymentStatus',paymentInfo.payment_status,\r\n"
-			+ "						                                              'remark',paymentInfo.remark,\r\n"
-			+ "						                                              'isDeleted',paymentInfo.is_deleted,\r\n"
-			+ "						                                              'createdDate',Date(paymentInfo.created_date),\r\n"
-			+ "						 											'createdBy',paymentInfo.created_by,\r\n"
-			+ "						                                  'modifiedDate',Date(paymentInfo.modified_date),\r\n"
-			+ "						                                  'modifiedBy',paymentInfo.modified_by\r\n"
+			+ "        'paymentMode', paymentInfo.payment_mode,\r\n"
+			+ "        'bankName', paymentInfo.bank_name,\r\n"
+			+ "        'chqORddNo', paymentInfo.chq_OR_dd_no,\r\n"
+			+ "        'chqORddDate', DATE_FORMAT(paymentInfo.chq_OR_dd_date, '%Y-%m-%d'),\r\n"
+			+ "        'paymentDate', DATE_FORMAT(paymentInfo.payment_date, '%Y-%m-%d'),\r\n"
+			+ "        'amount', paymentInfo.amount,\r\n"
+			+ "        'paymentStatus', paymentInfo.payment_status,\r\n"
+			+ "        'remark', paymentInfo.remark,\r\n"
+			+ "        'isDeleted', paymentInfo.is_deleted,\r\n"
+			+ "        'createdDate', DATE(paymentInfo.created_date),\r\n"
+			+ "        'createdBy', paymentInfo.created_by,\r\n"
+			+ "        'modifiedDate', DATE(paymentInfo.modified_date),\r\n"
+			+ "        'modifiedBy', paymentInfo.modified_by,\r\n"
+			+ "        'donationId', paymentInfo.donationId,\r\n"
+			+ "        'bankPaymentRefNo', paymentInfo.bank_payment_ref_no,\r\n"
+			+ "        'cardName', paymentInfo.card_name,\r\n"
+			+ "        'currency', paymentInfo.currency,\r\n"
+			+ "        'paymentTrackingId', paymentInfo.payment_tracking_id,\r\n"
+			+ "        'orderId', paymentInfo.order_id,\r\n"
+			+ "        'accountId', paymentInfo.account_id,\r\n"
+			+ "        'receiptDate', DATE(paymentInfo.receipt_date),\r\n"
+			+ "        'receivedAmount', paymentInfo.received_amount,\r\n"
+			+ "        'bankCharge', paymentInfo.bank_charge,\r\n"
+			+ "        'documentNumber', paymentInfo.document_number,\r\n"
+			+ "        'bankAddress', paymentInfo.bank_address,\r\n"
+			+ "        'depositNumber', paymentInfo.deposit_number,\r\n"
+			+ "        'depositDate', DATE(paymentInfo.deposit_date),\r\n"
+			+ "        'receiptNumber', paymentInfo.receipt_number,\r\n"
+			+ "        'realizationDate', DATE(paymentInfo.realization_date),\r\n"
+			+ "        'creditCardNo', paymentInfo.credit_card_no,\r\n"
+			+ "        'expiry', paymentInfo.expiry,\r\n"
+			+ "        'cardholderName', paymentInfo.cardholder_name,\r\n"
+			+ "        'chequeNumber', paymentInfo.cheque_number,\r\n"
+			+ "        'chequeDate', DATE_FORMAT(paymentInfo.cheque_date, '%Y-%m-%d'),\r\n"
+			+ "        'ddNumber', paymentInfo.dd_number,\r\n"
+			+ "        'ddDate', DATE_FORMAT(paymentInfo.dd_date, '%Y-%m-%d'),\r\n"
+			+ "        'sourceType', paymentInfo.source_type\r\n"
 			+ "						 			                             )\r\n"
 			+ "						 			                         )\r\n"
 			+ "						 			                         FROM tbl_payment_info AS paymentInfo\r\n"
@@ -120,12 +144,12 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 			+ "						 			             )\r\n"
 			+ "						 			             FROM tbl_donation AS donations\r\n"
 			+ "						 			             JOIN tbl_user_master AS users ON users.user_id = donations.userId\r\n"
-			+ "						 			             WHERE donations.donation_id = ?1 AND donations.deleted = false\r\n"
+			+ "						 			             WHERE donations.donation_id = ?1 AND IFNULL(donations.deleted, false)= false\r\n"
 			+ "						 			         )\r\n" + "						 			     ) \r\n"
 			+ "						 			     )AS Result\r\n"
 			+ "						 			 FROM tbl_donation AS donations\r\n"
 			+ "						 			 JOIN tbl_user_master AS users ON users.user_id = donations.userId\r\n"
-			+ "						 			 WHERE donations.donation_id = ?1 AND donations.deleted = false", nativeQuery = true)
+			+ "						 			 WHERE donations.donation_id = ?1 AND IFNULL(donations.deleted, false) = false", nativeQuery = true)
 
 	Object getSpecificDonationById(int donationId);
 
@@ -172,9 +196,12 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 	@Query(value="select * from tbl_donation as d, tbl_user_master as u where u.user_id=d.userId anf u.webId=?;",nativeQuery = true)
 	public Donation getDonationByWebId(String webId);
 
-	@Query(value = "SELECT donation_code FROM tbl_donation ORDER BY donation_code DESC LIMIT 1",nativeQuery = true)
+	@Query(value = "SELECT donation_code FROM tbl_donation WHERE donation_code IS NOT NULL AND donation_code != '' ORDER BY donation_code DESC LIMIT 1",nativeQuery = true)
 	public String getLastDonationID();
 	
 	@Query(value = "SELECT * FROM tbl_donation where userId in(select user_id from tbl_user_master where pan_card=?1 )",nativeQuery = true)
 	public Donation findByUserPan(String panCard);
+	
+	@Query(value="select no_of_bouquets from tbl_user_packages where donationId=?",nativeQuery = true)
+	public int getNoOfPlants(int donationId);
 }

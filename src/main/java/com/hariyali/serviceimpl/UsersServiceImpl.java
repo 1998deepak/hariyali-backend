@@ -4,6 +4,8 @@ import static java.util.Objects.isNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,8 +36,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hariyali.EnumConstants;
@@ -48,7 +49,9 @@ import com.hariyali.dto.DonorListRequestDTO;
 import com.hariyali.dto.LoginRequest;
 import com.hariyali.dto.UsersDTO;
 import com.hariyali.entity.Address;
+import com.hariyali.entity.Document;
 import com.hariyali.entity.Donation;
+import com.hariyali.entity.OtpModel;
 import com.hariyali.entity.PaymentInfo;
 import com.hariyali.entity.Receipt;
 import com.hariyali.entity.Recipient;
@@ -59,7 +62,9 @@ import com.hariyali.exceptions.CustomException;
 import com.hariyali.exceptions.CustomExceptionDataAlreadyExists;
 import com.hariyali.exceptions.CustomExceptionNodataFound;
 import com.hariyali.repository.AddressRepository;
+import com.hariyali.repository.DocumentRepository;
 import com.hariyali.repository.DonationRepository;
+import com.hariyali.repository.OtpRepository;
 import com.hariyali.repository.PaymentInfoRepository;
 import com.hariyali.repository.ReceiptRepository;
 import com.hariyali.repository.RecipientRepository;
@@ -67,8 +72,10 @@ import com.hariyali.repository.UserPackageRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.ReceiptService;
 import com.hariyali.service.UsersService;
+import com.hariyali.utils.AES;
 import com.hariyali.utils.CommonService;
 import com.hariyali.utils.EmailService;
+import com.hariyali.utils.EncryptionDecryptionUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -126,12 +133,27 @@ public class UsersServiceImpl implements UsersService {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	OtpServiceImpl otpServiceImpl;
 
 	@Autowired
 	ReceiptService receiptService;
-	
+
 	@Autowired
 	CommonService commonService;
+
+	@Autowired
+	JwtServiceImpl jwtService;
+	
+	@Autowired
+	OtpRepository otpRepository;
+
+	@Autowired
+	DocumentRepository documentRepository;
+
+	@Autowired
+	private EncryptionDecryptionUtil encryptionDecryptionUtil;
 
 	private static final Logger logger = LoggerFactory.getLogger(UsersServiceImpl.class);
 
@@ -180,16 +202,16 @@ public class UsersServiceImpl implements UsersService {
 		validateDonation(usersDTO, "offline");
 
 		// send email to user
-		ApiResponse<UsersDTO> response = save(usersDTO,commonService.createDonarIDORDonationID("user"), request);
+		ApiResponse<UsersDTO> response = save(usersDTO, commonService.createDonarIDORDonationID("user"), request);
 
 		Users resulEntity = usersRepository.findByEmailId(usersDTO.getEmailId());
 
 		Receipt receipt = receiptRepository.getUserReceipt(resulEntity.getUserId());
-		//emailService.sendEmailWithAttachment(resulEntity.getEmailId(), EnumConstants.subject, EnumConstants.content,
-				//receipt.getReciept_Path(), resulEntity);
+		// emailService.sendEmailWithAttachment(resulEntity.getEmailId(),
+		// EnumConstants.subject, EnumConstants.content,
+		// receipt.getReciept_Path(), resulEntity);
 //		emailService.sendEmailWithAttachment(resulEntity.getEmailId(), EnumConstants.subject, EnumConstants.content,
 //				receipt.getReciept_Path(), resulEntity);
-
 
 		return response;
 
@@ -203,7 +225,7 @@ public class UsersServiceImpl implements UsersService {
 			throws JsonProcessingException {
 
 		validateDonation(usersDTO, "online");
-		return save(usersDTO, commonService.createDonarIDORDonationID("user"), null);
+		return save(usersDTO, null, null);
 //		return null;
 	}
 
@@ -219,6 +241,17 @@ public class UsersServiceImpl implements UsersService {
 
 		of(donationDTO).map(DonationDTO::getDonationMode).filter(mode -> donationMode.equalsIgnoreCase(mode))
 				.orElseThrow(() -> new CustomException("Invalid donation mode"));
+		if (usersDTO.getMeconnectId() != null) {
+			if (!usersDTO.getMeconnectId().isEmpty()) {
+				try {
+					String str = AES.decrypt(usersDTO.getMeconnectId());
+					String[] parts = str.split("\\|\\|");
+					System.out.println(parts[0] + ":=>" + parts[1]);
+				} catch (Exception e) {
+					throw new CustomException("Something went wrong...!");
+				}
+			}
+		}
 
 	}
 
@@ -239,7 +272,14 @@ public class UsersServiceImpl implements UsersService {
 		ApiResponse<DonationDTO> apiResponse = donationServiceImpl.saveUserDonations(usersDTO, donarID, request);
 		response.setGatewayURL(apiResponse.getGatewayURL());
 		response.setEncRequest(apiResponse.getEncRequest());
+		response.setStatus(apiResponse.getStatus());
 		response.setAccessCode(apiResponse.getAccessCode());
+		if (("OTHERTHANINDIA").equalsIgnoreCase(apiResponse.getStatus())) {
+			UsersDTO usersDTO2 = new UsersDTO();
+			usersDTO2.setDonations(Arrays.asList(apiResponse.getData()));
+			response.setData(usersDTO2);
+		}
+
 		return response;
 
 	}
@@ -257,7 +297,11 @@ public class UsersServiceImpl implements UsersService {
 		Users existingUser = usersRepository.findByEmailId(user.getEmailId());
 
 		if (existingUser != null) {
-			throw new CustomException("Email " + existingUser.getEmailId() + " already exists");
+			if(existingUser.getWebId() != null) {
+				throw new CustomException("Email " + existingUser.getEmailId() + " already exists");
+			} else{
+				user.setUserId(existingUser.getUserId());
+			}
 		}
 
 		Date newDate = new Date();
@@ -276,7 +320,7 @@ public class UsersServiceImpl implements UsersService {
 		}
 
 		// set user password in encoded format
-		user.setPassword(passwordEncoder.encode(EnumConstants.PASSWORD));
+//		user.setPassword(passwordEncoder.encode(EnumConstants.PASSWORD));
 
 		// set created and updated date
 		user.setCreatedDate(newDate);
@@ -300,8 +344,8 @@ public class UsersServiceImpl implements UsersService {
 		role.setUsertypeName("User");
 		user.setUserRole(role);
 		if ("online".equalsIgnoreCase(donationMode)) {
-		user.setApprovalStatus("Pending");
-		}else {
+			user.setApprovalStatus("Pending");
+		} else {
 			user.setApprovalStatus("Approved");
 		}
 		user.setIsDeleted(false);
@@ -394,21 +438,20 @@ public class UsersServiceImpl implements UsersService {
 	@Override
 	public ApiResponse<UsersDTO> getUserByEmail(String email) {
 		ApiResponse<UsersDTO> response = new ApiResponse<>();
-		Object user = usersRepository.getUserByEmail(email);
+		Users user = usersRepository.findByEmailId(email);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
 		// Gson gson = new Gson();
-		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
-		Users entity = gson.fromJson(user.toString(), Users.class);
-		if (entity.getEmailId() != null) {
-			if (entity.getDonorId() != null && entity.getWebId() == null) {
-				throw new CustomExceptionDataAlreadyExists(
-						"Donor with " + entity.getEmailId() + " is already registered, Kindly do click here to login or click on proceed button to continue your donation!");
+//		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
+//		Users entity = gson.fromJson(user.toString(), Users.class);
+		if (user.getEmailId() != null) {
+			if (user.getDonorId() != null && user.getWebId() != null) {
+				throw new CustomExceptionDataAlreadyExists("Donor with " + user.getEmailId()
+						+ " is already registered, Kindly do click here to login and continue your donation!");
 			}
-			response.setData(modelMapper.map(entity, UsersDTO.class));
+			response.setData(modelMapper.map(user, UsersDTO.class));
 			response.setStatus(EnumConstants.SUCCESS);
 			response.setStatusCode(HttpStatus.OK.value());
-			response.setMessage("User found Successfully");
 		} else
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
 		return response;
@@ -477,9 +520,7 @@ public class UsersServiceImpl implements UsersService {
 		Object user = usersRepository.getUserPersonalDetailsByEmail(email);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
-		Gson gson = new GsonBuilder()
-	            .registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY)
-	            .create();
+		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
 
@@ -491,8 +532,6 @@ public class UsersServiceImpl implements UsersService {
 		return response;
 
 	}
-	
-	
 
 	@Override
 	public ApiResponse<UsersDTO> getUserPersonalDetailsByDonorId(String donorId) {
@@ -628,21 +667,26 @@ public class UsersServiceImpl implements UsersService {
 
 	@Override
 	public ApiResponse<String> forgetPassword(String donorId, HttpSession session) throws JsonProcessingException {
-		ObjectMapper objectMapper = new ObjectMapper();
-		int otp = random.nextInt(999999);
-//		JsonNode jsonNode = objectMapper.readTree(formData);
-//		String donarID = jsonNode.get("donarID").asText();
-		Users user = this.usersRepository.findByDonorId(donorId);
-		emailService.sendSimpleEmail(user.getEmailId(), "forgetPassword",
-				"Your OTP is " + otp + ". Use this OTP to activate your account: ");
-		session.setAttribute("myotp", otp);
-		session.setAttribute("donarID", donorId);
+		Random random = new Random();
+		int otpValue = random.nextInt((int) Math.pow(10, 6));
+		Users user = jwtService.findUserByDonorIdOrEmailId(donorId);
+		if (user != null) {
+			String otp = String.format("%0" + 6 + "d", otpValue);
+			OtpModel otpModel = new OtpModel();
+			otpModel.setOtpCode(otp);
+			otpModel.setDonarIdOrEmail(user.getEmailId());
+			otpModel.setOtpExpiryTime(LocalDateTime.now().plusMinutes(10));
+			otpModel.setUsers(user);
+			otpRepository.save(otpModel);
+			String body = "Dear Donor,<br><br>" + "<br>Please use OTP to set new password - " + otp
+					+ "<br><br>-Team Hariyali<br><br>"
+					+ "PS: For any support or queries please reach out to us at <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a>";
+			emailService.sendSimpleEmail(user.getEmailId(), "Project Hariyali - Forgot Password", body);
+			
 
-		long otpTimestamp = System.currentTimeMillis();
-		session.setAttribute("otpTimestamp", otpTimestamp);
-		String email = user.getEmailId();
-		session.setAttribute("email", email);
-
+		} else {
+			throw new CustomException("User not forund");
+		}
 		ApiResponse<String> response = new ApiResponse<>();
 		response.setStatus(EnumConstants.SUCCESS);
 		response.setStatusCode(HttpStatus.OK.value());
@@ -651,69 +695,32 @@ public class UsersServiceImpl implements UsersService {
 		return response;
 	}
 
+	// verify otp
 	@Override
-	public ApiResponse<String> verifyOtp(String formData, HttpSession session, HttpServletRequest request)
-			throws JsonProcessingException {
+	public ApiResponse<String> verifyForgotOtp(String email, String otp) {
+		ApiResponse<String> result = new ApiResponse<>();
+		Users user = jwtService.findUserByDonorIdOrEmailId(email);
+		OtpModel otpModel = otpServiceImpl.findByOtp(otp);
+		if (user == null || !otp.equals(otpModel.getOtpCode())) {
+			throw new CustomExceptionNodataFound("Invalid OTP");
+		} else {
+			result.setStatus(EnumConstants.SUCCESS);
+			result.setMessage("OTP verified successfully");
+			result.setStatusCode(HttpStatus.OK.value());
 
-		ApiResponse<String> response = new ApiResponse<>();
-		ObjectMapper objectMapper = new ObjectMapper();
-		JsonNode jsonNode = objectMapper.readTree(formData);
-
-		String enteredOTP = jsonNode.get("OTP").asText();
-		Object storedOTPObject = session.getAttribute("myotp");
-
-		if (storedOTPObject == null) {
-			throw new CustomExceptionNodataFound("OTP not found");
+			return result;
 		}
-
-		String storedOTP = session.getAttribute("myotp").toString();
-		if (storedOTP == null) {
-			throw new CustomExceptionNodataFound("OTP not found");
-		}
-		long otpTimestamp = Long.parseLong(session.getAttribute("otpTimestamp").toString());
-		long currentTime = System.currentTimeMillis();
-		long timeLimitInMillis = 1 * 60 * 1000; // 1 minute
-
-		if (enteredOTP.equals(storedOTP) && (currentTime - otpTimestamp <= timeLimitInMillis)) {
-			response.setStatus(EnumConstants.SUCCESS);
-			response.setStatusCode(HttpStatus.OK.value());
-			response.setData(null);
-			response.setMessage("OTP verified successfully");
-
-			// Get the HttpSession object
-			HttpSession sessionExpired = request.getSession(false); // Pass 'false' to avoid creating a new session
-
-			// Invalidate the session
-			if (sessionExpired != null) {
-				sessionExpired.invalidate();
-				System.err.println("session expired");
-			}
-		}
-
-		else {
-			if (!enteredOTP.equals(storedOTP)) {
-				throw new CustomExceptionNodataFound("OTP not matched");
-			}
-			if (currentTime - otpTimestamp > timeLimitInMillis) {
-				throw new CustomExceptionNodataFound("OTP validation time limit exceeded");
-			} else {
-				throw new CustomExceptionNodataFound("Entered OTP is incorrect");
-			}
-		}
-		return response;
 	}
 
-	// forget User Password
+	// set new user Password
 	@Override
-	public ApiResponse<String> forgetUserPassword(LoginRequest request, HttpSession session)
+	public ApiResponse<String> setUserNewPassword(LoginRequest request, HttpSession session)
 			throws JsonProcessingException {
 		ApiResponse<String> res = new ApiResponse<>();
 
-		String userEmail = session.getAttribute("email").toString();
-
 		String password = request.getPassword();
 
-		Users user = this.usersRepository.findByEmailId(userEmail);
+		Users user = jwtService.findUserByDonorIdOrEmailId(request.getEmail());
 
 		if (user != null) {
 
@@ -740,13 +747,11 @@ public class UsersServiceImpl implements UsersService {
 		Pageable pageable = PageRequest.of(requestDTO.getPageNumber(), requestDTO.getPageSize());
 
 		Page<Object[]> result = usersRepository.getAllUsersWithWebId(ofNullable(requestDTO.getSearchText()).orElse(""),
-				requestDTO.getStatus(),
-				StringUtils.trimToNull(requestDTO.getDonorType()),
-				pageable);
+				requestDTO.getStatus(), StringUtils.trimToNull(requestDTO.getDonorType()), pageable);
 
 		if (!isNull(result) && !result.getContent().isEmpty()) {
-			List<UsersDTO> usersDTOS = of(result.getContent()).get().stream()
-					.map(this :: toUsersDTO).collect(Collectors.toList());
+			List<UsersDTO> usersDTOS = of(result.getContent()).get().stream().map(this::toUsersDTO)
+					.collect(Collectors.toList());
 			response.setData(usersDTOS);
 			response.setTotalPages(result.getTotalPages());
 			response.setTotalRecords(result.getTotalElements());
@@ -759,9 +764,9 @@ public class UsersServiceImpl implements UsersService {
 
 	}
 
-	private UsersDTO toUsersDTO(Object[] user){
+	private UsersDTO toUsersDTO(Object[] user) {
 		UsersDTO dto = new UsersDTO();
-		if(user.length > 0) {
+		if (user.length > 0) {
 			dto.setUserId(ofNullable(user[0]).map(String::valueOf).map(Integer::parseInt).orElse(0));
 			dto.setWebId(ofNullable(user[1]).map(String::valueOf).orElse(""));
 			dto.setDonorId(ofNullable(user[2]).map(String::valueOf).orElse(""));
@@ -792,7 +797,7 @@ public class UsersServiceImpl implements UsersService {
 		user.setRemark(usersDTO.getRemark());
 		user.setApprovalStatus(usersDTO.getApprovalStatus());
 
-		List<Donation> donation = user.getDonations();//this.donationRepository.getDonationDataByUserId(user.getUserId());
+		List<Donation> donation = user.getDonations();// this.donationRepository.getDonationDataByUserId(user.getUserId());
 		Users recipientEmail = null;
 
 		if ("Rejected".equalsIgnoreCase(usersDTO.getApprovalStatus())) {
@@ -800,7 +805,7 @@ public class UsersServiceImpl implements UsersService {
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Donation Rejected By " + userName);
 			result.setStatusCode(HttpStatus.FORBIDDEN.value());
-			sendRejectDonationEmails(user.getEmailId());
+			sendRejectDonationEmails(user);
 		} else if ("Approved".equalsIgnoreCase(usersDTO.getApprovalStatus())) {
 			recipientEmail = handleDonationApproval(user, donation, userName);
 			result.setStatus(EnumConstants.SUCCESS);
@@ -852,22 +857,22 @@ public class UsersServiceImpl implements UsersService {
 		}
 	}
 
-	private void sendRejectDonationEmails(String emailId) {
+	private void sendRejectDonationEmails(Users user) {
 		// Construct the email subject and content
 
-		Users user = this.usersRepository.findByEmailIdForDeletedUser(emailId);
 		if (user != null)
 
 		{
-			String subject = "Reject Donation";
-			String content = "Dear Sponsor,<br>"
-					+ "<p>Donation made by you has been rejected.</p>"
-					+"<p>Thanking you for your support to Project Hariyali.</p>"+ "Mahindra Foundation<br>" + "Sheetal Mehta<br>"
-					+ "Trustee & Executive Director<br>" + "K.C. Mahindra Education Trust,<br>" + "3rd Floor, Cecil Court,<br>"
-					+ "Near Regal Cinema,<br>" + "Mahakavi Bushan Marg,<br>" + "Mumbai 400001<br>"
-					+"<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>";
-
-			emailService.sendSimpleEmail(user.getEmailId(), subject, content);
+			String subject = "Project Hariyali: Donation Failure";
+			String content = "Dear %s,<br>"
+					+ "Thank you for your interest in Project Hariyali. Unfortunately we are unable to process your transaction. Please reach out to us at"
+					+ "<a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> for any queries"
+					+ "Thank You<br>" + "Team Hariyali<br>" + "Mahindra Foundation<br>" + "3rd Floor, Cecil Court,<br>"
+					+ "Near Regal Cinema,<br>" + "Mahakavi Bhushan Marg,<br>" + "Mumbai 400001<br>"
+					+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
+					+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
+			String mailBody = String.format(content, user.getFirstName(), content);
+			emailService.sendSimpleEmail(user.getEmailId(), subject, mailBody);
 		}
 	}
 
@@ -912,26 +917,32 @@ public class UsersServiceImpl implements UsersService {
 					throw new CustomExceptionNodataFound("Please select Dontation Type");
 				}
 				try {
-					String paymentStatus = d.getPaymentInfo().get(0).getPaymentStatus();
+
+					// added bug fix because payment info was getting null
+					String paymentStatus = paymentIfoRepository.getPaymentStatusByDonationId(d.getDonationId());
+//					String paymentStatus = d.getPaymentInfo().get(0).getPaymentStatus();
+
 					if ("Completed".equalsIgnoreCase(paymentStatus) || "Success".equalsIgnoreCase(paymentStatus)) {
 						receiptService.generateReceipt(d);
 						Receipt receipt = receiptRepository.getUserReceipt(user.getUserId());
 						Users recipientData = usersRepository.findByEmailId(recipientEmail.getEmailId());
 						if (d.getDonationType().equalsIgnoreCase("gift-donate")) {
-							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
-									EnumConstants.content, user);
-							emailService.sendGiftingLetterEmail(recipientData, d.getDonationEvent());
-							emailService.sendReceiptWithAttachment(user,d.getOrderId(), receipt);
-							
+							// emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
+							// EnumConstants.content, user);
+//							Document document = documentRepository.findByYearAndDocTypeAndDonation(
+//									Calendar.getInstance().get(Calendar.YEAR), "CERTIFICATE", d);
+//							emailService.sendGiftingLetterEmail(d, recipientData, d.getDonationEvent(),
+//									document.getFilePath());
+							emailService.sendReceiptWithAttachment(user, d.getOrderId(), receipt);
 
 						}
 //						emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
 //								EnumConstants.content, user);
-						emailService.sendReceiptWithAttachment(user,d.getOrderId(), receipt);
+						emailService.sendReceiptWithAttachment(user, d.getOrderId(), receipt);
 						emailService.sendThankyouLatter(user.getEmailId(), user);
 
 					} else {
-						sendRejectDonationEmails(user.getEmailId());
+						sendRejectDonationEmails(user);
 					}
 				} catch (Exception e) {
 					log.error("Exception = {}", e);
@@ -979,7 +990,6 @@ public class UsersServiceImpl implements UsersService {
 
 					this.recipientRepository.saveAll(donation.getRecipient());
 				}
-
 
 			}
 		}
@@ -1095,15 +1105,14 @@ public class UsersServiceImpl implements UsersService {
 	public List<String> getAllDonarId() {
 		return usersRepository.getAllDonorId();
 	}
-	
-	@Override
-	public List<String> getAllUserIds(){
-        List<String> userIds = usersRepository.getAllDonorId();
-        userIds.addAll(usersRepository.getAllEmailId());
-        return userIds;
-    }
 
-	
+	@Override
+	public List<String> getAllUserIds() {
+		List<String> userIds = usersRepository.getAllDonorId();
+		userIds.addAll(usersRepository.getAllEmailId());
+		return userIds;
+	}
+
 	@Override
 	public ApiResponse<String> getUserDonarId(String email) {
 		ApiResponse<String> response = new ApiResponse<>();
@@ -1119,5 +1128,24 @@ public class UsersServiceImpl implements UsersService {
 		return response;
 
 	}
+
+	@Override
+	@Transactional
+	public ApiResponse<String> changePassword(LoginRequest request, String token) {
+		ApiResponse<String> response = new ApiResponse<>();
+		String password = encryptionDecryptionUtil.decrypt(request.getPassword());
+		String userName = jwtHelper.getUsernameFromToken(token);
+
+		Users user = usersRepository.findByEmailId(userName);
+		if (passwordEncoder.matches(password, user.getPassword())) {
+			throw new CustomException("New password is same as old password!");
+		}
+
+		user.setPassword(passwordEncoder.encode(password));
+		usersRepository.save(user);
+		response.setStatus("Success");
+		response.setMessage("User password changed successfully!");
+		return response;
+	}// method
 
 }

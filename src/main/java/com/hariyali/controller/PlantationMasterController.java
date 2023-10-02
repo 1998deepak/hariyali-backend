@@ -1,31 +1,21 @@
 package com.hariyali.controller;
 
-import java.io.ByteArrayInputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.PaginationRequestDTO;
 import com.hariyali.dto.PlantationMasterDTO;
 import com.hariyali.service.PlantationMasterService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.hariyali.dto.ApiResponse;
-import com.hariyali.entity.Plantation;
-import com.hariyali.repository.PlantationRepository;
-import com.hariyali.service.PlantationService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/plantation/")
@@ -73,6 +63,29 @@ public class PlantationMasterController {
 
             // Set the filename based on the seasonType
             String fileName = "Plantation_Report.xlsx";
+            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+            IOUtils.copy(byteArrayInputStream, response.getOutputStream());
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("Exception = " + e);
+        }
+    }//method
+
+    /**
+     * Rest endpoint to download plantation template
+     *
+     * @param response HttpServletResponse
+     */
+    @GetMapping("/downloadTemplate")
+    public void downloadTemplate(HttpServletResponse response) {
+
+        try {
+            ByteArrayInputStream byteArrayInputStream = service.downloadTemplate();
+            response.setContentType("application/octet-stream");
+
+            // Set the filename based on the seasonType
+            String fileName = "PlantationTemplate.xlsx";
             response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
             response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             IOUtils.copy(byteArrayInputStream, response.getOutputStream());

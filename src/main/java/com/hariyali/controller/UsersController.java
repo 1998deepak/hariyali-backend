@@ -6,8 +6,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import com.hariyali.dto.*;
-import com.hariyali.exceptions.TooManyRequestException;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +22,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hariyali.EnumConstants;
+import com.hariyali.dto.ApiRequest;
+import com.hariyali.dto.ApiResponse;
+import com.hariyali.dto.DonorListRequestDTO;
+import com.hariyali.dto.LoginRequest;
+import com.hariyali.dto.UsersDTO;
 import com.hariyali.entity.OtpModel;
-import com.hariyali.entity.Users;
 import com.hariyali.exceptions.CustomException;
 import com.hariyali.exceptions.CustomExceptionNodataFound;
 import com.hariyali.repository.OtpRepository;
@@ -33,16 +36,6 @@ import com.hariyali.service.JwtService;
 import com.hariyali.service.UsersService;
 import com.hariyali.serviceimpl.OtpServiceImpl;
 import com.hariyali.utils.EncryptionDecryptionUtil;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -56,10 +49,10 @@ public class UsersController {
 
 	@Autowired
 	UsersRepository userRepository;
-	
+
 	@Autowired
 	OtpServiceImpl otpService;
-	
+
 	@Autowired
 	OtpRepository otpRepository;
 
@@ -68,6 +61,7 @@ public class UsersController {
 
 	@Autowired
 	ModelMapper modelMapper;
+
 	// method to get user by email
 	@GetMapping("/getAlluser")
 	public ResponseEntity<ApiResponse<Object>> getAllusers() {
@@ -100,17 +94,15 @@ public class UsersController {
 	public ResponseEntity<ApiResponse<UsersDTO>> addUserOffline(@RequestBody UsersDTO usersDTO,
 			HttpServletRequest request) throws JsonProcessingException, MessagingException {
 //		ApiRequest response = new ApiRequest(formData);
-		return new ResponseEntity<>(usersService.saveUserAndDonationsOffline(usersDTO, request),
-				HttpStatus.OK);
+		return new ResponseEntity<>(usersService.saveUserAndDonationsOffline(usersDTO, request), HttpStatus.OK);
 
 	}
 
 	// method to add user package
 	@PostMapping("/userAddOnline")
-	public ResponseEntity<ApiResponse<UsersDTO>> addUserOnline(@RequestBody UsersDTO formData, HttpServletRequest request)
-			throws JsonProcessingException {
-		return new ResponseEntity<>(usersService.saveUserAndDonationsOnline(formData, request),
-				HttpStatus.OK);
+	public ResponseEntity<ApiResponse<UsersDTO>> addUserOnline(@RequestBody UsersDTO formData,
+			HttpServletRequest request) throws JsonProcessingException {
+		return new ResponseEntity<>(usersService.saveUserAndDonationsOnline(formData, request), HttpStatus.OK);
 	}
 
 	// method to get all donation of specific user by email
@@ -122,8 +114,8 @@ public class UsersController {
 	}
 
 	@PutMapping("/updateUser")
-	public ResponseEntity<ApiResponse<UsersDTO>> updateUser(@RequestBody UsersDTO formData, @RequestParam String emailId,
-			HttpServletRequest request) throws JsonProcessingException {
+	public ResponseEntity<ApiResponse<UsersDTO>> updateUser(@RequestBody UsersDTO formData,
+			@RequestParam String emailId, HttpServletRequest request) throws JsonProcessingException {
 //		ApiRequest response = new ApiRequest(formData);
 		return new ResponseEntity<>(usersService.updateUser(formData, emailId, request), HttpStatus.OK);
 
@@ -135,20 +127,20 @@ public class UsersController {
 		email = encryptionDecryptionUtil.decrypt(email);
 		return new ResponseEntity<>(usersService.getUserPersonalDetails(email), HttpStatus.OK);
 	}
-	
-	// method to get user donar Id by email
-		@GetMapping("/getUserDonarId/{email}")
-		public ResponseEntity<ApiResponse<String>> getUserDonarId(@PathVariable String email) {
-			email = encryptionDecryptionUtil.decrypt(email);
-			return new ResponseEntity<>(usersService.getUserDonarId(email), HttpStatus.OK);
-		}
-	
-	// method to get existing user details by email
-		@GetMapping("/getExistingUser/{email}")
-		public ResponseEntity<ApiResponse<UsersDTO>> getExistingUserPersonalDetails(@PathVariable String email) {
 
-			return new ResponseEntity<>(usersService.getExistingUserByEmail(email), HttpStatus.OK);
-		}
+	// method to get user donar Id by email
+	@GetMapping("/getUserDonarId/{email}")
+	public ResponseEntity<ApiResponse<String>> getUserDonarId(@PathVariable String email) {
+		email = encryptionDecryptionUtil.decrypt(email);
+		return new ResponseEntity<>(usersService.getUserDonarId(email), HttpStatus.OK);
+	}
+
+	// method to get existing user details by email
+	@GetMapping("/getExistingUser/{email}")
+	public ResponseEntity<ApiResponse<UsersDTO>> getExistingUserPersonalDetails(@PathVariable String email) {
+
+		return new ResponseEntity<>(usersService.getExistingUserByEmail(email), HttpStatus.OK);
+	}
 
 	// method to get user personal details by donorId
 	@GetMapping("/getUserDetailsByDonorId/{donorId}")
@@ -157,40 +149,28 @@ public class UsersController {
 		donorId = encryptionDecryptionUtil.decrypt(donorId);
 		return new ResponseEntity<>(usersService.getUserPersonalDetailsByDonorId(donorId), HttpStatus.OK);
 	}
+  
+	// forget password api
+		@PostMapping("/forgetPassword/{donorId}")
+		public ResponseEntity<?> forgetPassword(@PathVariable String donorId, HttpSession session)
+				throws JsonProcessingException {
+			return new ResponseEntity<>(usersService.forgetPassword(donorId, session), HttpStatus.OK);
+		}
 
-//	@PostMapping("/verify")
-//	public ResponseEntity<?> verifyOtp(@RequestParam String donorId, @RequestParam String otp) {
-//		Users user = usersService.findByDonorId(donorId);
-//		if (user == null) {
-//			return ResponseEntity.badRequest().body("Invalid donor ID");
-//		}
-//		// Get OTP from cache and compare with input OTP
-//		String cachedOtp = usersService.getOtp(donorId);
-//		if (cachedOtp == null || !cachedOtp.equals(otp)) {
-//			return ResponseEntity.badRequest().body("Invalid OTP");
-//		}
-//		// OTP is valid, clear it from cache
-//		usersService.saveOtp(donorId, null);
-//		return ResponseEntity.ok("OTP verified successfully");
-//	}
+		//verify otp
+		@PostMapping("/verifyForgotOtp")
+		public ResponseEntity<ApiResponse<String>> verifyForgotOtp(@RequestParam String donarIdOrEmail, @RequestParam String otp){
+			return new ResponseEntity<>(usersService.verifyForgotOtp(donarIdOrEmail,otp),
+					HttpStatus.OK);
+		}
 
-	@PostMapping("/forgetPassword")
-	public ResponseEntity<?> forgetPassword(@RequestBody UsersDTO usersDTO, HttpSession session)
-			throws JsonProcessingException {
-//		ApiRequest apiRequest = new ApiRequest(formData);
-		return new ResponseEntity<>(usersService.forgetPassword(usersDTO.getDonorId().toString(), session),
-				HttpStatus.OK);
-	}
+		// set new password
+		@PostMapping("/setUserNewPassword")
+		public ResponseEntity<?> setUserNewPassword(@RequestBody LoginRequest formData, HttpSession session)
+				throws JsonProcessingException {
+			return new ResponseEntity<>(this.usersService.setUserNewPassword(formData, session), HttpStatus.OK);
+	  }
 
-//	@PostMapping("/verifyOtp")
-//	public ResponseEntity<ApiResponse<String>> verifyOtp(@RequestBody String formData, HttpSession session,
-//			HttpServletRequest request) throws JsonProcessingException {
-//		System.out.println("formData = " + formData);
-//
-//		ApiRequest apiRequest = new ApiRequest(formData);
-//		return new ResponseEntity<>(usersService.verifyOtp(apiRequest.getFormData().toString(), session, request),
-//				HttpStatus.OK);
-//	}
 
 	@PostMapping("/accountActivate")
 	public ResponseEntity<ApiResponse<String>> accountActivate(@RequestBody String formData, HttpSession session)
@@ -204,7 +184,8 @@ public class UsersController {
 
 	// method to get user by email
 	@PostMapping("/getAlluserWithWebId")
-	public ResponseEntity<ApiResponse<List<UsersDTO>>> getAllusersWithWebId(@RequestBody DonorListRequestDTO requestDTO) {
+	public ResponseEntity<ApiResponse<List<UsersDTO>>> getAllusersWithWebId(
+			@RequestBody DonorListRequestDTO requestDTO) {
 		return new ResponseEntity<>(usersService.getAllUsersWithWebId(requestDTO), HttpStatus.OK);
 	}
 
@@ -214,14 +195,6 @@ public class UsersController {
 //		ApiRequest apiRequest = new ApiRequest(formData);
 		return new ResponseEntity<>(
 				this.usersService.approvedOnlineDonationOfUser(formData, request),
-				HttpStatus.OK);
-	}
-
-	@PostMapping("forgetUserPassword")
-	public ResponseEntity<?> forgetUserPasswordByEmail(@RequestBody LoginRequest formData, HttpSession session)
-			throws JsonProcessingException {
-//		ApiRequest apiRequest = new ApiRequest(formData);
-		return new ResponseEntity<>(this.usersService.forgetUserPassword(formData, session),
 				HttpStatus.OK);
 	}
 
@@ -237,15 +210,15 @@ public class UsersController {
 		List<String> donarId = usersService.getAllDonarId();
 		return ResponseEntity.ok(donarId);
 	}
-	
-    @GetMapping("/getAllUserId")
-    public ResponseEntity<List<String>> getAllUserIds() {
-        List<String> donarId = usersService.getAllUserIds();
-        return ResponseEntity.ok(donarId);
-    }
+
+	@GetMapping("/getAllUserId")
+	public ResponseEntity<List<String>> getAllUserIds() {
+		List<String> donarId = usersService.getAllUserIds();
+		return ResponseEntity.ok(donarId);
+	}
 
 	@PostMapping("/sendOtp")
-	public ResponseEntity<?> sendOtp(@RequestParam String email){
+	public ResponseEntity<?> sendOtp(@RequestParam String email) {
 		ApiResponse<?> result = new ApiResponse<>();
 		try {
 			otpService.sendOtpByEmail(email);
@@ -257,7 +230,7 @@ public class UsersController {
 			return new ResponseEntity<>("Invalid Mail", HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	@PostMapping("/verifyOtp")
 	public ResponseEntity<?> verifyOtp(@RequestParam String donarIdOrEmail, @RequestParam String otp) {
 		ApiResponse<?> result = new ApiResponse<>();
@@ -268,12 +241,11 @@ public class UsersController {
 		if (otpModel == null) {
 			throw new CustomExceptionNodataFound("Your OTP has been expired... Please resend OTP...");
 		}
-		if(otp.equals(otpModel.getOtpCode())) {
+		if (otp.equals(otpModel.getOtpCode())) {
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Otp is Valid");
 			result.setStatusCode(HttpStatus.OK.value());
-		}
-		else {
+		} else {
 			return new ResponseEntity<>("Invalid OTP", HttpStatus.OK);
 		}
 		otpModel.setOtpCode(null);

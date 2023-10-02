@@ -35,7 +35,7 @@ public class UploadFormTenBeServiceImpl implements UploadFormTenBeService {
 	private UsersRepository usersRepository;
 
 
-	@Value("${spring.file.path}")
+	@Value("${file.path}")
 	String FILE_PATH;
 	
 //	String FILE_PATH = "C:\\Users\\admin\\Desktop\\GCP_MOUNT_AREA";

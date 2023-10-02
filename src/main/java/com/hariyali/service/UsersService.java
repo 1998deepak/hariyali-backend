@@ -8,7 +8,6 @@ import javax.servlet.http.HttpSession;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.DonorListRequestDTO;
 import com.hariyali.dto.LoginRequest;
@@ -41,8 +40,10 @@ public interface UsersService {
 	    
 	public ApiResponse<UsersDTO> updateUser(UsersDTO usersDTO, String emailId,HttpServletRequest request);
 
-	public ApiResponse<String> verifyOtp(String string, HttpSession session, HttpServletRequest request) throws JsonMappingException, JsonProcessingException;
+//	public ApiResponse<String> verifyForgotOtp(String string, HttpSession session, HttpServletRequest request) throws JsonMappingException, JsonProcessingException;
 
+	public ApiResponse<String> verifyForgotOtp(String email, String otp);
+	
 	public ApiResponse<String> activateAccount(String formData, HttpSession session) throws JsonMappingException, JsonProcessingException;
 
 	String getOtp(String donorId);
@@ -64,13 +65,14 @@ public interface UsersService {
 			throws JsonProcessingException;
 
 	
-	ApiResponse<String> forgetUserPassword(LoginRequest loginRequest, HttpSession session) throws JsonProcessingException;
+	ApiResponse<String> setUserNewPassword(LoginRequest loginRequest, HttpSession session) throws JsonProcessingException;
 
 	public ApiResponse<UsersDTO> getUserPersonalDetailsbyEmailOrDonorId(String emailOrDonorId);
 
 	public List<String> getAllDonarId();
 
 	ApiResponse<String> getUserDonarId(String email);
+	ApiResponse<String> changePassword(LoginRequest request, String token);
 
 	List<String> getAllUserIds();
 

@@ -2,6 +2,9 @@ package com.hariyali.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.hariyali.exceptions.ConcurrentSessionException;
+import com.hariyali.exceptions.CustomException;
+import com.hariyali.service.UsersService;
 import com.hariyali.utils.EncryptionDecryptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +26,7 @@ import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.LoginRequest;
 import com.hariyali.entity.OtpModel;
 import com.hariyali.entity.Users;
+import com.hariyali.exceptions.CustomException;
 import com.hariyali.exceptions.CustomExceptionNodataFound;
 import com.hariyali.repository.OtpRepository;
 import com.hariyali.repository.UsersRepository;
@@ -42,6 +46,9 @@ public class JwtController {
 
 	@Autowired
 	UsersRepository userRepository;
+
+	@Autowired
+	UsersService usersService;
 
 	@Autowired
 	OtpRepository otpRepository;
@@ -85,7 +92,7 @@ public class JwtController {
 			}
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
-			return new ResponseEntity<>("Invalid Username or Password", HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -162,6 +169,15 @@ public class JwtController {
 		ApiRequest apiRequest = new ApiRequest(formData);
 
 		return new ResponseEntity<>(this.jwtService.resetPassword(apiRequest.getFormData().toString()), HttpStatus.OK);
+
+	}
+	// method to change password
+	@PostMapping("changePassword")
+	public ResponseEntity<ApiResponse<String>> changePassword(@RequestBody LoginRequest loginRequest, HttpServletRequest request) throws JsonProcessingException {
+
+		String token = request.getHeader("Authorization").substring(7);
+
+		return new ResponseEntity<>(usersService.changePassword(loginRequest, token), HttpStatus.OK);
 
 	}
 
