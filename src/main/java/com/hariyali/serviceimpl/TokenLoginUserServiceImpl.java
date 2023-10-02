@@ -81,7 +81,7 @@ public class TokenLoginUserServiceImpl implements TokenLoginUserService {
 				user.setFlag(tokenLoginUser.isFlag());
 				user.setLastUpdatedOn(tokenLoginUser.getLastUpdatedOn());
 			} else {
-				throw new CustomExceptionNodataFound("User not found");
+				user = tokenLoginUser;
 			}
 		}
 
@@ -107,7 +107,7 @@ public class TokenLoginUserServiceImpl implements TokenLoginUserService {
 
 	@Override
 	public TokenLoginUser findByUsernameEmailId(String emailId) {
-		return this.tokenLoginUserRepository.findByEmailId(emailId);
+		return this.tokenLoginUserRepository.findByUsernameEmailId(emailId);
 	}
 
 }
