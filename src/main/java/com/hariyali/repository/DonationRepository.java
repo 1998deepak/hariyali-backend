@@ -204,4 +204,13 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 	
 	@Query(value="select no_of_bouquets from tbl_user_packages where donationId=?",nativeQuery = true)
 	public int getNoOfPlants(int donationId);
+
+	@Query(value = "SELECT * FROM tbl_donation d INNER JOIN tbl_payment_info p ON d.donation_id=p.donationId \n" +
+			"INNER JOIN tbl_user_master u ON u.user_id = d.userId WHERE u.emailId = :email AND u.is_deleted=false \n" +
+			"ORDER BY p.payment_date DESC",
+		countQuery = "SELECT * FROM tbl_donation d INNER JOIN tbl_payment_info p ON d.donation_id=p.donationId \n" +
+				"INNER JOIN tbl_user_master u ON u.user_id = d.userId WHERE u.emailId = :email AND u.is_deleted=false \n" +
+				"ORDER BY p.payment_date DESC", nativeQuery = true
+	)
+	public Page<Donation> getUserDonations(@Param("email") String email, Pageable pageable);
 }
