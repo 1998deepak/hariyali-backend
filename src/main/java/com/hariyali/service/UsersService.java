@@ -12,6 +12,7 @@ import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.DonorListRequestDTO;
 import com.hariyali.dto.LoginRequest;
 import com.hariyali.dto.UsersDTO;
+import com.hariyali.entity.Donation;
 import com.hariyali.entity.Users;
 import com.hariyali.exceptions.CustomException;
 
@@ -76,4 +77,5 @@ public interface UsersService {
 
 	List<String> getAllUserIds();
 
+	ApiResponse<List<Donation>> getUserDonations(String email, Integer pageNo, Integer pageSize);
 }

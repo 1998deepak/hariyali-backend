@@ -5,14 +5,7 @@ import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
@@ -438,15 +431,15 @@ public class UsersServiceImpl implements UsersService {
 	@Override
 	public ApiResponse<UsersDTO> getUserByEmail(String email) {
 		ApiResponse<UsersDTO> response = new ApiResponse<>();
-		Users user = usersRepository.findByEmailId(email);
+		Object user = usersRepository.getUserByEmail(email);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
 		// Gson gson = new Gson();
-//		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
-//		Users entity = gson.fromJson(user.toString(), Users.class);
-		if (user.getEmailId() != null) {
-			if (user.getDonorId() != null && user.getWebId() != null) {
-				throw new CustomExceptionDataAlreadyExists("Donor with " + user.getEmailId()
+		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
+		Users entity = gson.fromJson(user.toString(), Users.class);
+		if (entity.getEmailId() != null) {
+			if (entity.getDonorId() != null) {
+				throw new CustomExceptionDataAlreadyExists("Donor with " + entity.getEmailId()
 						+ " is already registered, Kindly do click here to login and continue your donation!");
 			}
 			response.setData(modelMapper.map(user, UsersDTO.class));
@@ -807,7 +800,7 @@ public class UsersServiceImpl implements UsersService {
 			result.setStatusCode(HttpStatus.FORBIDDEN.value());
 			sendRejectDonationEmails(user);
 		} else if ("Approved".equalsIgnoreCase(usersDTO.getApprovalStatus())) {
-			recipientEmail = handleDonationApproval(user, donation, userName);
+			recipientEmail = handleDonationApproval(user, Collections.singletonList(donation.get(0)), userName);
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Donation Approved By " + userName);
 			result.setStatusCode(HttpStatus.OK.value());
@@ -1111,6 +1104,21 @@ public class UsersServiceImpl implements UsersService {
 		List<String> userIds = usersRepository.getAllDonorId();
 		userIds.addAll(usersRepository.getAllEmailId());
 		return userIds;
+	}
+
+	@Override
+	public ApiResponse<List<Donation>> getUserDonations(String email, Integer pageNo, Integer pageSize) {
+		ApiResponse<List<Donation>> response = new ApiResponse<>();
+
+		Page<Donation> result = donationRepository.getUserDonations(email, PageRequest.of(pageNo, pageSize));
+		if(result.getTotalElements() == 0){
+			throw new CustomException("No user donatation found");
+		} else{
+			response.setTotalRecords(result.getTotalElements());
+			response.setData(result.getContent());
+			response.setStatus("Success");
+		}
+		return response;
 	}
 
 	@Override
