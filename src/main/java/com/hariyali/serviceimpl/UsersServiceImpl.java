@@ -802,13 +802,13 @@ public class UsersServiceImpl implements UsersService {
 		Users recipientEmail = null;
 
 		if ("Rejected".equalsIgnoreCase(usersDTO.getApprovalStatus())) {
-			recipientEmail = handleDonationRejection(user, donation);
+			recipientEmail = handleDonationRejection(user, Collections.singletonList(donation.get(0)));
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Donation Rejected By " + userName);
 			result.setStatusCode(HttpStatus.FORBIDDEN.value());
 			sendRejectDonationEmails(user);
 		} else if ("Approved".equalsIgnoreCase(usersDTO.getApprovalStatus())) {
-			recipientEmail = handleDonationApproval(user, donation, userName);
+			recipientEmail = handleDonationApproval(user, Collections.singletonList(donation.get(0)), userName);
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Donation Approved By " + userName);
 			result.setStatusCode(HttpStatus.OK.value());
