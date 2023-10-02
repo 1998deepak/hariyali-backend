@@ -693,7 +693,8 @@ public class UsersServiceImpl implements UsersService {
 	public ApiResponse<String> verifyForgotOtp(String email, String otp) {
 		ApiResponse<String> result = new ApiResponse<>();
 		Users user = jwtService.findUserByDonorIdOrEmailId(email);
-		OtpModel otpModel = otpServiceImpl.findByOtp(otp);
+		 OtpModel otpModel = otpServiceImpl.getOtpByEmail(email); 
+//		 OtpModel otpModel = otpServiceImpl.findByOtp(otp);
 		if (user == null || !otp.equals(otpModel.getOtpCode())) {
 			throw new CustomExceptionNodataFound("Invalid OTP");
 		} else {
@@ -794,7 +795,7 @@ public class UsersServiceImpl implements UsersService {
 		Users recipientEmail = null;
 
 		if ("Rejected".equalsIgnoreCase(usersDTO.getApprovalStatus())) {
-			recipientEmail = handleDonationRejection(user, donation);
+			recipientEmail = handleDonationRejection(user, Collections.singletonList(donation.get(0)));
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Donation Rejected By " + userName);
 			result.setStatusCode(HttpStatus.FORBIDDEN.value());
