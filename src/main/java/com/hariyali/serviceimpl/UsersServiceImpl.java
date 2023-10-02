@@ -4,14 +4,8 @@ import static java.util.Objects.isNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
@@ -19,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
-import com.hariyali.utils.EncryptionDecryptionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -36,8 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hariyali.EnumConstants;
@@ -52,6 +44,7 @@ import com.hariyali.dto.UsersDTO;
 import com.hariyali.entity.Address;
 import com.hariyali.entity.Document;
 import com.hariyali.entity.Donation;
+import com.hariyali.entity.OtpModel;
 import com.hariyali.entity.PaymentInfo;
 import com.hariyali.entity.Receipt;
 import com.hariyali.entity.Recipient;
@@ -64,6 +57,7 @@ import com.hariyali.exceptions.CustomExceptionNodataFound;
 import com.hariyali.repository.AddressRepository;
 import com.hariyali.repository.DocumentRepository;
 import com.hariyali.repository.DonationRepository;
+import com.hariyali.repository.OtpRepository;
 import com.hariyali.repository.PaymentInfoRepository;
 import com.hariyali.repository.ReceiptRepository;
 import com.hariyali.repository.RecipientRepository;
@@ -74,6 +68,7 @@ import com.hariyali.service.UsersService;
 import com.hariyali.utils.AES;
 import com.hariyali.utils.CommonService;
 import com.hariyali.utils.EmailService;
+import com.hariyali.utils.EncryptionDecryptionUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -131,6 +126,9 @@ public class UsersServiceImpl implements UsersService {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	OtpServiceImpl otpServiceImpl;
 
 	@Autowired
 	ReceiptService receiptService;
@@ -140,6 +138,9 @@ public class UsersServiceImpl implements UsersService {
 
 	@Autowired
 	JwtServiceImpl jwtService;
+	
+	@Autowired
+	OtpRepository otpRepository;
 
 	@Autowired
 	DocumentRepository documentRepository;
@@ -217,7 +218,7 @@ public class UsersServiceImpl implements UsersService {
 			throws JsonProcessingException {
 
 		validateDonation(usersDTO, "online");
-		return save(usersDTO, commonService.createDonarIDORDonationID("user"), null);
+		return save(usersDTO, null, null);
 //		return null;
 	}
 
@@ -289,7 +290,11 @@ public class UsersServiceImpl implements UsersService {
 		Users existingUser = usersRepository.findByEmailId(user.getEmailId());
 
 		if (existingUser != null) {
-			throw new CustomException("Email " + existingUser.getEmailId() + " already exists");
+			if(existingUser.getWebId() != null) {
+				throw new CustomException("Email " + existingUser.getEmailId() + " already exists");
+			} else{
+				user.setUserId(existingUser.getUserId());
+			}
 		}
 
 		Date newDate = new Date();
@@ -433,13 +438,11 @@ public class UsersServiceImpl implements UsersService {
 		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
-			if (entity.getDonorId() != null && entity.getWebId() == null) {
-				response.setMessage("Donor with " + entity.getEmailId()
-						+ " is already registered, Kindly do click here to login or click on proceed button to continue your donation!");
-			} else {
-				response.setMessage("User found Successfully");
+			if (entity.getDonorId() != null) {
+				throw new CustomExceptionDataAlreadyExists("Donor with " + entity.getEmailId()
+						+ " is already registered, Kindly do click here to login and continue your donation!");
 			}
-			response.setData(modelMapper.map(entity, UsersDTO.class));
+			response.setData(modelMapper.map(user, UsersDTO.class));
 			response.setStatus(EnumConstants.SUCCESS);
 			response.setStatusCode(HttpStatus.OK.value());
 		} else
@@ -659,24 +662,24 @@ public class UsersServiceImpl implements UsersService {
 	public ApiResponse<String> forgetPassword(String donorId, HttpSession session) throws JsonProcessingException {
 		Random random = new Random();
 		int otpValue = random.nextInt((int) Math.pow(10, 6));
-		String otp = String.format("%0" + 6 + "d", otpValue);
 		Users user = jwtService.findUserByDonorIdOrEmailId(donorId);
 		if (user != null) {
+			String otp = String.format("%0" + 6 + "d", otpValue);
+			OtpModel otpModel = new OtpModel();
+			otpModel.setOtpCode(otp);
+			otpModel.setDonarIdOrEmail(user.getEmailId());
+			otpModel.setOtpExpiryTime(LocalDateTime.now().plusMinutes(10));
+			otpModel.setUsers(user);
+			otpRepository.save(otpModel);
 			String body = "Dear Donor,<br><br>" + "<br>Please use OTP to set new password - " + otp
 					+ "<br><br>-Team Hariyali<br><br>"
 					+ "PS: For any support or queries please reach out to us at <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a>";
 			emailService.sendSimpleEmail(user.getEmailId(), "Project Hariyali - Forgot Password", body);
+			
+
 		} else {
 			throw new CustomException("User not forund");
 		}
-		session.setAttribute("myotp", otp);
-		session.setAttribute("donarID", donorId);
-
-		long otpTimestamp = System.currentTimeMillis();
-		session.setAttribute("otpTimestamp", otpTimestamp);
-		String email = user.getEmailId();
-		session.setAttribute("email", email);
-
 		ApiResponse<String> response = new ApiResponse<>();
 		response.setStatus(EnumConstants.SUCCESS);
 		response.setStatusCode(HttpStatus.OK.value());
@@ -687,47 +690,20 @@ public class UsersServiceImpl implements UsersService {
 
 	// verify otp
 	@Override
-	public ApiResponse<String> verifyForgotOtp(String formData, HttpSession session, HttpServletRequest request)
-			throws JsonProcessingException {
+	public ApiResponse<String> verifyForgotOtp(String email, String otp) {
+		ApiResponse<String> result = new ApiResponse<>();
+		Users user = jwtService.findUserByDonorIdOrEmailId(email);
+		 OtpModel otpModel = otpServiceImpl.getOtpByEmail(email); 
+//		 OtpModel otpModel = otpServiceImpl.findByOtp(otp);
+		if (user == null || !otp.equals(otpModel.getOtpCode())) {
+			throw new CustomExceptionNodataFound("Invalid OTP");
+		} else {
+			result.setStatus(EnumConstants.SUCCESS);
+			result.setMessage("OTP verified successfully");
+			result.setStatusCode(HttpStatus.OK.value());
 
-		ApiResponse<String> response = new ApiResponse<>();
-		ObjectMapper objectMapper = new ObjectMapper();
-		JsonNode jsonNode = objectMapper.readTree(formData);
-
-		String enteredOTP = jsonNode.get("OTP").asText();
-		Object storedOTPObject = session.getAttribute("myotp");
-
-		if (storedOTPObject == null) {
-			throw new CustomExceptionNodataFound("OTP not found");
+			return result;
 		}
-
-		String storedOTP = session.getAttribute("myotp").toString();
-		if (storedOTP == null) {
-			throw new CustomExceptionNodataFound("OTP not found");
-		}
-		long otpTimestamp = Long.parseLong(session.getAttribute("otpTimestamp").toString());
-		long currentTime = System.currentTimeMillis();
-		long timeLimitInMillis = 3 * 60 * 1000; // 1 minute
-
-		if (enteredOTP.equals(storedOTP) && (currentTime - otpTimestamp <= timeLimitInMillis)) {
-			response.setStatus(EnumConstants.SUCCESS);
-			response.setStatusCode(HttpStatus.OK.value());
-			response.setData(null);
-			response.setMessage("OTP verified successfully");
-		}
-
-		else {
-			if (!enteredOTP.equals(storedOTP)) {
-				throw new CustomExceptionNodataFound("OTP not matched");
-			}
-			if (currentTime - otpTimestamp > timeLimitInMillis) {
-				throw new CustomExceptionNodataFound("OTP validation time limit exceeded");
-			} else {
-				throw new CustomExceptionNodataFound("Entered OTP is incorrect");
-			}
-		}
-		session.removeAttribute("myotp");
-		return response;
 	}
 
 	// set new user Password
@@ -736,11 +712,9 @@ public class UsersServiceImpl implements UsersService {
 			throws JsonProcessingException {
 		ApiResponse<String> res = new ApiResponse<>();
 
-		String userEmail = session.getAttribute("email").toString();
-
 		String password = request.getPassword();
 
-		Users user = this.usersRepository.findByEmailId(userEmail);
+		Users user = jwtService.findUserByDonorIdOrEmailId(request.getEmail());
 
 		if (user != null) {
 
@@ -821,13 +795,13 @@ public class UsersServiceImpl implements UsersService {
 		Users recipientEmail = null;
 
 		if ("Rejected".equalsIgnoreCase(usersDTO.getApprovalStatus())) {
-			recipientEmail = handleDonationRejection(user, donation);
+			recipientEmail = handleDonationRejection(user, Collections.singletonList(donation.get(0)));
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Donation Rejected By " + userName);
 			result.setStatusCode(HttpStatus.FORBIDDEN.value());
 			sendRejectDonationEmails(user);
 		} else if ("Approved".equalsIgnoreCase(usersDTO.getApprovalStatus())) {
-			recipientEmail = handleDonationApproval(user, donation, userName);
+			recipientEmail = handleDonationApproval(user, Collections.singletonList(donation.get(0)), userName);
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Donation Approved By " + userName);
 			result.setStatusCode(HttpStatus.OK.value());
@@ -949,10 +923,10 @@ public class UsersServiceImpl implements UsersService {
 						if (d.getDonationType().equalsIgnoreCase("gift-donate")) {
 							// emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
 							// EnumConstants.content, user);
-							Document document = documentRepository.findByYearAndDocTypeAndDonation(
-									Calendar.getInstance().get(Calendar.YEAR), "CERTIFICATE", d);
-							emailService.sendGiftingLetterEmail(d, recipientData, d.getDonationEvent(),
-									document.getFilePath());
+//							Document document = documentRepository.findByYearAndDocTypeAndDonation(
+//									Calendar.getInstance().get(Calendar.YEAR), "CERTIFICATE", d);
+//							emailService.sendGiftingLetterEmail(d, recipientData, d.getDonationEvent(),
+//									document.getFilePath());
 							emailService.sendReceiptWithAttachment(user, d.getOrderId(), receipt);
 
 						}
@@ -1131,6 +1105,21 @@ public class UsersServiceImpl implements UsersService {
 		List<String> userIds = usersRepository.getAllDonorId();
 		userIds.addAll(usersRepository.getAllEmailId());
 		return userIds;
+	}
+
+	@Override
+	public ApiResponse<List<Donation>> getUserDonations(String email, Integer pageNo, Integer pageSize) {
+		ApiResponse<List<Donation>> response = new ApiResponse<>();
+
+		Page<Donation> result = donationRepository.getUserDonations(email, PageRequest.of(pageNo, pageSize));
+		if(result.getTotalElements() == 0){
+			throw new CustomException("No user donatation found");
+		} else{
+			response.setTotalRecords(result.getTotalElements());
+			response.setData(result.getContent());
+			response.setStatus("Success");
+		}
+		return response;
 	}
 
 	@Override

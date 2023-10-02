@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.hariyali.utils.EncryptionDecryptionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -101,6 +102,9 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 	@Autowired
 	RestTemplate restTemplate;
 
+	@Autowired
+	EncryptionDecryptionUtil encryptionDecryptionUtil;
+
 	@Value("${frontend.redirect-url}")
 	String frontendRedirectURL;
 
@@ -149,16 +153,18 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 //		}
 		String redirectUrl = frontendRedirectURL;
 		Users user = userRepository.getUserByDonationId(donation.getDonationId());
-		if (user.getWebId() == null) {
-			user.setWebId(userService.generateWebId());
-			userRepository.save(user);
-			log.info("user" + user);
-		} else {
-			redirectUrl = frontendUserRedirectURL;
-		}
+
 
 		if ("Completed".equalsIgnoreCase(paymentInfo.getPaymentStatus())
 				|| "Success".equalsIgnoreCase(paymentInfo.getPaymentStatus())) {
+			if (user.getWebId() == null) {
+				user.setWebId(userService.generateWebId());
+				user.setDonorId(commonService.createDonarIDORDonationID("user"));
+				userRepository.save(user);
+				log.info("user" + user);
+			} else {
+				redirectUrl = frontendUserRedirectURL;
+			}
 			int donationCnt = donationRepository.donationCount(user.getEmailId());
 			if (donationCnt == 1) {
 				if (donation.getDonationType().equalsIgnoreCase("self-donate")) {
@@ -206,9 +212,16 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 					}
 				}
 			}
+		} else{
+			if (user.getWebId() == null) {
+				userRepository.delete(user);
+			} else {
+				redirectUrl = frontendUserRedirectURL;
+			}
+
 		}
 		ApiResponse<String> apiResponse = new ApiResponse<>();
-		apiResponse.setData(redirectUrl + paymentInfo.getOrderId());
+		apiResponse.setData(redirectUrl + encryptionDecryptionUtil.encrypt(paymentInfo.getOrderId()));
 		return apiResponse;
 	}
 
@@ -235,9 +248,13 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 		ApiResponse<PaymentInfoDTO> response = new ApiResponse<>();
 		PaymentInfo info = paymentInfoRepository.findByOrderId(orderId);
 		PaymentInfoDTO dto = new PaymentInfoDTO();
-		dto.setBankPaymentRefNo(info.getBankPaymentRefNo());
-		dto.setPaymentStatus(info.getPaymentStatus());
-		dto.setRemark(info.getRemark());
+		if(!isNull(info)) {
+			dto.setBankPaymentRefNo(info.getBankPaymentRefNo());
+			dto.setPaymentStatus(info.getPaymentStatus());
+			dto.setRemark(info.getRemark());
+		} else{
+			response.setStatus("Failed");
+		}
 		response.setData(dto);
 		response.setStatus("Success");
 		return response;

@@ -11,7 +11,7 @@ import com.hariyali.entity.Users;
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Integer> {
 
-	@Query(value = "SELECT doc_id FROM tbl_user_document ORDER BY doc_id DESC LIMIT 1", nativeQuery = true)
+	@Query(value = "SELECT doc_id FROM tbl_user_document WHERE doc_id IS NOT NULL AND doc_id !='' ORDER BY doc_id DESC LIMIT 1", nativeQuery = true)
 	public String getLastDocID();
 
 	public Document findByYearAndDocTypeAndDonation(int year, String docType,Donation donation);

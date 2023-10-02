@@ -122,15 +122,13 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	Page<Object[]> getAllUsersWithWebId(@Param("searchText") String searchText, @Param("status") String status,
 			@Param("donorType") String donorType, Pageable pageable);
 
-	@Query(value = "SELECT JSON_ARRAYAGG( " + "JSON_OBJECT( " + "'donationId', d.donation_id, "
-			+ "'donationCode', d.donation_code, " + "'donationType', d.donation_type, " + // Add this line for donation
-																							// type
-			"'paymentInfo', JSON_OBJECT( " + "'paymentInfoId', p.paymentInfo_id, "
-			+ "'paymentDate', DATE(p.payment_date), " + "'paymentStatus', p.payment_status " + "), "
-			+ "'donorId', u.donorId, " + "'firstName', u.first_name, " + "'lastName', u.last_name " + ") "
-			+ ") AS 'Result' " + "FROM tbl_donation d " + "INNER JOIN tbl_payment_info p ON d.donation_id=p.donationId "
-			+ "INNER JOIN tbl_user_master u ON u.user_id = d.userId " + "WHERE u.emailId = ?1 AND u.is_deleted=false "
-			+ "ORDER BY p.payment_date DESC", nativeQuery = true)
+	@Query(value = "SELECT JSON_ARRAYAGG( JSON_OBJECT( 'donationId', d.donation_id, \r\n"
+			+ "'donationCode', d.donation_code, 'donationType', d.donation_type,\r\n"
+			+ "'paymentInfo', JSON_OBJECT( 'paymentInfoId', p.order_id, \r\n"
+			+ "'paymentDate', DATE(p.payment_date), 'paymentStatus', p.payment_status ),'donorId', u.donorId, 'firstName', \r\n"
+			+ "u.first_name, 'lastName', u.last_name ) )AS 'Result' FROM tbl_donation d INNER JOIN tbl_payment_info p ON d.donation_id=p.donationId \r\n"
+			+ " INNER JOIN tbl_user_master u ON u.user_id = d.userId WHERE u.emailId = ?1 AND u.is_deleted=false \r\n"
+			+ " ORDER BY p.payment_date DESC", nativeQuery = true)
 
 	Object getAllDonationOfSpecificUser(String email);
 
@@ -267,7 +265,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	@Query(value = "select donorId from tbl_user_master where emailId=?", nativeQuery = true)
 	public String findDonarIdByEmail(String email);
 
-	@Query(value = "SELECT donorId FROM tbl_user_master ORDER BY donorId DESC LIMIT 1", nativeQuery = true)
+	@Query(value = "SELECT donorId FROM tbl_user_master WHERE donorId IS NOT NULL AND donorId !='' ORDER BY donorId DESC LIMIT 1", nativeQuery = true)
 	String getLastDonorID();
 
 	Users findByPanCard(String panCard);

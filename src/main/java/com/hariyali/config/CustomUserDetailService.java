@@ -34,7 +34,7 @@ public class CustomUserDetailService implements UserDetailsService {
 		}
 		user= this.userRepo.findByEmailId(username);
 		
-		 if (user!=null &&  (username.equals(user.getEmailId()))) {
+		 if (user!=null &&  (username.equalsIgnoreCase(user.getEmailId()))) {
 			    System.out.println("LoadUserName: " + user.getEmailId());
 			    System.out.println("Name: " + user.getFirstName() + " " + user.getLastName());
 			    return new CustomUserDetails(user);

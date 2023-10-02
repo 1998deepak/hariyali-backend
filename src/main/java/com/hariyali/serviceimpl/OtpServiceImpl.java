@@ -42,7 +42,26 @@ public class OtpServiceImpl {
 		String body = "Dear Donor,<br><br>" + "You have are accessing the profile on Hariyali website."
 				+ "<br>Please use OTP for logging in - " + otp + "<br><br>-Team Hariyali<br><br>"
 				+ "PS: For any support or queries please reach out to us at <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a>";
-		sendEmail(emailId, body);
+		sendEmail(emailId,"Project Hariyali-Login OTP", body);
+	}
+	
+	public void resendOtpByEmail(String emailId) {
+		Users user = userRepository.findByEmailId(emailId);
+		OtpModel otpModel = new OtpModel();
+		if (user == null) {
+			throw new IllegalArgumentException("User not found with email: " + emailId);
+		}
+
+		String otp = generateOtp();
+		otpModel.setOtpCode(otp);
+		otpModel.setDonarIdOrEmail(emailId);
+		otpModel.setOtpExpiryTime(LocalDateTime.now().plusMinutes(10));
+		otpModel.setUsers(user);
+		otpRepository.save(otpModel);
+		String body = "Dear Donor,<br><br>" + "You have are accessing the profile on Hariyali website."
+				+ "<br>Please use new OTP - " + otp + "<br><br>-Team Hariyali<br><br>"
+				+ "PS: For any support or queries please reach out to us at <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a>";
+		sendEmail(emailId,"Project Hariyali-New OTP", body);
 	}
 
 	private String generateOtp() {
@@ -51,10 +70,10 @@ public class OtpServiceImpl {
 		return String.format("%0" + OTP_LENGTH + "d", otpValue);
 	}
 
-	private void sendEmail(String toEmail, String body) {
+	private void sendEmail(String toEmail,String subject, String body) {
 
 		try {
-			ccServiceEmailAPI.sendCorrespondenceMail(toEmail, "Login Otp", body);
+			ccServiceEmailAPI.sendCorrespondenceMail(toEmail, subject, body);
 		} catch (EmailNotConfiguredException e) {
 			throw new EmailNotConfiguredException(e.getMessage());
 		}

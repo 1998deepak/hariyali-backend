@@ -6,6 +6,8 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.hariyali.config.JwtHelper;
+import com.hariyali.entity.Donation;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -62,6 +64,9 @@ public class UsersController {
 	@Autowired
 	ModelMapper modelMapper;
 
+	@Autowired
+	private JwtHelper jwtHelper;
+
 	// method to get user by email
 	@GetMapping("/getAlluser")
 	public ResponseEntity<ApiResponse<Object>> getAllusers() {
@@ -106,10 +111,10 @@ public class UsersController {
 	}
 
 	// method to get all donation of specific user by email
-	@GetMapping("/getAllDonationOfUser/{email}")
-	public ResponseEntity<ApiResponse<Object>> getAllDonationOfUser(@PathVariable String email) {
-		email = encryptionDecryptionUtil.decrypt(email);
-		ApiResponse<Object> apiResponse = this.usersService.getAllDonationOfSpecificUser(email);
+	@GetMapping("/getAllDonationOfUser")
+	public ResponseEntity<ApiResponse<List<Donation>>> getAllDonationOfUser(HttpServletRequest request, @RequestParam("PageSize") Integer pageSize, @RequestParam("PageNo") Integer pageNo) {
+		String email = jwtHelper.getUsernameFromToken(request.getHeader("Authorization").substring(7));
+		ApiResponse<List<Donation>> apiResponse = this.usersService.getUserDonations(email, pageNo, pageSize);
 		return new ResponseEntity<>(apiResponse, HttpStatus.OK);
 	}
 
@@ -151,29 +156,25 @@ public class UsersController {
 	}
   
 	// forget password api
-	@PostMapping("/forgetPassword/{donorId}")
-	public ResponseEntity<?> forgetPassword(@PathVariable String donorId, HttpSession session)
-			throws JsonProcessingException {
-		return new ResponseEntity<>(usersService.forgetPassword(donorId, session), HttpStatus.OK);
-	}
+		@PostMapping("/forgetPassword/{donorId}")
+		public ResponseEntity<?> forgetPassword(@PathVariable String donorId, HttpSession session)
+				throws JsonProcessingException {
+			return new ResponseEntity<>(usersService.forgetPassword(donorId, session), HttpStatus.OK);
+		}
 
-	//verify otp
-	@PostMapping("/verifyForgotOtp")
-	public ResponseEntity<ApiResponse<String>> verifyForgotOtp(@RequestBody String formData, HttpSession session,
-			HttpServletRequest request) throws JsonProcessingException {
-		System.out.println("formData = " + formData);
+		//verify otp
+		@PostMapping("/verifyForgotOtp")
+		public ResponseEntity<ApiResponse<String>> verifyForgotOtp(@RequestParam String donarIdOrEmail, @RequestParam String otp){
+			return new ResponseEntity<>(usersService.verifyForgotOtp(donarIdOrEmail,otp),
+					HttpStatus.OK);
+		}
 
-		ApiRequest apiRequest = new ApiRequest(formData);
-		return new ResponseEntity<>(usersService.verifyForgotOtp(apiRequest.getFormData().toString(), session, request),
-				HttpStatus.OK);
-	}
-
-	// set new password
-	@PostMapping("/setUserNewPassword")
-	public ResponseEntity<?> setUserNewPassword(@RequestBody LoginRequest formData, HttpSession session)
-			throws JsonProcessingException {
-		return new ResponseEntity<>(this.usersService.setUserNewPassword(formData, session), HttpStatus.OK);
-  }
+		// set new password
+		@PostMapping("/setUserNewPassword")
+		public ResponseEntity<?> setUserNewPassword(@RequestBody LoginRequest formData, HttpSession session)
+				throws JsonProcessingException {
+			return new ResponseEntity<>(this.usersService.setUserNewPassword(formData, session), HttpStatus.OK);
+	  }
 
 
 	@PostMapping("/accountActivate")

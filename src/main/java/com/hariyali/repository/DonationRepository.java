@@ -144,12 +144,12 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 			+ "						 			             )\r\n"
 			+ "						 			             FROM tbl_donation AS donations\r\n"
 			+ "						 			             JOIN tbl_user_master AS users ON users.user_id = donations.userId\r\n"
-			+ "						 			             WHERE donations.donation_id = ?1 AND donations.deleted = false\r\n"
+			+ "						 			             WHERE donations.donation_id = ?1 AND IFNULL(donations.deleted, false)= false\r\n"
 			+ "						 			         )\r\n" + "						 			     ) \r\n"
 			+ "						 			     )AS Result\r\n"
 			+ "						 			 FROM tbl_donation AS donations\r\n"
 			+ "						 			 JOIN tbl_user_master AS users ON users.user_id = donations.userId\r\n"
-			+ "						 			 WHERE donations.donation_id = ?1 AND donations.deleted = false", nativeQuery = true)
+			+ "						 			 WHERE donations.donation_id = ?1 AND IFNULL(donations.deleted, false) = false", nativeQuery = true)
 
 	Object getSpecificDonationById(int donationId);
 
@@ -196,7 +196,7 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 	@Query(value="select * from tbl_donation as d, tbl_user_master as u where u.user_id=d.userId anf u.webId=?;",nativeQuery = true)
 	public Donation getDonationByWebId(String webId);
 
-	@Query(value = "SELECT donation_code FROM tbl_donation ORDER BY donation_code DESC LIMIT 1",nativeQuery = true)
+	@Query(value = "SELECT donation_code FROM tbl_donation WHERE donation_code IS NOT NULL AND donation_code != '' ORDER BY donation_code DESC LIMIT 1",nativeQuery = true)
 	public String getLastDonationID();
 	
 	@Query(value = "SELECT * FROM tbl_donation where userId in(select user_id from tbl_user_master where pan_card=?1 )",nativeQuery = true)
@@ -204,4 +204,13 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 	
 	@Query(value="select no_of_bouquets from tbl_user_packages where donationId=?",nativeQuery = true)
 	public int getNoOfPlants(int donationId);
+
+	@Query(value = "SELECT * FROM tbl_donation d INNER JOIN tbl_payment_info p ON d.donation_id=p.donationId \n" +
+			"INNER JOIN tbl_user_master u ON u.user_id = d.userId WHERE u.emailId = :email AND u.is_deleted=false \n" +
+			"ORDER BY p.payment_date DESC",
+		countQuery = "SELECT * FROM tbl_donation d INNER JOIN tbl_payment_info p ON d.donation_id=p.donationId \n" +
+				"INNER JOIN tbl_user_master u ON u.user_id = d.userId WHERE u.emailId = :email AND u.is_deleted=false \n" +
+				"ORDER BY p.payment_date DESC", nativeQuery = true
+	)
+	public Page<Donation> getUserDonations(@Param("email") String email, Pageable pageable);
 }

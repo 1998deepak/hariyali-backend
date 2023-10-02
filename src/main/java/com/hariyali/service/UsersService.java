@@ -12,6 +12,7 @@ import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.DonorListRequestDTO;
 import com.hariyali.dto.LoginRequest;
 import com.hariyali.dto.UsersDTO;
+import com.hariyali.entity.Donation;
 import com.hariyali.entity.Users;
 import com.hariyali.exceptions.CustomException;
 
@@ -40,8 +41,10 @@ public interface UsersService {
 	    
 	public ApiResponse<UsersDTO> updateUser(UsersDTO usersDTO, String emailId,HttpServletRequest request);
 
-	public ApiResponse<String> verifyForgotOtp(String string, HttpSession session, HttpServletRequest request) throws JsonMappingException, JsonProcessingException;
+//	public ApiResponse<String> verifyForgotOtp(String string, HttpSession session, HttpServletRequest request) throws JsonMappingException, JsonProcessingException;
 
+	public ApiResponse<String> verifyForgotOtp(String email, String otp);
+	
 	public ApiResponse<String> activateAccount(String formData, HttpSession session) throws JsonMappingException, JsonProcessingException;
 
 	String getOtp(String donorId);
@@ -74,4 +77,5 @@ public interface UsersService {
 
 	List<String> getAllUserIds();
 
+	ApiResponse<List<Donation>> getUserDonations(String email, Integer pageNo, Integer pageSize);
 }

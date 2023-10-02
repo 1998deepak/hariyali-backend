@@ -80,7 +80,7 @@ public class Donation implements Serializable {
 	private String modifiedBy;
 
 	@JsonIdentityReference(alwaysAsId = true)
-	@OneToMany(mappedBy = "userDonation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "userDonation", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	private List<PaymentInfo> paymentInfo;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -88,11 +88,11 @@ public class Donation implements Serializable {
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userId")
 	private Users users;
 
-	@OneToMany(mappedBy = "userDonation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "userDonation", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	@JsonIdentityReference(alwaysAsId = true)
 	private List<Recipient> recipient;
 
-	@OneToMany(mappedBy = "userDonation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "userDonation", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	@JsonIdentityReference(alwaysAsId = true)
 	private List<UserPackages> userPackage;
 

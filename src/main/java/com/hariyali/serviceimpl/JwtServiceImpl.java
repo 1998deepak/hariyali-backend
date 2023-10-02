@@ -29,6 +29,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.Optional;
 
@@ -298,7 +299,7 @@ public class JwtServiceImpl implements JwtService {
 
 	// logout
 	@Override
-
+	@Transactional
 	public ApiResponse<String> logout(LoginRequest request, String token) {
 		ApiResponse<String> result = new ApiResponse<>();
 		if (token != null) {
@@ -318,7 +319,7 @@ public class JwtServiceImpl implements JwtService {
 			} else {
 				userResponseDonorId = this.userRepository.findByEmailId(request.getUsername());
 
-				if (request.getUsername().equals(userName)) {
+				if (request.getUsername().equalsIgnoreCase(userName)) {
 					this.customUserDetailService.loadUserByUsername(userName);
 				}
 			}

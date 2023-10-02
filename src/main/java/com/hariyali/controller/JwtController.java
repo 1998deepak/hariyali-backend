@@ -129,7 +129,7 @@ public class JwtController {
 			otpModel.setOtpCode(null);
 			otpModel.setOtpExpiryTime(null);
 			otpRepository.save(otpModel);
-			otpService.sendOtpByEmail(donarIdOrEmail);
+			otpService.resendOtpByEmail(donarIdOrEmail);
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Otp Send Successfully");
 			result.setStatusCode(HttpStatus.OK.value());
