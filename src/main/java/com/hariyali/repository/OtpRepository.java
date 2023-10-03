@@ -19,5 +19,8 @@ public interface OtpRepository extends JpaRepository<OtpModel, Integer>{
 	@Query(value="SELECT * FROM tbl_otp WHERE otp_id = (SELECT MAX(otp_id) FROM tbl_otp WHERE donarIdOrEmail = ?) ;",nativeQuery=true)
 	OtpModel getOtpByEmail(String otp);
 
+	@Query(value="SELECT * FROM tbl_otp WHERE  donarIdOrEmail = ?1 order by otp_id desc Limit 1",nativeQuery=true)
+	OtpModel getOldOtpByEmail(String otp);
+
 	
 }
