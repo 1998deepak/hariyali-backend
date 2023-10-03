@@ -188,8 +188,8 @@ public interface DonationRepository extends JpaRepository<Donation, Integer> {
 			+ "WHERE u.emailId = ?;",nativeQuery = true)
 	public int donationCount(String emailId);
 
-	@Query(value = "SELECT * FROM tbl_donation WHERE userId = :userId",
-	countQuery = "SELECT COUNT(*) FROM tbl_donation WHERE userId = :userId",
+	@Query(value = "SELECT * FROM tbl_donation WHERE userId = :userId order by approval_date",
+	countQuery = "SELECT COUNT(*) FROM tbl_donation WHERE userId = :userId order by approval_date",
 	nativeQuery = true)
 	Page<Donation> findByUserId(@Param("userId") Integer userId, Pageable pageable);
 
