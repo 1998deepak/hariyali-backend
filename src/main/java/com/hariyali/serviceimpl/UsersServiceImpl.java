@@ -771,7 +771,7 @@ public class UsersServiceImpl implements UsersService {
 			dto.setApprovalStatus(ofNullable(user[7]).map(String::valueOf).orElse(""));
 			dto.setEmailId(ofNullable(user[8]).map(String::valueOf).orElse(""));
 			dto.setRemark(ofNullable(user[9]).map(String::valueOf).orElse(""));
-
+			dto.setTotalPendingDonation(ofNullable(user[10]).map(String::valueOf).map(Integer::parseInt).orElse(0));
 		}
 		return dto;
 	}

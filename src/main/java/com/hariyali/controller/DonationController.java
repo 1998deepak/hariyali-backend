@@ -2,6 +2,7 @@ package com.hariyali.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.hariyali.config.JwtHelper;
 import com.hariyali.dto.*;
 import com.hariyali.service.PaymentIntegrationService;
 import com.hariyali.utils.EncryptionDecryptionUtil;
@@ -38,6 +39,9 @@ public class DonationController {
 
 	@Autowired
 	private EncryptionDecryptionUtil encryptionDecryptionUtil;
+
+	@Autowired
+	private JwtHelper jwtHelper;
 
 //	 method to add user new Donations
 	@PostMapping("/newDonation")
@@ -101,5 +105,13 @@ public class DonationController {
 	public ApiResponse<List<DonationDTO>> searchDonationById1(@RequestBody DonorListRequestDTO requestDTO){
 		return donationService.getDonations(requestDTO);
 	}
+
+	@PostMapping("/approveUserDonation")
+	public ResponseEntity<ApiResponse<String>> approveUserDonation(@RequestBody DonationDTO dto, HttpServletRequest request){
+		String token = request.getHeader("Authorization");
+		String userName = jwtHelper.getUsernameFromToken(token.substring(7));
+		return new ResponseEntity<>(donationService.approveUserDonation(dto, userName), HttpStatus.OK);
+	}
+
 
 }
