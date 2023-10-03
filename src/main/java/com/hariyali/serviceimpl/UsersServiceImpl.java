@@ -669,6 +669,7 @@ public class UsersServiceImpl implements UsersService {
 			otpModel.setOtpCode(otp);
 			otpModel.setDonarIdOrEmail(user.getEmailId());
 			otpModel.setOtpExpiryTime(LocalDateTime.now().plusMinutes(10));
+			otpModel.setCreatedDate(LocalDateTime.now().plusMinutes(10));
 			otpModel.setUsers(user);
 			otpRepository.save(otpModel);
 			String body = "Dear Donor,<br><br>" + "<br>Please use OTP to set new password - " + otp
