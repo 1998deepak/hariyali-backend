@@ -51,7 +51,10 @@ public class OtpServiceImpl {
 		if (user == null) {
 			throw new IllegalArgumentException("User not found with email: " + emailId);
 		}
-
+		OtpModel oldOtp = otpRepository.getOldOtpByEmail(emailId);
+		oldOtp.setOtpCode(null);
+		oldOtp.setOtpExpiryTime(null);
+		otpRepository.save(oldOtp);
 		String otp = generateOtp();
 		otpModel.setOtpCode(otp);
 		otpModel.setDonarIdOrEmail(emailId);
