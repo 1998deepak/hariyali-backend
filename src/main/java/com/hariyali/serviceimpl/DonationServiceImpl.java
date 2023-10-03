@@ -491,9 +491,22 @@ public class DonationServiceImpl implements DonationService {
 			}
 		}
 		if (usersDTO != null) {
-			Users users = usersRepository.findByUserId(usersDTO.getUserId());
+			Users users = usersRepository.findByEmailId(usersDTO.getEmailId());
 			if (users != null) {
-				if (!("INDIA").equalsIgnoreCase(usersDTO.getCitizenship())) {
+				if(("Corporate").equalsIgnoreCase(usersDTO.getDonarType())){
+					if (!("INDIA").equalsIgnoreCase(usersDTO.getAddress().stream().map(a->a.getCountry()).findFirst().get())) {
+						response.setStatus(EnumConstants.OTHERTHANINDIA);
+						response.setGatewayURL("/FcraAccount");
+						DonationDTO donationDTO = new DonationDTO();
+						Double amount=usersDTO.getDonations().stream().map(d->d.getUserPackage()).findFirst().get().stream().map(u->u.getAmount()).findFirst().get();
+						donationDTO.setTotalAmount(amount);
+						donationDTO.setCreatedBy(usersDTO.getAddress().stream().map(a->a.getCountry()).findFirst().get());
+						response.setData(donationDTO);
+						return response;
+					}
+				}
+				if(("Individual").equalsIgnoreCase(usersDTO.getDonarType())){
+				 if (!("INDIA").equalsIgnoreCase(usersDTO.getCitizenship())) {
 					response.setStatus(EnumConstants.OTHERTHANINDIA);
 					response.setGatewayURL("/FcraAccount");
 					DonationDTO donationDTO = new DonationDTO();
@@ -503,9 +516,23 @@ public class DonationServiceImpl implements DonationService {
 					response.setData(donationDTO);
 					return response;
 				}
+			  }
 			} else {
-				if (usersDTO.getCitizenship() != null) {
-					if (!("INDIA").equalsIgnoreCase(usersDTO.getCitizenship())) {
+				if (usersDTO.getCitizenship() != null || usersDTO.getCountry() != null) {
+					if(("Corporate").equalsIgnoreCase(usersDTO.getDonarType())){
+						if (!("INDIA").equalsIgnoreCase(usersDTO.getAddress().stream().map(a->a.getCountry()).findFirst().get())) {
+							response.setStatus(EnumConstants.OTHERTHANINDIA);
+							response.setGatewayURL("/FcraAccount");
+							DonationDTO donationDTO = new DonationDTO();
+							Double amount=usersDTO.getDonations().stream().map(d->d.getUserPackage()).findFirst().get().stream().map(u->u.getAmount()).findFirst().get();
+							donationDTO.setTotalAmount(amount);
+							donationDTO.setCreatedBy(usersDTO.getAddress().stream().map(a->a.getCountry()).findFirst().get());
+							response.setData(donationDTO);
+							return response;
+						}
+					}
+					if(("Individual").equalsIgnoreCase(usersDTO.getDonarType())){
+					 if (!("INDIA").equalsIgnoreCase(usersDTO.getCitizenship())) {
 						response.setStatus(EnumConstants.OTHERTHANINDIA);
 						response.setGatewayURL("/FcraAccount");
 						DonationDTO donationDTO = new DonationDTO();
@@ -513,9 +540,9 @@ public class DonationServiceImpl implements DonationService {
 						donationDTO.setTotalAmount(amount);
 						donationDTO.setCreatedBy(usersDTO.getCitizenship());
 						response.setData(donationDTO);
-						
 						return response;
 					}
+				  }
 				}
 			}
 		}

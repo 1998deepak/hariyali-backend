@@ -62,7 +62,7 @@ public class CommonService {
 			lastFiveDigitsStr = lastDonarID.substring(lastDonarID.length() - 5);
 			lastFiveDigits = Integer.parseInt(lastFiveDigitsStr) + 1;
 			formattedResult = String.format("%05d", lastFiveDigits);
-			return "DN" + year + String.format("%02d", month) + formattedResult;
+			return "DID" + year + String.format("%02d", month) + formattedResult;
 		} else if (idForEntity.equalsIgnoreCase("donation")) {
 			String lastDonationID = donationRepository.getLastDonationID();
 			if (lastDonationID == null)

@@ -17,9 +17,9 @@ public interface OtpRepository extends JpaRepository<OtpModel, Integer>{
 	OtpModel findByOtp(String otp);
 	
 	@Query(value="SELECT * FROM tbl_otp WHERE otp_id = (SELECT MAX(otp_id) FROM tbl_otp WHERE donarIdOrEmail = ?) ;",nativeQuery=true)
-	OtpModel getOtpByEmail(String otp);
-
-	@Query(value="SELECT * FROM tbl_otp WHERE created_date = (SELECT MAX(created_date) FROM tbl_otp WHERE donarIdOrEmail = ?) ;",nativeQuery=true)
+	OtpModel getOtpByEmail(String otp, String otp2);
+	
+@Query(value="SELECT * FROM tbl_otp WHERE created_date = (SELECT MAX(created_date) FROM tbl_otp WHERE donarIdOrEmail = ?) ;",nativeQuery=true)
 	OtpModel findByEmailOtp(String userId);
 
 	

@@ -242,20 +242,17 @@ public class UsersController {
 		if (otp == null || donarIdOrEmail == null) {
 			throw new CustomExceptionNodataFound("Please enter your Donar Id or Email  and OTP");
 		}
-		OtpModel otpModel = otpService.getOtpByEmail(donarIdOrEmail);
+		OtpModel otpModel = otpService.getOtpByEmail(donarIdOrEmail,otp);
 		if (otpModel == null) {
 			throw new CustomExceptionNodataFound("Your OTP has been expired... Please resend OTP...");
-		}
-		if (otp.equals(otpModel.getOtpCode())) {
+		}else{
 			result.setStatus(EnumConstants.SUCCESS);
 			result.setMessage("Otp is Valid");
 			result.setStatusCode(HttpStatus.OK.value());
-		} else {
-			return new ResponseEntity<>("Invalid OTP", HttpStatus.OK);
+			otpModel.setOtpCode(null);
+			otpModel.setOtpExpiryTime(null);
+			otpRepository.save(otpModel);
 		}
-		otpModel.setOtpCode(null);
-		otpModel.setOtpExpiryTime(null);
-		otpRepository.save(otpModel);
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
