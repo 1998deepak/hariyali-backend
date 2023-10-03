@@ -563,7 +563,7 @@ public class DonationServiceImpl implements DonationService {
 			queryString += "&language=EN";
 			queryString += "&billing_name=" + ofNullable(usersDTO.getFirstName()).filter(StringUtils::isNotEmpty)
 					.orElse(resulEntity.getFirstName()) + " " + ofNullable(usersDTO.getLastName())
-					.filter(StringUtils::isNotEmpty).orElse(usersDTO.getLastName());
+					.filter(StringUtils::isNotEmpty).orElse(resulEntity.getLastName());
 			AddressDTO address = ofNullable(usersDTO.getAddress()).orElse(resulEntity.getAddress().stream()
 					.map(addressEntity -> modelMapper.map(addressEntity, AddressDTO.class))
 					.collect(Collectors.toList())).stream().findFirst().get();
