@@ -52,7 +52,7 @@ public interface EnumConstants {
 			"<p>Welcome to Project Hariyali.</p>" +
 			"<p>The Mahindra Foundation and Naandi Foundation would like to thank you for your donation."
 			+"<p>You can login to your account on our website <a href='http://www.hariyali.org.in'>www.hariyali.org.in</a> with following login details.</p>"
-			+"<p>Email ID : <b>%s<b><br>"
+			+"<p>Email ID : <b>%s</b><br>"
 			+"Password: <b>%s</b></p>"
 			+"You can view details of your plantation activities here.<br>"
 			+"Your contribution will reduce carbon footprint, support livelihood of small holding farmer families and mitigate climate change."
@@ -76,7 +76,7 @@ public interface EnumConstants {
 	public static final String contentGiftee="<p>Dear %s,</p>"+
 			"<p>Welcome to Project Hariyali.</p>" 
 			+"<p>You can login to your account on our website <a href='http://www.hariyali.org.in'>www.hariyali.org.in</a> with following login details.</p>"
-			+"<p>Email ID : <b>%s<b><br>"
+			+"<p>Email ID : <b>%s</b><br>"
 			+"Password: <b>%s</b></p>"
 			+"You can view details of your plantation activities there.<br><br>"
 			+"<p>Thank you.</p>"+ "Team Hariyali<br>"+ "Mahindra Foundation<br> 3rd Floor, Cecil Court,"

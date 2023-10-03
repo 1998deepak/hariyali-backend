@@ -669,6 +669,7 @@ public class UsersServiceImpl implements UsersService {
 			otpModel.setOtpCode(otp);
 			otpModel.setDonarIdOrEmail(user.getEmailId());
 			otpModel.setOtpExpiryTime(LocalDateTime.now().plusMinutes(10));
+			otpModel.setCreatedDate(LocalDateTime.now().plusMinutes(10));
 			otpModel.setUsers(user);
 			otpRepository.save(otpModel);
 			String body = "Dear Donor,<br><br>" + "<br>Please use OTP to set new password - " + otp
@@ -920,18 +921,6 @@ public class UsersServiceImpl implements UsersService {
 						receiptService.generateReceipt(d);
 						Receipt receipt = receiptRepository.getUserReceipt(user.getUserId());
 						Users recipientData = usersRepository.findByEmailId(recipientEmail.getEmailId());
-						if (d.getDonationType().equalsIgnoreCase("gift-donate")) {
-							// emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
-							// EnumConstants.content, user);
-//							Document document = documentRepository.findByYearAndDocTypeAndDonation(
-//									Calendar.getInstance().get(Calendar.YEAR), "CERTIFICATE", d);
-//							emailService.sendGiftingLetterEmail(d, recipientData, d.getDonationEvent(),
-//									document.getFilePath());
-							emailService.sendReceiptWithAttachment(user, d.getOrderId(), receipt);
-
-						}
-//						emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
-//								EnumConstants.content, user);
 						emailService.sendReceiptWithAttachment(user, d.getOrderId(), receipt);
 						emailService.sendThankyouLatter(user.getEmailId(), user);
 
