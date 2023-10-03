@@ -44,6 +44,9 @@ public class OtpModel {
 	@Column(name = "otpExpiryTime")
 	LocalDateTime otpExpiryTime;
 	
+	@Column(name = "created_date")
+	LocalDateTime createdDate;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "userId",referencedColumnName = "user_id")
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userId")

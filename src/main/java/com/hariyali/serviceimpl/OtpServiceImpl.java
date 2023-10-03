@@ -37,6 +37,7 @@ public class OtpServiceImpl {
 		otpModel.setOtpCode(otp);
 		otpModel.setDonarIdOrEmail(emailId);
 		otpModel.setOtpExpiryTime(LocalDateTime.now().plusMinutes(10));
+		otpModel.setCreatedDate(LocalDateTime.now().plusMinutes(10));
 		otpModel.setUsers(user);
 		otpRepository.save(otpModel);
 		String body = "Dear Donor,<br><br>" + "You have are accessing the profile on Hariyali website."
@@ -56,6 +57,7 @@ public class OtpServiceImpl {
 		otpModel.setOtpCode(otp);
 		otpModel.setDonarIdOrEmail(emailId);
 		otpModel.setOtpExpiryTime(LocalDateTime.now().plusMinutes(10));
+		otpModel.setCreatedDate(LocalDateTime.now().plusMinutes(10));
 		otpModel.setUsers(user);
 		otpRepository.save(otpModel);
 		String body = "Dear Donor,<br><br>" + "You have are accessing the profile on Hariyali website."
@@ -90,5 +92,9 @@ public class OtpServiceImpl {
 	public OtpModel getOtpByEmail(String donarIdOrEmail) {
 		// TODO Auto-generated method stub
 		return otpRepository.getOtpByEmail(donarIdOrEmail);
+	}
+	
+	public OtpModel findByEmailOtp(String email) {
+		return otpRepository.findByEmailOtp(email);
 	}
 }

@@ -469,7 +469,7 @@ public class JwtServiceImpl implements JwtService {
 	public ApiResponse<String> verifyOtp(String email, String otp) {
 	    ApiResponse<String> result = new ApiResponse<>();
 	    Users user = findUserByDonorIdOrEmailId(email);
-	    OtpModel otpModel=otpService.findByOtp(otp);
+	    OtpModel otpModel=otpService.findByEmailOtp(email);
 	    if (user == null || !otp.equals(otpModel.getOtpCode())) {
 	        throw new CustomExceptionNodataFound("Invalid OTP");
 	    }

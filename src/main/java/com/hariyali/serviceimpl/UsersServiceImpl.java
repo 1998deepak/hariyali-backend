@@ -693,7 +693,7 @@ public class UsersServiceImpl implements UsersService {
 	public ApiResponse<String> verifyForgotOtp(String email, String otp) {
 		ApiResponse<String> result = new ApiResponse<>();
 		Users user = jwtService.findUserByDonorIdOrEmailId(email);
-		 OtpModel otpModel = otpServiceImpl.getOtpByEmail(email); 
+		 OtpModel otpModel = otpServiceImpl.findByEmailOtp(email); 
 //		 OtpModel otpModel = otpServiceImpl.findByOtp(otp);
 		if (user == null || !otp.equals(otpModel.getOtpCode())) {
 			throw new CustomExceptionNodataFound("Invalid OTP");
