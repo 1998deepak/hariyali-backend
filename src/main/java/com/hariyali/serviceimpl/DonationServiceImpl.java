@@ -344,7 +344,7 @@ public class DonationServiceImpl implements DonationService {
 		}
 		Donation donation = donationRepository.getById(donationDTO.getDonationId());
 		String paymentStatus = paymentIfoRepository.getPaymentStatusByDonationId(donationDTO.getDonationId());
-		if (paymentStatus.equalsIgnoreCase("Completed")) {
+		if (paymentStatus.equalsIgnoreCase("Completed") || "Success".equalsIgnoreCase(paymentStatus) ) {
 			receiptService.generateReceipt(donation);
 		}
 		response.setData(donationDTO);
