@@ -135,5 +135,8 @@ public class Users implements Serializable {
 
 	@Column(name = "active_session")
 	private Integer activeSession = 0;
+	
+	@Column(name = "aadhar_card")
+	private String aadharCard;
 
 }

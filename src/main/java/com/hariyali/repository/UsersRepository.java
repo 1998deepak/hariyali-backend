@@ -167,7 +167,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "	                 'donorId', users.donorId,\r\n" + "	                 'emailId', users.emailId,\r\n"
 			+ "	                 'donarType', users.donor_type,\r\n"
 			+ "	                 'prefix', users.prefix,\r\n"
-			+ "	                 'organisation', users.organisation,\r\n"
+			+ "	                 'organisation', users.organisation,'aadharCard',users.aadhar_card,\r\n"
 			+ "	                 'activityType', users.activity_type,\r\n"
 			+ "'campaignConsent',users.campaign_consent,\r\n" + "'dataConsent',CASE WHEN users.data_consent = 1 THEN 'true' ELSE 'false' END,\r\n"
 			+ "                     'panCard',users.pan_card,\r\n" + "	                 'address', (\r\n"
