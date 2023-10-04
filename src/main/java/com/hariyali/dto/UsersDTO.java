@@ -100,4 +100,5 @@ public class UsersDTO {
 
 	private Boolean dataConsent;
 	private Integer totalPendingDonation;
+	private String aadharCard;
 }
