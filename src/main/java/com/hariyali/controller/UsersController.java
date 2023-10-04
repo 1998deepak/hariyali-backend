@@ -1,13 +1,12 @@
 package com.hariyali.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import com.hariyali.config.JwtHelper;
-import com.hariyali.entity.Donation;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,11 +23,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hariyali.EnumConstants;
+import com.hariyali.config.JwtHelper;
 import com.hariyali.dto.ApiRequest;
 import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.DonorListRequestDTO;
 import com.hariyali.dto.LoginRequest;
 import com.hariyali.dto.UsersDTO;
+import com.hariyali.entity.Donation;
 import com.hariyali.entity.OtpModel;
 import com.hariyali.exceptions.CustomException;
 import com.hariyali.exceptions.CustomExceptionNodataFound;
@@ -112,8 +113,8 @@ public class UsersController {
 
 	// method to get all donation of specific user by email
 	@GetMapping("/getAllDonationOfUser")
-	public ResponseEntity<ApiResponse<List<Donation>>> getAllDonationOfUser(HttpServletRequest request, @RequestParam("PageSize") Integer pageSize, @RequestParam("PageNo") Integer pageNo) {
-		String email = jwtHelper.getUsernameFromToken(request.getHeader("Authorization").substring(7));
+	public ResponseEntity<ApiResponse<List<Donation>>> getAllDonationOfUser(HttpServletRequest request,@RequestParam(value="email",required=false) String email, @RequestParam("PageSize") Integer pageSize, @RequestParam("PageNo") Integer pageNo) {
+		email = Optional.ofNullable(email).orElse(jwtHelper.getUsernameFromToken(request.getHeader("Authorization").substring(7)));
 		ApiResponse<List<Donation>> apiResponse = this.usersService.getUserDonations(email, pageNo, pageSize);
 		return new ResponseEntity<>(apiResponse, HttpStatus.OK);
 	}
