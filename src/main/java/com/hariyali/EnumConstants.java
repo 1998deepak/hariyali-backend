@@ -39,7 +39,7 @@ public interface EnumConstants {
 			+ "You have been gifted with %d plant/s by %s.<br>"
 			+ "We sincerely hope this gift adds a touch of happiness and warmth in your life.<br>"
 			+ "A beautiful personalized gift card is attached.<br>"
-			+ "We will be sending your login credentials in a separate email.You can view details of plantation activities there.<br><br>"
+			+ "This gift will help reduce carbon footprint, support livelihood of small holding farmer families and mitigate climate change.<br><br>"
 			+ "Thank you,<br>" + "Team Hariyali<br>" + "Mahindra Foundation<br>"
 			+ "3rd Floor, Cecil Court,Near Regal Cinema,<br>" + "Mahakavi Bhushan Marg,Colaba,<br>"
 			+ "Mumbai,Maharashta - 400001<br>" + "PS : Contact support@hariyali.org.in in case of any query.<br>"

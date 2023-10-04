@@ -182,8 +182,8 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 							responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
 					emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
 							user);
-					emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subjectGiftee,
-							EnumConstants.contentGiftee, recipientData);
+//					emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subjectGiftee,
+//							EnumConstants.contentGiftee, recipientData);
 					emailService.sendGiftingLetterEmail(donation, recipientData, donation.getDonationEvent(),
 							responseCertifiate.get("outputFile"));
 				}
@@ -197,8 +197,8 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 							fullNameOfDonar, recipientData.getEmailId());
 					commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
 							responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
-					emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subjectGiftee,
-							EnumConstants.contentGiftee, recipientData);
+//					emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subjectGiftee,
+//							EnumConstants.contentGiftee, recipientData);
 					emailService.sendGiftingLetterEmail(donation, recipientData, donation.getDonationEvent(),
 							responseCertifiate.get("outputFile"));
 				}

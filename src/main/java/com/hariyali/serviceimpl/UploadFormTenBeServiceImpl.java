@@ -1,17 +1,20 @@
 package com.hariyali.serviceimpl;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.poi.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.hariyali.config.JwtHelper;
+import com.hariyali.entity.Receipt;
 import com.hariyali.entity.Users;
 import com.hariyali.repository.DonationRepository;
 import com.hariyali.repository.UsersRepository;
@@ -126,6 +130,14 @@ public class UploadFormTenBeServiceImpl implements UploadFormTenBeService {
 			}
 
 		}
+	}
+
+	@Override
+	public void downloadReceipt(String docNo, HttpServletResponse response) {
+//		Receipt receipt = donationRepository.findByDocId(docNo)
+		//need to Add logic over here
+		
+		
 	}
 
 }
