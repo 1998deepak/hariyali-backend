@@ -150,12 +150,11 @@ public class ReceiptServiceImpl implements ReceiptService {
 
             // Add the logo to the document
             document.add(logoParagraph);
-//            document.add(new Paragraph("\n"));
             PdfPTable receiptTable = new PdfPTable(2);
             receiptTable.setWidthPercentage(100);
 
 
-            Font receiptFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12);
+            Font receiptFont = FontFactory.getFont("Calibri", 11);
             Paragraph receiptParagraph = new Paragraph();
             receiptParagraph.setAlignment(Element.ALIGN_CENTER);
             receiptParagraph.add("Receipt");
@@ -199,6 +198,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             String amountWords = Conversion.NumberToWord(roundUpAmount.toString());
             String amountInWords = Conversion.formattedAmountInWords(amountWords);
             System.err.println("amountInWords:" + amountInWords);
+
             Font boldFont = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
             Paragraph donorDetails = new Paragraph();
             donorDetails.setAlignment(Element.ALIGN_LEFT);
@@ -207,7 +207,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             donorDetails.add(new Chunk(name.toUpperCase(), normal));
             donorDetails.add(new Chunk(" a sum of Rupees ",normal));
             donorDetails.add(new Chunk(amountInWords, normal));
-            donorDetails.add(new Chunk(" only through our Website Dt. " + formattedDate + " towards your donation.",normal));
+            donorDetails.add(new Chunk("only through Hariyali website Dt. " + formattedDate + " towards your donation.",normal));
             document.add(donorDetails);
             document.add(new Paragraph("\n"));
             document.add(new Paragraph("\n"));
@@ -217,7 +217,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             PdfPTable informationTable = new PdfPTable(2);
             informationTable.setWidthPercentage(100);
             var paragraph = new Paragraph();
-            paragraph.add(new Chunk("\n\nINR " + donationAmount,normal));
+            paragraph.add(new Chunk("INR " + donationAmount,normal));
             paragraph.add(new Chunk("\nFor Naandi Foundation\n\n",normal));
 
             Image logoSeal = null;
@@ -260,28 +260,15 @@ public class ReceiptServiceImpl implements ReceiptService {
 
             p.add(new Chunk("\nPin Code/Postal Code: " + address.getPostalCode(),normal1));
 
-            p.add(new Chunk("\nPAN/AADHAAR:  " + ofNullable(donation.getUsers().getPanCard()).filter(pan -> !pan.isEmpty()).orElse(donation.getUsers().getAadharCard()),normal1));
+            p.add(new Chunk("\nPAN/AADHAAR:  " + ofNullable(donation.getUsers().getPanCard()).filter(pan -> !pan.isEmpty()).orElse(donation.getUsers().getAadharCard()).toUpperCase(),normal1));
 
             PdfPCell rightInfoCell = new PdfPCell(p);
             rightInfoCell.setBorder(Rectangle.BOX);
             rightInfoCell.setBorderWidth(1);
             rightInfoCell.setHorizontalAlignment(Element.ALIGN_LEFT);
             rightInfoCell.setPadding(10f);
-//            rightInfoCell.setRowspan(12);
             informationTable.addCell(rightInfoCell);
 
-//            document.add(new Paragraph("\n"));
-//            leftInfoCell = new PdfPCell(logoSeal);
-//            leftInfoCell.setBorder(Rectangle.NO_BORDER);
-//            leftInfoCell.setBorderWidth(1);
-//            leftInfoCell.setHorizontalAlignment(Element.ALIGN_LEFT);
-//            informationTable.addCell(leftInfoCell);
-//            rightInfoCell = new PdfPCell();
-//            rightInfoCell.setBorder(Rectangle.NO_BORDER);
-//            rightInfoCell.setBorderWidth(1);
-////            rightInfoCell.setRowspan(1);
-//            rightInfoCell.setHorizontalAlignment(Element.ALIGN_LEFT);
-//            informationTable.addCell(rightInfoCell);
             document.add(informationTable);
 
             Chunk c2 = new Chunk("(This is a computer-generated receipt, signature not required)", normal);
