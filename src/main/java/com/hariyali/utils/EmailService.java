@@ -2,15 +2,13 @@ package com.hariyali.utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.hariyali.exceptions.CustomException;
-import net.sf.jasperreports.engine.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -18,17 +16,25 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.hariyali.EnumConstants;
-import com.hariyali.dto.PlantationMasterDTO;
 import com.hariyali.entity.Donation;
+import com.hariyali.entity.Plantation;
+import com.hariyali.entity.PlantationMaster;
 import com.hariyali.entity.Receipt;
+import com.hariyali.entity.UserPackages;
 import com.hariyali.entity.Users;
+import com.hariyali.exceptions.CustomException;
 import com.hariyali.exceptions.EmailNotConfiguredException;
 import com.hariyali.repository.DonationRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.serviceimpl.CCServiceEmailAPI;
-import com.hariyali.serviceimpl.DonationServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.engine.JREmptyDataSource;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
 
 @Slf4j
 @Service
