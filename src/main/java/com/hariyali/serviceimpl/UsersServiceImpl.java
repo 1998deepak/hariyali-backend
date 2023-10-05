@@ -866,14 +866,16 @@ public class UsersServiceImpl implements UsersService {
 		{
 			String subject = "Project Hariyali: Donation Failure";
 			String content = "Dear %s,<br>"
-					+ "Thank you for your interest in Project Hariyali. Unfortunately we are unable to process your transaction. Please reach out to us at"
-					+ "<a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> for any queries"
+					+ "Thank you for your interest in Project Hariyali. Unfortunately we are unable to process your transaction. Please reach out to us at "
+					+ "<a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> for any queries<br><br>"
 					+ "Thank You<br>" + "Team Hariyali<br>" + "Mahindra Foundation<br>" + "3rd Floor, Cecil Court,<br>"
 					+ "Near Regal Cinema,<br>" + "Mahakavi Bhushan Marg,<br>" + "Mumbai 400001<br>"
 					+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
 					+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
 			String mailBody = String.format(content, user.getFirstName(), content);
 			emailService.sendSimpleEmail(user.getEmailId(), subject, mailBody);
+			log.info("mail send for rejection");
+
 		}
 	}
 
