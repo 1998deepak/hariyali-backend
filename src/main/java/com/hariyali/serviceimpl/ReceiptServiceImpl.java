@@ -124,7 +124,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         Document document = new Document(PageSize.A4);
         PdfWriter writer;
         try {
-            Font normal = new Font(Font.FontFamily.HELVETICA, 10);
+        	Font normal = FontFactory.getFont("Calibri", 11);
+//            Font normal = new Font(Font.FontFamily.HELVETICA, 10);
             writer = PdfWriter.getInstance(document, new FileOutputStream(fullPath));
             document.open();
 
@@ -161,21 +162,21 @@ public class ReceiptServiceImpl implements ReceiptService {
             receiptParagraph.setFont(receiptFont);
             document.add(receiptParagraph);
 
-//            document.add(new Paragraph("\n"));
+            document.add(new Paragraph("\n"));
 
-            PdfPCell leftCell = new PdfPCell(new Phrase("Transaction Number:" + donation.getOrderId()));
+            PdfPCell leftCell = new PdfPCell(new Phrase("Transaction Number:" + donation.getOrderId(),normal));
             leftCell.setBorder(Rectangle.NO_BORDER);
             leftCell.setBorderWidth(50);
             leftCell.setHorizontalAlignment(Element.ALIGN_LEFT);
             receiptTable.addCell(leftCell);
 
-            PdfPCell rightCell = new PdfPCell(new Phrase("DATE: " + formattedDate));
+            PdfPCell rightCell = new PdfPCell(new Phrase("DATE: " + formattedDate,normal));
             rightCell.setBorder(Rectangle.NO_BORDER);
             rightCell.setBorderWidth(50);
             rightCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             receiptTable.addCell(rightCell);
 
-            leftCell = new PdfPCell(new Phrase("Donation Code:" + donation.getDonationCode()));
+            leftCell = new PdfPCell(new Phrase("Donation Code:" + donation.getDonationCode(),normal));
             leftCell.setBorder(Rectangle.NO_BORDER);
             leftCell.setBorderWidth(50);
             leftCell.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -204,7 +205,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             Chunk nameChunk = new Chunk("Received with thanks from ", normal);
             donorDetails.add(nameChunk);
             donorDetails.add(new Chunk(name.toUpperCase(), normal));
-            donorDetails.add(new Chunk(" the sum of Rupees ",normal));
+            donorDetails.add(new Chunk(" a sum of Rupees ",normal));
             donorDetails.add(new Chunk(amountInWords, normal));
             donorDetails.add(new Chunk(" only through our Website Dt. " + formattedDate + " towards your donation.",normal));
             document.add(donorDetails);
@@ -216,8 +217,8 @@ public class ReceiptServiceImpl implements ReceiptService {
             PdfPTable informationTable = new PdfPTable(2);
             informationTable.setWidthPercentage(100);
             var paragraph = new Paragraph();
-            paragraph.add("\n\nINR " + donationAmount);
-            paragraph.add("\nFor Naandi Foundation\n\n");
+            paragraph.add(new Chunk("\n\nINR " + donationAmount,normal));
+            paragraph.add(new Chunk("\nFor Naandi Foundation\n\n",normal));
 
             Image logoSeal = null;
             try {
@@ -240,25 +241,26 @@ public class ReceiptServiceImpl implements ReceiptService {
             informationTable.addCell(leftInfoCell);
 
             Address address = donation.getUsers().getAddress().get(0);
+            Font normal1 = FontFactory.getFont("CALIBRI", 10);
             var p = new Paragraph();
-            p.add("Donors Information:\n");
-            p.add("Address: " + address.getStreet1()+"\n");
+            p.add(new Chunk("Donors Information:\n",normal1));
+            p.add(new Chunk("Address: " + address.getStreet1()+"\n",normal1));
             if (StringUtils.isNotEmpty(address.getStreet1())) {
-                p.add(address.getStreet1() + "\n");
+                p.add(new Chunk(address.getStreet1() + "\n",normal1));
             }
             if (StringUtils.isNotEmpty(address.getStreet2())) {
-                p.add(address.getStreet2() + "\n");
+                p.add(new Chunk(address.getStreet2() + "\n",normal1));
             }
             if (StringUtils.isNotEmpty(address.getStreet3())) {
-                p.add(address.getStreet3() + "\n");
+                p.add(new Chunk(address.getStreet3() + "\n",normal1));
             }
-            p.add("State: " + address.getState());
+            p.add(new Chunk("State: " + address.getState(),normal1));
 
-            p.add("\nCountry: " + address.getCountry());
+            p.add(new Chunk("\nCountry: " + address.getCountry(),normal1));
 
-            p.add("\nPin Code/Postal Code: " + address.getPostalCode());
+            p.add(new Chunk("\nPin Code/Postal Code: " + address.getPostalCode(),normal1));
 
-            p.add("\nPAN/AADHAAR:  " + ofNullable(donation.getUsers().getPanCard()).filter(pan -> !pan.isEmpty()).orElse(donation.getUsers().getAadharCard()));
+            p.add(new Chunk("\nPAN/AADHAAR:  " + ofNullable(donation.getUsers().getPanCard()).filter(pan -> !pan.isEmpty()).orElse(donation.getUsers().getAadharCard()),normal1));
 
             PdfPCell rightInfoCell = new PdfPCell(p);
             rightInfoCell.setBorder(Rectangle.BOX);
@@ -315,31 +317,34 @@ public class ReceiptServiceImpl implements ReceiptService {
             document.add(noteTable);
 //            document.add(new Paragraph("\n"));
 
-            Paragraph note = new Paragraph("This receipt is issued for accounting purpose only");
+            Paragraph note = new Paragraph("This receipt is issued for accounting purpose only",normal);
             note.setAlignment(Element.ALIGN_CENTER);
             document.add(note);
             document.add(new Paragraph("\n"));
 
-            note = new Paragraph("We shall issue Form 10BE after completion of the financial year as per CBDT notification no. 19/2021 dated 26.03.2021");
+            note = new Paragraph("We shall issue Form 10BE after completion of the financial year as per CBDT notification no. 19/2021 dated 26.03.2021",normal);
             note.setAlignment(Element.ALIGN_CENTER);
             document.add(note);
             document.add(new Paragraph("\n"));
 
-            note = new Paragraph("Note- Kindly note that Naandi Foundation shall not be responsible for the verification of the donor's PAN details as well as for the denial of deduction u/s 80G of the Income Tax Act, 1961 for furnishing an incorrect PAN.", boldFont);
+            Font boldNote = FontFactory.getFont("Arial", 10,Font.BOLD);
+            note = new Paragraph("Note- Kindly note that Naandi Foundation shall not be responsible for the verification of the donor's PAN details as well as for the denial of deduction u/s 80G of the Income Tax Act, 1961 for furnishing an incorrect PAN.", boldNote);
             note.setAlignment(Element.ALIGN_LEFT);
 //            note.setFont(boldFont);
             document.add(note);
             document.add(new Paragraph("\n"));
 
-            note = new Paragraph("Naandi Foundation 502, Trendset Towers, Road No. 2, Banjara Hills, Hyderabad – 500 034, ");
+            
+            Font font = FontFactory.getFont("Arial", 10);
+            note = new Paragraph("Naandi Foundation 502, Trendset Towers, Road No. 2, Banjara Hills, Hyderabad – 500 034, ",font);
             note.setAlignment(Element.ALIGN_CENTER);
             document.add(note);
 //            document.add(new Paragraph("\n"));
-            note = new Paragraph("Telangana INDIA");
+            note = new Paragraph("Telangana INDIA",font);
             note.setAlignment(Element.ALIGN_CENTER);
             document.add(note);
 //            document.add(new Paragraph("\n"));
-            note = new Paragraph("E-Mail: support@hariyali.org.in");
+            note = new Paragraph("E-Mail: support@hariyali.org.in",font);
             note.setAlignment(Element.ALIGN_CENTER);
             document.add(note);
 
