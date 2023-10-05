@@ -1,5 +1,32 @@
 package com.hariyali.serviceimpl;
 
+import static java.util.Optional.ofNullable;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Random;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.util.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
 import com.hariyali.EnumConstants;
 import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.ReceiptDto;
@@ -14,29 +41,20 @@ import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.ReceiptService;
 import com.hariyali.utils.Conversion;
 import com.hariyali.utils.EmailService;
-import com.itextpdf.text.*;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.util.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Random;
-
-import static java.util.Optional.ofNullable;
 
 @Service
 public class ReceiptServiceImpl implements ReceiptService {
@@ -112,7 +130,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
             Image logo = null;
             try {
-                //				logo = Image.getInstance("src/main/resources/Logo.png");
+//                				logo = Image.getInstance("src/main/resources/Logo.png");
                 Path path = emailService.getFileFromPath("Logo.png");
                 System.out.println("Logo=>" + path.toString());
                 logo = Image.getInstance(path.toString());
@@ -185,18 +203,20 @@ public class ReceiptServiceImpl implements ReceiptService {
             donorDetails.setAlignment(Element.ALIGN_LEFT);
             Chunk nameChunk = new Chunk("Received with thanks from ", normal);
             donorDetails.add(nameChunk);
-            donorDetails.add(new Chunk(name.toUpperCase(), boldFont));
-            donorDetails.add(" the sum of Rupees ");
-            donorDetails.add(new Chunk(amountInWords, boldFont));
-            donorDetails.add(new Chunk(" only through our Website Dt. " + formattedDate + " towards your donation."));
+            donorDetails.add(new Chunk(name.toUpperCase(), normal));
+            donorDetails.add(new Chunk(" the sum of Rupees ",normal));
+            donorDetails.add(new Chunk(amountInWords, normal));
+            donorDetails.add(new Chunk(" only through our Website Dt. " + formattedDate + " towards your donation.",normal));
             document.add(donorDetails);
             document.add(new Paragraph("\n"));
             document.add(new Paragraph("\n"));
 
+            BigDecimal donationAmount = BigDecimal.valueOf(donation.getTotalAmount()).setScale(2, RoundingMode.HALF_UP);
+            System.err.println("donationAmount:" + donationAmount);
             PdfPTable informationTable = new PdfPTable(2);
             informationTable.setWidthPercentage(100);
             var paragraph = new Paragraph();
-            paragraph.add("\n\nINR " + donation.getTotalAmount());
+            paragraph.add("\n\nINR " + donationAmount);
             paragraph.add("\nFor Naandi Foundation\n\n");
 
             Image logoSeal = null;
