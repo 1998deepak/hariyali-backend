@@ -246,9 +246,6 @@ public class ReceiptServiceImpl implements ReceiptService {
             var p = new Paragraph();
             p.add(new Chunk("Donors Information:\n",normal1));
             p.add(new Chunk("Address: " + address.getStreet1()+"\n",normal1));
-            if (StringUtils.isNotEmpty(address.getStreet1())) {
-                p.add(new Chunk(address.getStreet1() + "\n",normal1));
-            }
             if (StringUtils.isNotEmpty(address.getStreet2())) {
                 p.add(new Chunk(address.getStreet2() + "\n",normal1));
             }
