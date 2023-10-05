@@ -29,7 +29,7 @@ public class BankServiceImpl implements BankService {
     public ApiResponse<List<Bank>> getAllBanks() {
         ApiResponse<List<Bank>> apiResponse = new ApiResponse<>();
         apiResponse.setData(repository.findByIsActive(true));
-        log.info(apiResponse.getData().size() +" banks found!");
+        log.info(apiResponse.getData().size() +" banks found");
         apiResponse.setStatus("Success");
         return apiResponse;
     }//method

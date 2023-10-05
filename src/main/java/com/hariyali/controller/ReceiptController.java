@@ -56,7 +56,7 @@ public class ReceiptController {
 		response.setData(receiptDTOList);
 		response.setStatus(EnumConstants.SUCCESS);
 		response.setStatusCode(HttpStatus.OK.value());
-		response.setMessage("Data fetched successfully..!!");
+		response.setMessage("Data fetched successfully..");
 
 		return response;
 	}

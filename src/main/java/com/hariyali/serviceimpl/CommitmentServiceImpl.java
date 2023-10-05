@@ -60,7 +60,7 @@ public class CommitmentServiceImpl implements CommitmentService {
             response.setTotalRecords(result.getTotalElements());
             response.setStatus(EnumConstants.SUCCESS);
             response.setStatusCode(HttpStatus.OK.value());
-            response.setMessage("Data fetched successfully..!!");
+            response.setMessage("Data fetched successfully..");
             return response;
         } else
             throw new CustomException("No record found for given filter");

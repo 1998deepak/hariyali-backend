@@ -94,7 +94,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 			response.setData(result);
 			response.setStatus(EnumConstants.SUCCESS);
 			response.setStatusCode(HttpStatus.OK.value());
-			response.setMessage("Data fetched successfully..!!");
+			response.setMessage("Data fetched successfully..");
 			return response;
 		} else
 			throw new CustomException("There is No user who has webId");

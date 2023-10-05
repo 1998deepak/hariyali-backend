@@ -28,7 +28,7 @@ public class BankAccountServiceImpl implements BankAccountService {
     public ApiResponse<List<BankAccount>> getAllActiveAccountList() {
         ApiResponse<List<BankAccount>> apiResponse = new ApiResponse<>();
         apiResponse.setData(repository.findByIsActive(true));
-        log.info(apiResponse.getData().size() +" account found!");
+        log.info(apiResponse.getData().size() +" account found");
         apiResponse.setStatus("Success");
         return apiResponse;
     }//method

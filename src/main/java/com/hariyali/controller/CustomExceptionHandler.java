@@ -29,7 +29,7 @@ public class CustomExceptionHandler {
     public ResponseEntity<ApiResponse> handleException(SQLException exception) {
         log.error("Exception = " + exception.toString());
         exception.printStackTrace();
-        return processException("Internal server error, please try again later", HttpStatus.INTERNAL_SERVER_ERROR);
+        return processException("Something went wrong, please try again.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(CustomExceptionDataAlreadyExists.class)
@@ -58,7 +58,7 @@ public class CustomExceptionHandler {
     public ResponseEntity<ApiResponse> handleException(RuntimeException exception) {
         exception.printStackTrace();
         log.error("Exception = " + exception.toString());
-        return processException("Internal server error, please try again later", HttpStatus.INTERNAL_SERVER_ERROR);
+        return processException("Something went wrong, please try again.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(Exception.class)
@@ -66,7 +66,7 @@ public class CustomExceptionHandler {
     public ResponseEntity<ApiResponse> handleException(Exception exception) {
         exception.printStackTrace();
         log.error("Exception = " + exception.toString());
-        return processException("Internal server error, please try again later", HttpStatus.INTERNAL_SERVER_ERROR);
+        return processException("Something went wrong, please try again.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private ResponseEntity<ApiResponse> processException(String message, HttpStatus status){
