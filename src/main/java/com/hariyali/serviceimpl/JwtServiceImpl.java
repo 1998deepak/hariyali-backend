@@ -435,7 +435,7 @@ public class JwtServiceImpl implements JwtService {
 	            }
 	            System.err.println("user" + user);
 	            if(user == null) {
-	            	throw new CustomExceptionNodataFound("Uh-oh! It seems we couldn't find your account information");
+	            	throw new CustomExceptionNodataFound("Uh-oh! It seems we couldn't find your account information.");
 	            }
 	            log.debug("User found - {}", user.getEmailId().toUpperCase());
 
