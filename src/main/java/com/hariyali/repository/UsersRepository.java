@@ -114,21 +114,21 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "			 where users.is_deleted=false AND users.user_id=addr.userId", nativeQuery = true)
 	Object getAllUsersWithDonarID();
 
-	@Query(value = "SELECT u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, CASE WHEN IFNULL(d.approval_status, 'Pending') = 'Pending' THEN COUNT(d.userId) ELSE 0 END AS pending_count, MIN(d.donation_date) AS DonationDate\n" +
-			" FROM tbl_user_master u left join tbl_donation d ON IFNULL(d.approval_status, 'Pending') = 'Pending' and d.userId = u.user_id\n" +
+	@Query(value = "SELECT u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, CASE WHEN IFNULL(d.approval_status, 'Pending') = 'Pending' THEN COUNT(d.userId) ELSE 0 END AS pending_count, IFNULL(aadhar_card, pan_card) AS PANORAADHAR, MIN(d.donation_date) AS DonationDate\n" +
+			"  FROM tbl_user_master u left join tbl_donation d ON IFNULL(d.approval_status, 'Pending') = 'Pending' and d.userId = u.user_id\n" +
 			" WHERE u.webId IS NOT NULL\n" +
 			" AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
-			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR first_name LIKE CONCAT(:searchText, '%') \n" +
-			" OR last_name LIKE CONCAT(:searchText, '%') OR donor_type LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%')) \n" +
+			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR emailId LIKE CONCAT(:searchText, '%') \n" +
+			" OR concat(first_name, ' ', last_name) LIKE CONCAT(:searchText, '%') OR pan_card LIKE CONCAT(:searchText, '%') OR aadhar_card LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%')) \n" +
 			" GROUP BY u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark\n" +
 			" ORDER BY DonationDate"
 			, countQuery = "SELECT COUNT(*) FROM (SELECT u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, CASE WHEN IFNULL(d.approval_status, 'Pending') = 'Pending' THEN COUNT(d.userId) ELSE 0 END AS pending_count, MIN(d.donation_date) AS DonationDate\n" +
 			"FROM tbl_user_master u left join tbl_donation d ON IFNULL(d.approval_status, 'Pending') = 'Pending' and d.userId = u.user_id\n" +
 			"WHERE u.webId IS NOT NULL\n" +
 			"AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
-			"AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR first_name LIKE CONCAT(:searchText, '%') \n" +
-			"OR last_name LIKE CONCAT(:searchText, '%') OR donor_type LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%')) \n" +
-			"GROUP BY u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark\n" +
+			"AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR emailId LIKE CONCAT(:searchText, '%') \n" +
+			"OR concat(first_name, ' ', last_name) LIKE CONCAT(:searchText, '%') OR pan_card LIKE CONCAT(:searchText, '%') OR aadhar_card LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%')) \n" +
+			"GROUP BY u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, u.aadhar_card, u.pan_card\n" +
 			"ORDER BY DonationDate)  AS T", nativeQuery = true)
 	Page<Object[]> getAllUsersWithWebId(@Param("searchText") String searchText,
 			@Param("donorType") String donorType, Pageable pageable);
