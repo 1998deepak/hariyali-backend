@@ -32,7 +32,9 @@ public class OtpServiceImpl {
 		if (user == null) {
 			throw new IllegalArgumentException("User not found with email: " + emailId);
 		}
-
+		if(user.getPassword()==null) {
+			throw new IllegalArgumentException("User not found with email: " + emailId);
+		}
 		String otp = generateOtp();
 		otpModel.setOtpCode(otp);
 		otpModel.setDonarIdOrEmail(emailId);
