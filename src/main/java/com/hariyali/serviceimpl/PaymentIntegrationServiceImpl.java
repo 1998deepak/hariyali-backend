@@ -148,9 +148,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 		paymentInfo.setOrderId(donation.getOrderId());
 		// paymentInfo.setSourceType(ofNullable(response.get("source")).orElse(""));
 		paymentInfo = paymentInfoRepository.save(paymentInfo);
-//		if(!paymentInfo.getSourceType().isEmpty()) {
-//			callGogreenApi();
-//		}
+
 		String redirectUrl = frontendRedirectURL;
 		Users user = userRepository.getUserByDonationId(donation.getDonationId());
 
@@ -160,6 +158,8 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 			if (user.getWebId() == null) {
 				user.setWebId(userService.generateWebId());
 				user.setDonorId(commonService.createDonarIDORDonationID("user"));
+				user.setApprovalStatus("Approved");
+				user.setIsApproved(true);
 				userRepository.save(user);
 				log.info("user" + user);
 			} else {
@@ -182,8 +182,8 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 							responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
 					emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
 							user);
-					emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subjectGiftee,
-							EnumConstants.contentGiftee, recipientData);
+//					emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subjectGiftee,
+//							EnumConstants.contentGiftee, recipientData);
 					emailService.sendGiftingLetterEmail(donation, recipientData, donation.getDonationEvent(),
 							responseCertifiate.get("outputFile"));
 				}
@@ -197,8 +197,8 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 							fullNameOfDonar, recipientData.getEmailId());
 					commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
 							responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
-					emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subjectGiftee,
-							EnumConstants.contentGiftee, recipientData);
+//					emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subjectGiftee,
+//							EnumConstants.contentGiftee, recipientData);
 					emailService.sendGiftingLetterEmail(donation, recipientData, donation.getDonationEvent(),
 							responseCertifiate.get("outputFile"));
 				}

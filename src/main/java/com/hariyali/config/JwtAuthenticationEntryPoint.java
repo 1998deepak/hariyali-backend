@@ -46,6 +46,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint{
 		} else {
 			log.warn("JWT Token does not begin with Bearer String");
 		}
-		response.sendError(HttpServletResponse.SC_UNAUTHORIZED,"Access Denied! Unauthorized Request..");
+		response.sendError(HttpServletResponse.SC_UNAUTHORIZED,"Access Denied, Unauthorized Request..");
 	}
 }
