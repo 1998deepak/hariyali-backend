@@ -1,7 +1,7 @@
 package com.hariyali.entity;
 
 import java.time.LocalDate;
-
+import java.util.Date;
 import javax.persistence.*;
 
 import lombok.AllArgsConstructor;
