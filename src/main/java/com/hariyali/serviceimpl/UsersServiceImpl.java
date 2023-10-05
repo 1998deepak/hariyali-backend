@@ -742,7 +742,7 @@ public class UsersServiceImpl implements UsersService {
 		Pageable pageable = PageRequest.of(requestDTO.getPageNumber(), requestDTO.getPageSize());
 
 		Page<Object[]> result = usersRepository.getAllUsersWithWebId(ofNullable(requestDTO.getSearchText()).orElse(""),
-				requestDTO.getStatus(), StringUtils.trimToNull(requestDTO.getDonorType()), pageable);
+				StringUtils.trimToNull(requestDTO.getDonorType()), pageable);
 
 		if (!isNull(result) && !result.getContent().isEmpty()) {
 			List<UsersDTO> usersDTOS = of(result.getContent()).get().stream().map(this::toUsersDTO)

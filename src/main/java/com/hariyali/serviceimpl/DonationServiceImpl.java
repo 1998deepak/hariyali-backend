@@ -837,15 +837,35 @@ public class DonationServiceImpl implements DonationService {
 				receiptService.generateReceipt(donation);
 				Receipt receipt = receiptRepository.findByDonation(donation);
 				emailService.sendReceiptWithAttachment(donation.getUsers(), donation.getOrderId(), receipt);
-//				emailService.sendThankyouLatter(donation.getUsers().getEmailId(), donation.getUsers());
+				emailService.sendThankyouLatter(donation.getUsers().getEmailId(), donation.getUsers());
 			}
 
 			response.setMessage("Donation approved by "+userName);
 		} else {
+			sendRejectDonationEmails(donation.getUsers());
 			response.setMessage("Donation rejected by "+userName);
 		}
 		response.setStatus("Success");
 		return response;
+	}
+
+	private void sendRejectDonationEmails(Users user) {
+		// Construct the email subject and content
+
+		if (user != null)
+
+		{
+			String subject = "Project Hariyali: Donation Failure";
+			String content = "Dear %s,<br>"
+					+ "Thank you for your interest in Project Hariyali. Unfortunately we are unable to process your transaction. Please reach out to us at"
+					+ "<a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> for any queries"
+					+ "Thank You<br>" + "Team Hariyali<br>" + "Mahindra Foundation<br>" + "3rd Floor, Cecil Court,<br>"
+					+ "Near Regal Cinema,<br>" + "Mahakavi Bhushan Marg,<br>" + "Mumbai 400001<br>"
+					+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
+					+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
+			String mailBody = String.format(content, user.getFirstName(), content);
+			emailService.sendSimpleEmail(user.getEmailId(), subject, mailBody);
+		}
 	}
 
 }
