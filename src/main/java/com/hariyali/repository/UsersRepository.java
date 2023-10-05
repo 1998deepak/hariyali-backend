@@ -117,7 +117,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	@Query(value = "SELECT u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, CASE WHEN IFNULL(d.approval_status, 'Pending') = 'Pending' THEN COUNT(d.userId) ELSE 0 END AS pending_count, MIN(d.donation_date) AS DonationDate\n" +
 			" FROM tbl_user_master u left join tbl_donation d ON IFNULL(d.approval_status, 'Pending') = 'Pending' and d.userId = u.user_id\n" +
 			" WHERE u.webId IS NOT NULL\n" +
-			" AND u.approval_status = :status AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
+			" AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
 			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR first_name LIKE CONCAT(:searchText, '%') \n" +
 			" OR last_name LIKE CONCAT(:searchText, '%') OR donor_type LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%')) \n" +
 			" GROUP BY u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark\n" +
@@ -125,12 +125,12 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			, countQuery = "SELECT COUNT(*) FROM (SELECT u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, CASE WHEN IFNULL(d.approval_status, 'Pending') = 'Pending' THEN COUNT(d.userId) ELSE 0 END AS pending_count, MIN(d.donation_date) AS DonationDate\n" +
 			"FROM tbl_user_master u left join tbl_donation d ON IFNULL(d.approval_status, 'Pending') = 'Pending' and d.userId = u.user_id\n" +
 			"WHERE u.webId IS NOT NULL\n" +
-			"AND u.approval_status = :status AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
+			"AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
 			"AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR first_name LIKE CONCAT(:searchText, '%') \n" +
 			"OR last_name LIKE CONCAT(:searchText, '%') OR donor_type LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%')) \n" +
 			"GROUP BY u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark\n" +
 			"ORDER BY DonationDate)  AS T", nativeQuery = true)
-	Page<Object[]> getAllUsersWithWebId(@Param("searchText") String searchText, @Param("status") String status,
+	Page<Object[]> getAllUsersWithWebId(@Param("searchText") String searchText,
 			@Param("donorType") String donorType, Pageable pageable);
 
 	@Query(value = "SELECT JSON_ARRAYAGG( JSON_OBJECT( 'donationId', d.donation_id, \r\n"
