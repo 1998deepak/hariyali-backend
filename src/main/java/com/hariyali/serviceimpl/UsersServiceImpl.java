@@ -664,6 +664,9 @@ public class UsersServiceImpl implements UsersService {
 		int otpValue = random.nextInt((int) Math.pow(10, 6));
 		Users user = jwtService.findUserByDonorIdOrEmailId(donorId);
 		if (user != null) {
+			if(user.getPassword()==null) {
+				throw new CustomException("User not forund");
+			}
 			String otp = String.format("%0" + 6 + "d", otpValue);
 			OtpModel otpModel = new OtpModel();
 			otpModel.setOtpCode(otp);
@@ -681,6 +684,8 @@ public class UsersServiceImpl implements UsersService {
 		} else {
 			throw new CustomException("User not forund");
 		}
+		
+		
 		ApiResponse<String> response = new ApiResponse<>();
 		response.setStatus(EnumConstants.SUCCESS);
 		response.setStatusCode(HttpStatus.OK.value());
