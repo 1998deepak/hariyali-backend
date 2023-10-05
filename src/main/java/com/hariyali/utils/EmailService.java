@@ -173,50 +173,63 @@ public class EmailService {
 
 	}
 
-	public void sendPlantationMail(Users user, PlantationMasterDTO plantationMasterDTO) {
+	public void sendPlantationMail(UserPackages packages, PlantationMaster plantationMaster) {
+		String date = toDateString(plantationMaster.getPlantationDate(), "dd-MM-yyyy");
 		String subject = "Project Hariyali – Plantation Report";
-		String content = "Dear %s<br>" + "Thank you for contributing to Project Hariyali.<br>"
-				+ "For the donation dated,%s,%d plant/s have been planted in %s %s in the village %s, in the state of %s.<br>"
-				+ "&nbsp;&nbsp; We will be taking care of your plants for two years to ensure  its optimum growth and nurturing in the initial years for 100% survival of the sapling.  <br>"
-				+ "Thanks once again.<br>" + "<br>" + "Team Hariyali <br>" + "Mahindra Foundation<br>"
-				+ "3rd Floor, Cecil Court, Near Regal Cinema,<br>" + "Mahakavi Bushan Marg, Colaba, <br>"
-				+ "Mumbai, Maharashtra – 400001<br>"
-				+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
-				+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
 		SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
-		String year = yearFormat.format(plantationMasterDTO.getPlantationDate());
-		String mailBody = String.format(content, user.getFirstName(), plantationMasterDTO.getPlantationDateString(),
-				plantationMasterDTO.getNoOfPlantsPlanted(), plantationMasterDTO.getSeason(), year,
-				plantationMasterDTO.getVillage(), plantationMasterDTO.getState());
-		ccServiceEmailAPI.sendCorrespondenceMail(user.getEmailId(), subject, mailBody);
+		String year = yearFormat.format(plantationMaster.getPlantationDate());
+		String messsage = "Dear " + packages.getUserDonation().getUsers().getFirstName()
+				+ ",<br>Thank you for contributing to Project Hariyali.<br>" + "For the donation dated, " + date + ","
+				+ plantationMaster.getNoOfPlantsPlanted() + " plant have been planted in "
+				+ plantationMaster.getSeason() + " " + year + " in the village " + plantationMaster.getVillage()
+				+ "in the state of " + plantationMaster.getState() + ".<br>"
+				+ "We will be taking care of your plants for two years to ensure  its optimum growth and nurturing in the initial years for 100% survival of the sapling.  <br>"
+				+ "Thanks once again.<br>" + "<br>" + "Team Hariyali <br>" + "Mahindra Foundation<br>"
+				+ "3rd Floor, Cecil Court, Near Regal Cinema,<br>" + "Mahakavi Bhushan Marg, Colaba, <br>"
+				+ "Mumbai, Maharashtra -400001<br>"
+				+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
+				+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
+		log.info("mailBody:" + messsage);
+		ccServiceEmailAPI.sendCorrespondenceMail(packages.getUserDonation().getUsers().getEmailId(), subject, messsage);
+		log.info("Mail Sent!!!");
 	}
 
-	public void sendFirstAnnualPlantationMail(Users user, PlantationMasterDTO plantationMasterDTO) {
+	public void sendFirstAnnualPlantationMail(Plantation plantationMaster) {
+		String date=toDateString(plantationMaster.getPlantationMaster().getPlantationDate(), "dd-MM-yyyy");
 		String subject = "Project Hariyali – 1st Annual Report";
-		String content = "Dear %s<br>" + "Thank you for contributing to Project Hariyali.	<br>"
-				+ "For the donations dated – __<DD-MON-YYYY>__,  we are happy to report that <number of 	plants> plants are healthy and growing well.<br>"
-				+ "&nbsp;&nbsp;We thank you once again for your contribution to our planet earth.<br>" + "<br>"
+		String content = "Dear "+plantationMaster.getUserPackages().getUserDonation().getUsers().getFirstName()+",<br>Thank you for contributing to Project Hariyali.	<br>"
+				+ "For the donations dated – "+date+",  we are happy to report that "+ plantationMaster.getNoOfPlantsPlanted()+" plants are healthy and growing well.<br>"
+				+ "We thank you once again for your contribution to our planet earth.<br>" + "<br>"
 				+ "Team Hariyali <br>" + "Mahindra Foundation<br>" + "3rd Floor, Cecil Court, Near Regal Cinema,<br>"
-				+ "Mahakavi Bushan Marg, Colaba, <br>" + "Mumbai, Maharashtra – 400001<br>"
+				+ "Mahakavi Bhushan Marg, Colaba, <br>" + "Mumbai, Maharashtra – 400001<br>"
 				+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
 				+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
-		String mailBody = String.format(content, user.getFirstName());
-		ccServiceEmailAPI.sendCorrespondenceMail(user.getEmailId(), subject, mailBody);
+		ccServiceEmailAPI.sendCorrespondenceMail(
+				plantationMaster.getUserPackages().getUserDonation().getUsers().getEmailId(), subject, content);
 	}
 
-	public void sendSecondAnnualPlantationMail(Users user, PlantationMasterDTO plantationMasterDTO) {
+	public void sendSecondAnnualPlantationMail(Plantation plantationMaster) {
+		String date=toDateString(plantationMaster.getPlantationMaster().getPlantationDate(), "dd-MM-yyyy");
 		String subject = "Project Hariyali – 2nd Annual Report";
-		String content = "Dear %s<br>" + "Thank you for contributing to Project Hariyali.	<br>"
-				+ "For the donations dated – __<DD-MON-YYYY>__,  we are happy to report that <number of 	plants> plants are healthy and growing well.<br>"
-				+ "&nbsp;&nbsp;We thank you once again for your contribution to our planet earth.<br>" + "<br>"
+		String content ="Dear "+plantationMaster.getUserPackages().getUserDonation().getUsers().getFirstName()+ ",<br>Thank you for contributing to Project Hariyali.<br>"
+				+ "For the donations dated –"+date+" ,  we are happy to report that "+ plantationMaster.getNoOfPlantsPlanted()+"  plants are healthy and growing well.<br>"
+				+ "We thank you once again for your contribution to our planet earth.<br><br>"
 				+ "Team Hariyali <br>" + "Mahindra Foundation<br>" + "3rd Floor, Cecil Court, Near Regal Cinema,<br>"
-				+ "Mahakavi Bushan Marg, Colaba, <br>" + "Mumbai, Maharashtra – 400001<br>"
+				+ "Mahakavi Bhushan Marg, Colaba, <br>" + "Mumbai, Maharashtra – 400001<br>"
 				+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
 				+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
-		String mailBody = String.format(content, user.getFirstName());
-		ccServiceEmailAPI.sendCorrespondenceMail(user.getEmailId(), subject, mailBody);
+		String mailBody = String.format(content,
+				plantationMaster.getUserPackages().getUserDonation().getUsers().getFirstName(),
+				toDateString(plantationMaster.getPlantationMaster().getPlantationDate(), "dd-MM-yyyy"),
+				plantationMaster.getNoOfPlantsPlanted());
+		ccServiceEmailAPI.sendCorrespondenceMail(
+				plantationMaster.getUserPackages().getUserDonation().getUsers().getEmailId(), subject, mailBody);
 	}
 
+	private String toDateString(Date date, String dateFormat) {
+		SimpleDateFormat format = new SimpleDateFormat(dateFormat);
+		return format.format(date);
+	}
 	public Map<String, String> generateCertificateForThankYou(String donarName, String emailID) {
 
 		String filepath = null;
