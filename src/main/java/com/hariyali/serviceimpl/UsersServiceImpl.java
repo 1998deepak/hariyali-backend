@@ -440,7 +440,7 @@ public class UsersServiceImpl implements UsersService {
 		if (entity.getEmailId() != null) {
 			if (entity.getDonorId() != null) {
 				throw new CustomExceptionDataAlreadyExists("Donor with " + entity.getEmailId()
-						+ " is already registered, Kindly do click here to login and continue your donation!");
+						+ " is already registered, Kindly do click here to login and continue your donation");
 			}
 			response.setData(modelMapper.map(user, UsersDTO.class));
 			response.setStatus(EnumConstants.SUCCESS);
@@ -481,7 +481,7 @@ public class UsersServiceImpl implements UsersService {
 			response.setData(result);
 			response.setStatus(EnumConstants.SUCCESS);
 			response.setStatusCode(HttpStatus.OK.value());
-			response.setMessage("Data fetched successfully..!!");
+			response.setMessage("Data fetched successfully..");
 			return response;
 		} else
 			throw new CustomException("There is No user who has donarID");
@@ -499,7 +499,7 @@ public class UsersServiceImpl implements UsersService {
 			response.setData(result);
 			response.setStatus(EnumConstants.SUCCESS);
 			response.setStatusCode(HttpStatus.OK.value());
-			response.setMessage("Data fetched successfully..!!");
+			response.setMessage("Data fetched successfully..");
 			return response;
 
 		} else {
@@ -664,6 +664,9 @@ public class UsersServiceImpl implements UsersService {
 		int otpValue = random.nextInt((int) Math.pow(10, 6));
 		Users user = jwtService.findUserByDonorIdOrEmailId(donorId);
 		if (user != null) {
+			if(user.getPassword()==null) {
+				throw new CustomException("User not forund");
+			}
 			String otp = String.format("%0" + 6 + "d", otpValue);
 			OtpModel otpModel = new OtpModel();
 			otpModel.setOtpCode(otp);
@@ -681,6 +684,8 @@ public class UsersServiceImpl implements UsersService {
 		} else {
 			throw new CustomException("User not forund");
 		}
+		
+		
 		ApiResponse<String> response = new ApiResponse<>();
 		response.setStatus(EnumConstants.SUCCESS);
 		response.setStatusCode(HttpStatus.OK.value());
@@ -752,7 +757,7 @@ public class UsersServiceImpl implements UsersService {
 			response.setTotalRecords(result.getTotalElements());
 			response.setStatus(EnumConstants.SUCCESS);
 			response.setStatusCode(HttpStatus.OK.value());
-			response.setMessage("Data fetched successfully..!!");
+			response.setMessage("Data fetched successfully..");
 			return response;
 		} else
 			throw new CustomException("There is No user who has webId");
@@ -1137,13 +1142,13 @@ public class UsersServiceImpl implements UsersService {
 
 		Users user = usersRepository.findByEmailId(userName);
 		if (passwordEncoder.matches(password, user.getPassword())) {
-			throw new CustomException("New password is same as old password!");
+			throw new CustomException("New password is same as old password");
 		}
 
 		user.setPassword(passwordEncoder.encode(password));
 		usersRepository.save(user);
 		response.setStatus("Success");
-		response.setMessage("User password changed successfully!");
+		response.setMessage("User password changed successfully");
 		return response;
 	}// method
 

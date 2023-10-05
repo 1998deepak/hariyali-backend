@@ -94,15 +94,15 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         ApiResponse<Object> response = new ApiResponse<>();
 
-        Object result = receiptRepository.getAllReciept();
-        if (result != null) {
-            response.setData(result);
-            response.setStatus(EnumConstants.SUCCESS);
-            response.setStatusCode(HttpStatus.OK.value());
-            response.setMessage("Data fetched successfully..!!");
-            return response;
-        } else
-            throw new CustomException("There is No user who has webId");
+		Object result = receiptRepository.getAllReciept();
+		if (result != null) {
+			response.setData(result);
+			response.setStatus(EnumConstants.SUCCESS);
+			response.setStatusCode(HttpStatus.OK.value());
+			response.setMessage("Data fetched successfully..");
+			return response;
+		} else
+			throw new CustomException("There is No user who has webId");
 
     }
 

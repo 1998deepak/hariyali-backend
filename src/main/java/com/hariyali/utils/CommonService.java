@@ -80,8 +80,8 @@ public class CommonService {
 			formattedResult = String.format("%05d", lastFiveDigits);
 			return "DOC" + year + String.format("%02d", month) + formattedResult;
 		} else {
-			log.error("send appropriate idForEntity value..!!");
-			throw new CustomException("send appropriate idForEntity value..!!");
+			log.error("send appropriate idForEntity value..");
+			throw new CustomException("send appropriate idForEntity value..");
 		}
 
 	}

@@ -502,6 +502,9 @@ public class DonationServiceImpl implements DonationService {
 						donationDTO.setTotalAmount(amount);
 						donationDTO.setCreatedBy(usersDTO.getAddress().stream().map(a->a.getCountry()).findFirst().get());
 						response.setData(donationDTO);
+						// removing password for FCRA USER
+						users.setPassword(null);
+						usersRepository.save(users);
 						return response;
 					}
 				}
@@ -514,6 +517,9 @@ public class DonationServiceImpl implements DonationService {
 					donationDTO.setTotalAmount(amount);
 					donationDTO.setCreatedBy(usersDTO.getCitizenship());
 					response.setData(donationDTO);
+					// removing password for FCRA USER
+					users.setPassword(null);
+					usersRepository.save(users);
 					return response;
 				}
 			  }
@@ -528,6 +534,9 @@ public class DonationServiceImpl implements DonationService {
 							donationDTO.setTotalAmount(amount);
 							donationDTO.setCreatedBy(usersDTO.getAddress().stream().map(a->a.getCountry()).findFirst().get());
 							response.setData(donationDTO);
+							// removing password for FCRA USER
+							users.setPassword(null);
+							usersRepository.save(users);
 							return response;
 						}
 					}
@@ -540,6 +549,9 @@ public class DonationServiceImpl implements DonationService {
 						donationDTO.setTotalAmount(amount);
 						donationDTO.setCreatedBy(usersDTO.getCitizenship());
 						response.setData(donationDTO);
+						// removing password for FCRA USER
+						users.setPassword(null);
+						usersRepository.save(users);
 						return response;
 					}
 				  }
