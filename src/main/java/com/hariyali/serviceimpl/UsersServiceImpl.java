@@ -662,7 +662,7 @@ public class UsersServiceImpl implements UsersService {
 	public ApiResponse<String> forgetPassword(String donorId, HttpSession session) throws JsonProcessingException {
 		Random random = new Random();
 		int otpValue = random.nextInt((int) Math.pow(10, 6));
-		Users user = jwtService.findUserByDonorIdOrEmailIdAndApprovalStatus(donorId,"Approved");
+		Users user = jwtService.findUserByDonorIdOrEmailId(donorId);
 		if (user != null) {
 			String otp = String.format("%0" + 6 + "d", otpValue);
 			OtpModel otpModel = new OtpModel();
@@ -944,9 +944,9 @@ public class UsersServiceImpl implements UsersService {
 
 	// reject donation
 	private Users handleDonationRejection(Users user, List<Donation> donations) {
-		user.setIsDeleted(true);
-		user.setDonorId(null);
-		this.usersRepository.save(user);
+//		user.setIsDeleted(true);
+//		user.setDonorId(null);
+//		this.usersRepository.save(user);
 
 		if (donations != null) {
 			for (Donation donation : donations) {

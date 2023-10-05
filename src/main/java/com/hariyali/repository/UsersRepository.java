@@ -290,9 +290,9 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	@Query(value="select u.emailId from tbl_user_master as u, tbl_donation as d where u.user_id=d.userId and d.donation_id=?;",nativeQuery = true)
 	String getGiftorEmailByDonation(int donationId);
 
-	Users findByDonorIdAndApprovalStatus(String email, String approvalStatus);
-
-	Users findByEmailIdAndApprovalStatus(String email, String approvalStatus);
+//	Users findByDonorIdAndApprovalStatus(String email, String approvalStatus);
+//
+//	Users findByEmailIdAndApprovalStatus(String email, String approvalStatus);
 	
 	
 	
