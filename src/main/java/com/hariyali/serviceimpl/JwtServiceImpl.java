@@ -434,6 +434,9 @@ public class JwtServiceImpl implements JwtService {
 	                user = userResponse.get();
 	            }
 	            System.err.println("user" + user);
+	            if(user == null) {
+	            	throw new CustomExceptionNodataFound("Uh-oh! It seems we couldn't find your account information");
+	            }
 	            log.debug("User found - {}", user.getEmailId().toUpperCase());
 
 	            if (request.getUsername().equalsIgnoreCase(user.getEmailId())
@@ -451,7 +454,7 @@ public class JwtServiceImpl implements JwtService {
 						result.setMessage("Otp Send Successfully");
 						result.setStatusCode(HttpStatus.OK.value());
 						return result;
-					} else throw new ConcurrentSessionException("You cannot login because you have too many session active!");
+					} else throw new ConcurrentSessionException("Oops! It seems you're already logged in.");
 
 				} else {
 	                user.setLastloginDate(new Date());

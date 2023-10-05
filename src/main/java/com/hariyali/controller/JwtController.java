@@ -92,7 +92,7 @@ public class JwtController {
 			}
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().body("Invalid Credentials.");
+			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
 
