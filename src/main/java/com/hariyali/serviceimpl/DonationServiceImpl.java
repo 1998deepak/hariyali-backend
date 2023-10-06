@@ -177,11 +177,18 @@ public class DonationServiceImpl implements DonationService {
 				emailService.sendReceiptWithAttachment(userEmail, donationDto.getOrderId(), receipt);
 				emailService.sendThankyouLatter(userEmail.getEmailId(), userEmail);
 			} else {
-
 				emailService.sendWelcomeLetterMail(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content,
 						userEmail);
 				emailService.sendReceiptWithAttachment(userEmail, donationDto.getOrderId(), receipt);
 				emailService.sendThankyouLatter(userEmail.getEmailId(), userEmail);
+			}
+			if ("gift-donate".equalsIgnoreCase(donationDto.getDonationType())) {
+				String fullNameOfDonar = usersDTO.getFirstName() + " " + usersDTO.getLastName();
+				Map<String, String> responseCertifiate = generateCertificate(
+						donationDto.getRecipient().get(0).getFirstName(), donationDto.getGiftContent(), donationDto.getDonationEvent(),
+						fullNameOfDonar, donationDto.getRecipient().get(0).getEmailId());
+				emailService.sendGiftingLetterEmail(modelMapper.map(donationDto, Donation.class), null, donationDto.getDonationEvent(),
+						responseCertifiate.get("outputFile"));
 			}
 
 			return response;
@@ -476,7 +483,7 @@ public class DonationServiceImpl implements DonationService {
 									// Check if the email already exists
 									Users existingUser = usersRepository.findByEmailId(recipientEmail);
 									if (existingUser != null) {
-
+										request.getSession().setAttribute(orderId+"",recipients);
 										continue;
 									}
 

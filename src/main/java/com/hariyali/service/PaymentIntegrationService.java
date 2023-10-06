@@ -3,6 +3,8 @@ package com.hariyali.service;
 import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.PaymentInfoDTO;
 
+import javax.servlet.http.HttpSession;
+
 /**
  * Interface to handle payment integration confirmation
  *
@@ -12,7 +14,7 @@ import com.hariyali.dto.PaymentInfoDTO;
  */
 public interface PaymentIntegrationService {
 
-    ApiResponse<String> confirmPayment(String encryptedResponse);
+    ApiResponse<String> confirmPayment(String encryptedResponse, HttpSession session);
 
     ApiResponse<PaymentInfoDTO> findPaymentInfoByOrderId(String orderId);
 }
