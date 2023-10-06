@@ -234,7 +234,7 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
             dto.setNoOfPlantsPlanted(ofNullable(row.getCell(5)).map(XSSFCell::getRawValue).map(Long::parseLong)
                             .orElseThrow(()-> new CustomException("No of plats planted is invalid or empty in row no "+ rowNumber+" column no 5")));
             dto.setPlantationDate(ofNullable(row.getCell(6)).map(String::valueOf).map(String::trim)
-                            .map(date ->toDate(date, "dd/MM/yyyy"))
+                            .map(date ->toDate(date, "dd-MM-yyyy"))
                             .orElseThrow(()-> new CustomException("PlantationDate is invalid or empty in row no "+ rowNumber+" column no 6, required in dd/MM/yyyy format")));
             dto.setLatitude(ofNullable(row.getCell(7)).map(XSSFCell::getRawValue).map(Double::valueOf)
                             .orElseThrow(()-> new CustomException("Latitude is invalid or empty in row no "+ rowNumber+" column no 7")));

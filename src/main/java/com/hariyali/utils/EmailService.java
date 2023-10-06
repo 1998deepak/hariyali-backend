@@ -187,7 +187,7 @@ public class EmailService {
 		String year = yearFormat.format(plantationMaster.getPlantationDate());
 		String messsage = "Dear " + packages.getUserDonation().getUsers().getFirstName()
 				+ ",<br>Thank you for contributing to Project Hariyali.<br>" + "For the donation dated, " + date + ","
-				+ plantationMaster.getNoOfPlantsPlanted() + " plant have been planted in "
+				+ plantationMaster.getNoOfPlantsPlanted() + " plant/s have been planted in "
 				+ plantationMaster.getSeason() + " " + year + " in the village " + plantationMaster.getVillage()
 				+ "in the state of " + plantationMaster.getState() + ".<br>"
 				+ "We will be taking care of your plants for two years to ensure  its optimum growth and nurturing in the initial years for 100% survival of the sapling.  <br>"
