@@ -33,6 +33,6 @@ public class PaymentIntegrationController {
     public void paymentIntegration(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String encryptedResponse = request.getParameter("encResp");
 
-        response.sendRedirect(service.confirmPayment(encryptedResponse).getData());
+        response.sendRedirect(service.confirmPayment(encryptedResponse, request.getSession()).getData());
     }
 }
