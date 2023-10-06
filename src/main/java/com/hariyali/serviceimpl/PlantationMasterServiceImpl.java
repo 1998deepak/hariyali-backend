@@ -168,10 +168,11 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
                             if ((noOfPlantsPlanted - (packages.getNoOfBouquets() - allocatedPlant)) > 0) {
                                 allocatedPlant = packages.getNoOfBouquets() - allocatedPlant;
                                 packages.setPlanted(true);
-                                sendMail(packages.getUserDonation().getUsers().getEmailId(), toDateString(plantationMaster.getPlantationDate(), "dd/MM/yyyy"));
+                               emailService.sendPlantationMail(packages, plantationMaster);
                             } else {
                                 packages.setPlanted(false);
                                 allocatedPlant = noOfPlantsPlanted.intValue();
+                                emailService.sendPlantationMail(packages, plantationMaster);
                             }
                             noOfPlantsPlanted -= allocatedPlant;
                             packages.setPlantAllocated(allocatedPlant);
@@ -518,5 +519,33 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
         response.setData(repository.findByDistinctCities(year));
         return response;
     }//method
+
+    @Override
+	public String sendPlantationYear1Report(long plantationId,HttpServletRequest request) {
+		Date currentDate = new Date();
+		String token = request.getHeader("Authorization");
+		String userName = jwtHelper.getUsernameFromToken(token.substring(7));
+		Plantation plant=plantationRepository.getById(plantationId);
+		emailService.sendFirstAnnualPlantationMail(plant);
+		plant.setYear1Report(true);
+		plant.setYear1ReportBy(userName);
+		plant.setYear1ReportDate(currentDate);
+		plantationRepository.save(plant);
+		return "Year 1 report send successfully";
+	}
+	
+	@Override
+	public String sendPlantationYear2Report(long plantationId,HttpServletRequest request) {
+		Date newDate = new Date();
+		String token = request.getHeader("Authorization");
+		String userName = jwtHelper.getUsernameFromToken(token.substring(7));
+		Plantation plant=plantationRepository.getById(plantationId);
+		emailService.sendSecondAnnualPlantationMail(plant);
+		plant.setYear2Report(true);
+		plant.setYear2ReportBy(userName);
+		plant.setYear2ReportDate(newDate);
+		plantationRepository.save(plant);
+		return "Year 2 report send successfully";
+	}
 
 }//class

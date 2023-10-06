@@ -117,4 +117,14 @@ public class PlantationMasterController {
         return new ResponseEntity<>(service.findByDistinctCities(year), HttpStatus.OK);
     }//method
 
+     @PostMapping("/sendPlantationYear1Report")
+    public ResponseEntity<String> sendPlantationYear1Report(@RequestParam("plantationId") long plantationId,HttpServletRequest request) {
+    	
+    	return new ResponseEntity<>(service.sendPlantationYear1Report(plantationId,request), HttpStatus.OK);   	
+    }
+    
+    @PostMapping("/sendPlantationYear2Report")
+    public ResponseEntity<String> sendPlantationYear2Report(@RequestParam("plantationId") long plantationId,HttpServletRequest request) {
+    	return new ResponseEntity<>(service.sendPlantationYear2Report(plantationId,request), HttpStatus.OK);
+    }
 }//class

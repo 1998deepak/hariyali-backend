@@ -1,7 +1,7 @@
 package com.hariyali.entity;
 
 import java.time.LocalDate;
-
+import java.util.Date;
 import javax.persistence.*;
 
 import lombok.AllArgsConstructor;
@@ -40,6 +40,18 @@ public class Plantation {
 
 	@Column(name = "year2_report")
 	Boolean year2Report;
+	
+	@Column(name = "year1_report_date")
+	Date year1ReportDate;
+
+	@Column(name = "year1_report_By")
+	String year1ReportBy;
+
+	@Column(name = "year2_report_date")
+	Date year2ReportDate;
+
+	@Column(name = "year2_report_By")
+	String year2ReportBy;
 
 	@Column(name = "created_by")
 	String createdBy;

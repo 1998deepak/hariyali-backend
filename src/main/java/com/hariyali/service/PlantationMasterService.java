@@ -75,4 +75,8 @@ public interface PlantationMasterService {
      */
     public ApiResponse<List<String>> findByDistinctCities(Integer year);
 
+    public String sendPlantationYear1Report(long plantationId,HttpServletRequest request);
+	
+	public String sendPlantationYear2Report(long plantationId,HttpServletRequest request);
+
 }//interface
