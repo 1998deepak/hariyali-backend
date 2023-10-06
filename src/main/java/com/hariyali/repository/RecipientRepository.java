@@ -44,4 +44,6 @@ public interface RecipientRepository extends JpaRepository<Recipient, Integer>{
 	
 	@Query(value="select * from tbl_recipient where donationId=?",nativeQuery=true)
 	public List<Recipient> getRecipientDataByDonationId(int donationId);
+
+	public Recipient findByEmailId(String emailId);
 }

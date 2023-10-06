@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.hariyali.utils.EncryptionDecryptionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +29,7 @@ import com.hariyali.dto.HariyaliGogreenIntegrationDTO;
 import com.hariyali.dto.PaymentInfoDTO;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.PaymentInfo;
+import com.hariyali.entity.Recipient;
 import com.hariyali.entity.UserPackages;
 import com.hariyali.entity.Users;
 import com.hariyali.entity.paymentGateway.PaymentGatewayConfiguration;
@@ -37,12 +37,14 @@ import com.hariyali.exceptions.CustomException;
 import com.hariyali.repository.DonationRepository;
 import com.hariyali.repository.PaymentInfoRepository;
 import com.hariyali.repository.ReceiptRepository;
+import com.hariyali.repository.RecipientRepository;
 import com.hariyali.repository.UserPackageRepository;
 import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.PaymentIntegrationService;
 import com.hariyali.service.ReceiptService;
 import com.hariyali.utils.CommonService;
 import com.hariyali.utils.EmailService;
+import com.hariyali.utils.EncryptionDecryptionUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -65,6 +67,9 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 
 	@Autowired
 	private PaymentInfoRepository paymentInfoRepository;
+	
+	@Autowired
+	private RecipientRepository recipientRepository;
 
 	@Autowired
 	UsersRepository userRepository;
@@ -175,9 +180,10 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 					String recipientEmail = donation.getRecipient().get(0).getEmailId();
 					Users recipientData = userRepository.findByEmailId(recipientEmail);
 					String fullNameOfDonar = user.getFirstName() + " " + user.getLastName();
+					
 					Map<String, String> responseCertifiate = donationServiceImpl.generateCertificate(
-							recipientData.getFirstName(), donation.getGiftContent(), donation.getDonationEvent(),
-							fullNameOfDonar, recipientData.getEmailId());
+							donation.getRecipient().get(0).getFirstName(), donation.getGiftContent(), donation.getDonationEvent(),
+							fullNameOfDonar, donation.getRecipient().get(0).getEmailId());
 					commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
 							responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
 					emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,

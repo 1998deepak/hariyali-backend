@@ -322,10 +322,10 @@ public class DonationServiceImpl implements DonationService {
 								}
 							}
 						}
-						Users recipientData = usersRepository.findByEmailId(recipient.getEmailId());
+						Users recipientData = usersRepository.findByEmailId(donation.getRecipient().get(0).getEmailId());
 						String fullNameOfDonar = resulEntity.getFirstName() + " " + resulEntity.getLastName();
 
-						Map<String, String> responseCertifiate = generateCertificate(recipientData.getFirstName(),
+						Map<String, String> responseCertifiate = generateCertificate(donation.getRecipient().get(0).getFirstName(),
 								donationDTO.getGiftContent(), donationDTO.getDonationEvent(), fullNameOfDonar,
 								resulEntity.getEmailId());
 
