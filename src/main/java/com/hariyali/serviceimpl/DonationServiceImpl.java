@@ -182,14 +182,14 @@ public class DonationServiceImpl implements DonationService {
 				emailService.sendReceiptWithAttachment(userEmail, donationDto.getOrderId(), receipt);
 				emailService.sendThankyouLatter(userEmail.getEmailId(), userEmail);
 			}
-			if ("gift-donate".equalsIgnoreCase(donationDto.getDonationType())) {
-				String fullNameOfDonar = usersDTO.getFirstName() + " " + usersDTO.getLastName();
-				Map<String, String> responseCertifiate = generateCertificate(
-						donationDto.getRecipient().get(0).getFirstName(), donationDto.getGiftContent(), donationDto.getDonationEvent(),
-						fullNameOfDonar, donationDto.getRecipient().get(0).getEmailId());
-				emailService.sendGiftingLetterEmail(modelMapper.map(donationDto, Donation.class), null, donationDto.getDonationEvent(),
-						responseCertifiate.get("outputFile"));
-			}
+//			if ("gift-donate".equalsIgnoreCase(donationDto.getDonationType())) {
+//				String fullNameOfDonar = usersDTO.getFirstName() + " " + usersDTO.getLastName();
+//				Map<String, String> responseCertifiate = generateCertificate(
+//						donationDto.getRecipient().get(0).getFirstName(), donationDto.getGiftContent(), donationDto.getDonationEvent(),
+//						fullNameOfDonar, donationDto.getRecipient().get(0).getEmailId());
+//				emailService.sendGiftingLetterEmail(modelMapper.map(donationDto, Donation.class), null, donationDto.getDonationEvent(),
+//						responseCertifiate.get("outputFile"));
+//			}
 
 			return response;
 		} else if ("online".equalsIgnoreCase(donationDTO.getDonationMode())) {
@@ -378,8 +378,10 @@ public class DonationServiceImpl implements DonationService {
 		Users userToken = null;
 		if (request != null) {
 			token = request.getHeader("Authorization");
-			userName = jwtHelper.getUsernameFromToken(token.substring(7));
-			userToken = this.usersRepository.findByEmailId(userName);
+			if (!isNull(token)) {
+				userName = jwtHelper.getUsernameFromToken(token.substring(7));
+				userToken = this.usersRepository.findByEmailId(userName);
+			}
 		}
 
 		String createdBy;
