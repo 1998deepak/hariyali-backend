@@ -70,7 +70,7 @@ public class JwtWebSecurityConfig   {
 	            .antMatchers("/api/v1/usersGetAll", "/api/v1/user-by-email/**", "/api/v1/package/**", "/api/v1/AddPackage",
 	                         "/api/v1/package-by-id/**", "/api/v1/GetAllReports", "/api/v1/uploadFileDocument",
 	                         "/api/v1/downloadFileDocument/**", "/api/v1/donorList", "/api/v1/leaderBoard", "/api/v1/map/**",
-	                         "/api/v1/AddMap", "/api/v1/deleteuser/**", "/api/v1/userAdd","/api/v1/updateDonation","/api/v1/inactivePackages/**","/ai/v1/approvedDonation")
+	                         "/api/v1/AddMap", "/api/v1/deleteuser/**", "/api/v1/userAdd","/api/v1/updateDonation","/api/v1/inactivePackages/**","/ai/v1/approvedDonation","api/v1/plantation/sendPlantationYear1Report","api/v1/plantation/sendPlantationYear2Report")
 	                .hasAnyAuthority("Admin")
 	            .antMatchers("/api/v1/updateUser/**","/api/v1/newDonation","/api/v1/getUserPersonalDetailsbyEmailOrDonorId","/api/v1/getAllDonationByUser/", "/api/v1/plantation/**, /api/v1/commitment/**").hasAnyAuthority("User","Admin")
 	            .and()
