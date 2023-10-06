@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.hariyali.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -27,11 +28,6 @@ import com.hariyali.dao.paymentGateway.PaymentGatewayConfigurationDao;
 import com.hariyali.dto.ApiResponse;
 import com.hariyali.dto.HariyaliGogreenIntegrationDTO;
 import com.hariyali.dto.PaymentInfoDTO;
-import com.hariyali.entity.Donation;
-import com.hariyali.entity.PaymentInfo;
-import com.hariyali.entity.Recipient;
-import com.hariyali.entity.UserPackages;
-import com.hariyali.entity.Users;
 import com.hariyali.entity.paymentGateway.PaymentGatewayConfiguration;
 import com.hariyali.exceptions.CustomException;
 import com.hariyali.repository.DonationRepository;
@@ -47,6 +43,8 @@ import com.hariyali.utils.EmailService;
 import com.hariyali.utils.EncryptionDecryptionUtil;
 
 import lombok.extern.slf4j.Slf4j;
+
+import javax.servlet.http.HttpSession;
 
 /**
  * Implementation class for PaymentIntegrationService interface
@@ -117,7 +115,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 	String frontendUserRedirectURL;
 
 	@Override
-	public ApiResponse<String> confirmPayment(String encryptedResponse) {
+	public ApiResponse<String> confirmPayment(String encryptedResponse, HttpSession session) {
 		// get payment gateway configuration for CCAVENUE
 		PaymentGatewayConfiguration gatewayConfiguration = gatewayConfigurationDao.findByGatewayName("CCAVENUE");
 
@@ -171,6 +169,8 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 				redirectUrl = frontendUserRedirectURL;
 			}
 			int donationCnt = donationRepository.donationCount(user.getEmailId());
+			Recipient sessionRecipient = (Recipient) session.getAttribute(orderId);
+
 			if (donationCnt == 1) {
 				if (donation.getDonationType().equalsIgnoreCase("self-donate")) {
 					emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
@@ -180,7 +180,11 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 					String recipientEmail = donation.getRecipient().get(0).getEmailId();
 					Users recipientData = userRepository.findByEmailId(recipientEmail);
 					String fullNameOfDonar = user.getFirstName() + " " + user.getLastName();
-					
+
+					if(!isNull(sessionRecipient)){
+						donation.getRecipient().get(0).setFirstName(sessionRecipient.getFirstName());
+						session.removeAttribute(orderId);
+					}
 					Map<String, String> responseCertifiate = donationServiceImpl.generateCertificate(
 							donation.getRecipient().get(0).getFirstName(), donation.getGiftContent(), donation.getDonationEvent(),
 							fullNameOfDonar, donation.getRecipient().get(0).getEmailId());
@@ -198,8 +202,12 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 					String recipientEmail = donation.getRecipient().get(0).getEmailId();
 					Users recipientData = userRepository.findByEmailId(recipientEmail);
 					String fullNameOfDonar = user.getFirstName() + " " + user.getLastName();
+					if(!isNull(sessionRecipient)){
+						donation.getRecipient().get(0).setFirstName(sessionRecipient.getFirstName());
+						session.removeAttribute(orderId);
+					}
 					Map<String, String> responseCertifiate = donationServiceImpl.generateCertificate(
-							recipientData.getFirstName(), donation.getGiftContent(), donation.getDonationEvent(),
+							donation.getRecipient().get(0).getFirstName(), donation.getGiftContent(), donation.getDonationEvent(),
 							fullNameOfDonar, recipientData.getEmailId());
 					commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
 							responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
