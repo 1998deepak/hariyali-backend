@@ -20,6 +20,7 @@ import com.hariyali.entity.Donation;
 import com.hariyali.entity.Plantation;
 import com.hariyali.entity.PlantationMaster;
 import com.hariyali.entity.Receipt;
+import com.hariyali.entity.Recipient;
 import com.hariyali.entity.UserPackages;
 import com.hariyali.entity.Users;
 import com.hariyali.exceptions.CustomException;
@@ -96,8 +97,8 @@ public class EmailService {
 		File[] files = { resource.getFile() };
 		String subject = EnumConstants.GIFTING_MSG_SUBJECT;
 		String body = EnumConstants.GIFTING_MSG_BODY;
-		String mailBody = String.format(body, recipientData.getFirstName(), noOfPlant, giftorFirstName+" "+giftorLastName);
-		ccServiceEmailAPI.sendCorrespondenceMailForGift(recipientData.getEmailId(), subject, mailBody, giftorMail,
+		String mailBody = String.format(body, donation.getRecipient().get(0).getFirstName(), noOfPlant, giftorFirstName+" "+giftorLastName);
+		ccServiceEmailAPI.sendCorrespondenceMailForGift(donation.getRecipient().get(0).getEmailId(), subject, mailBody, giftorMail,
 				files);
 		log.info("Mail Sent...");
 	}
