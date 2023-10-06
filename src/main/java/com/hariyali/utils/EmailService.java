@@ -205,10 +205,10 @@ public class EmailService {
 		String date=toDateString(plantationMaster.getPlantationMaster().getPlantationDate(), "dd-MM-yyyy");
 		String subject = "Project Hariyali – 1st Annual Report";
 		String content = "Dear "+plantationMaster.getUserPackages().getUserDonation().getUsers().getFirstName()+",<br>Thank you for contributing to Project Hariyali.	<br>"
-				+ "For the donations dated – "+date+",  we are happy to report that "+ plantationMaster.getNoOfPlantsPlanted()+" plants are healthy and growing well.<br>"
+				+ "For the donations dated &ndash; "+date+",  we are happy to report that "+ plantationMaster.getNoOfPlantsPlanted()+" plants are healthy and growing well.<br>"
 				+ "We thank you once again for your contribution to our planet earth.<br>" + "<br>"
 				+ "Team Hariyali <br>" + "Mahindra Foundation<br>" + "3rd Floor, Cecil Court, Near Regal Cinema,<br>"
-				+ "Mahakavi Bhushan Marg, Colaba, <br>" + "Mumbai, Maharashtra – 400001<br>"
+				+ "Mahakavi Bhushan Marg, Colaba, <br>" + "Mumbai, Maharashtra &ndash; 400001<br>"
 				+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
 				+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
 		ccServiceEmailAPI.sendCorrespondenceMail(
@@ -219,18 +219,14 @@ public class EmailService {
 		String date=toDateString(plantationMaster.getPlantationMaster().getPlantationDate(), "dd-MM-yyyy");
 		String subject = "Project Hariyali – 2nd Annual Report";
 		String content ="Dear "+plantationMaster.getUserPackages().getUserDonation().getUsers().getFirstName()+ ",<br>Thank you for contributing to Project Hariyali.<br>"
-				+ "For the donations dated –"+date+" ,  we are happy to report that "+ plantationMaster.getNoOfPlantsPlanted()+"  plants are healthy and growing well.<br>"
+				+ "For the donations dated &ndash; "+date+" ,  we are happy to report that "+ plantationMaster.getNoOfPlantsPlanted()+"  plants are healthy and growing well.<br>"
 				+ "We thank you once again for your contribution to our planet earth.<br><br>"
 				+ "Team Hariyali <br>" + "Mahindra Foundation<br>" + "3rd Floor, Cecil Court, Near Regal Cinema,<br>"
-				+ "Mahakavi Bhushan Marg, Colaba, <br>" + "Mumbai, Maharashtra – 400001<br>"
+				+ "Mahakavi Bhushan Marg, Colaba, <br>" + "Mumbai, Maharashtra &ndash; 400001<br>"
 				+ "<p>PS : Contact <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a> in case of any query.</p>"
 				+ "<i>Project Hariyali is a joint initiative of Mahindra Foundation & Naandi Foundation.</i>";
-		String mailBody = String.format(content,
-				plantationMaster.getUserPackages().getUserDonation().getUsers().getFirstName(),
-				toDateString(plantationMaster.getPlantationMaster().getPlantationDate(), "dd-MM-yyyy"),
-				plantationMaster.getNoOfPlantsPlanted());
 		ccServiceEmailAPI.sendCorrespondenceMail(
-				plantationMaster.getUserPackages().getUserDonation().getUsers().getEmailId(), subject, mailBody);
+				plantationMaster.getUserPackages().getUserDonation().getUsers().getEmailId(), subject, content);
 	}
 
 	private String toDateString(Date date, String dateFormat) {

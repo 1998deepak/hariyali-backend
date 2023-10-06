@@ -233,9 +233,9 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
                             .orElseThrow(()-> new CustomException("Plat is invalid or empty in row no "+ rowNumber+" column no 4")));
             dto.setNoOfPlantsPlanted(ofNullable(row.getCell(5)).map(XSSFCell::getRawValue).map(Long::parseLong)
                             .orElseThrow(()-> new CustomException("No of plats planted is invalid or empty in row no "+ rowNumber+" column no 5")));
-            dto.setPlantationDate(ofNullable(row.getCell(6)).map(String::valueOf).map(String::trim)
-                            .map(date ->toDate(date, "dd-MM-yyyy"))
-                            .orElseThrow(()-> new CustomException("PlantationDate is invalid or empty in row no "+ rowNumber+" column no 6, required in dd/MM/yyyy format")));
+            Optional<Date> plantationDate = ofNullable(row.getCell(6)).map(String::valueOf).map(String::trim)
+                    .map(date ->toDate(date, "dd-MM-yyyy"));
+            dto.setPlantationDate(plantationDate.isPresent() ? plantationDate.get() : ofNullable(row.getCell(6)).map(XSSFCell::getDateCellValue).orElseThrow(()-> new CustomException("PlantationDate is invalid or empty in row no "+ rowNumber+" column no 6, required in dd-MM-yyyy format")));
             dto.setLatitude(ofNullable(row.getCell(7)).map(XSSFCell::getRawValue).map(Double::valueOf)
                             .orElseThrow(()-> new CustomException("Latitude is invalid or empty in row no "+ rowNumber+" column no 7")));
             dto.setLongitude(ofNullable(row.getCell(8)).map(XSSFCell::getRawValue).map(Double::valueOf)
@@ -252,8 +252,9 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
         try {
             return format.parse(dateString);
         } catch (ParseException e) {
-            throw new CustomException("Invalid date format, please provide date in "+ dateFormat);
+            log.error("Invalid date format, please provide date in "+ dateFormat);
         }
+        return null;
     }
 
     private String toDateString(Date date, String dateFormat) {
