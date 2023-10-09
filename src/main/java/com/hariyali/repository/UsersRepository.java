@@ -1,5 +1,6 @@
 package com.hariyali.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -115,23 +116,29 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 	Object getAllUsersWithDonarID();
 
 	@Query(value = "SELECT u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, CASE WHEN IFNULL(d.approval_status, 'Pending') = 'Pending' THEN COUNT(d.userId) ELSE 0 END AS pending_count, IFNULL(aadhar_card, pan_card) AS PANORAADHAR, MIN(d.donation_date) AS DonationDate\n" +
-			"  FROM tbl_user_master u left join tbl_donation d ON IFNULL(d.approval_status, 'Pending') = 'Pending' and d.userId = u.user_id\n" +
-			" WHERE u.webId IS NOT NULL\n" +
-			" AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
+			" ,(SELECT 1 from tbl_user_document where userId = u.user_id AND doc_type<>'CERTIFICATE' limit 1) AS HasDocument " +
+			" FROM tbl_user_master u left join tbl_donation d ON IFNULL(d.approval_status, 'Pending') = 'Pending' and d.userId = u.user_id\n" +
+			" WHERE \n" +
+			" ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
+			" AND ((:fromDate is not null AND d.donation_date between :fromDate and IFNULL(:toDate, SYSDATE() )) OR :fromDate is null)"+
 			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR emailId LIKE CONCAT(:searchText, '%') \n" +
 			" OR concat(first_name, ' ', last_name) LIKE CONCAT(:searchText, '%') OR pan_card LIKE CONCAT(:searchText, '%') OR aadhar_card LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%')) \n" +
 			" GROUP BY u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark\n" +
 			" ORDER BY DonationDate"
 			, countQuery = "SELECT COUNT(*) FROM (SELECT u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, CASE WHEN IFNULL(d.approval_status, 'Pending') = 'Pending' THEN COUNT(d.userId) ELSE 0 END AS pending_count, MIN(d.donation_date) AS DonationDate\n" +
 			"FROM tbl_user_master u left join tbl_donation d ON IFNULL(d.approval_status, 'Pending') = 'Pending' and d.userId = u.user_id\n" +
-			"WHERE u.webId IS NOT NULL\n" +
-			"AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
-			"AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR emailId LIKE CONCAT(:searchText, '%') \n" +
-			"OR concat(first_name, ' ', last_name) LIKE CONCAT(:searchText, '%') OR pan_card LIKE CONCAT(:searchText, '%') OR aadhar_card LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%')) \n" +
-			"GROUP BY u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, u.aadhar_card, u.pan_card\n" +
-			"ORDER BY DonationDate)  AS T", nativeQuery = true)
+			"WHERE \n" +
+			" ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
+			" AND ((:fromDate is not null AND d.donation_date between :fromDate and IFNULL(:toDate, SYSDATE() )) OR :fromDate is null)"+
+			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR emailId LIKE CONCAT(:searchText, '%') \n" +
+			" OR concat(first_name, ' ', last_name) LIKE CONCAT(:searchText, '%') OR pan_card LIKE CONCAT(:searchText, '%') OR aadhar_card LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%')) \n" +
+			" GROUP BY u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, u.aadhar_card, u.pan_card\n" +
+			" ORDER BY DonationDate)  AS T", nativeQuery = true)
 	Page<Object[]> getAllUsersWithWebId(@Param("searchText") String searchText,
-			@Param("donorType") String donorType, Pageable pageable);
+										@Param("donorType") String donorType,
+										@Param("fromDate") Date fromDate,
+										@Param("toDate") Date toDate,
+										Pageable pageable);
 
 	@Query(value = "SELECT JSON_ARRAYAGG( JSON_OBJECT( 'donationId', d.donation_id, \r\n"
 			+ "'donationCode', d.donation_code, 'donationType', d.donation_type,\r\n"

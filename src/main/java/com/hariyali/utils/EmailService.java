@@ -102,6 +102,7 @@ public class EmailService {
 				files);
 		log.info("Mail Sent...");
 	}
+
 	public void sendWebIdEmail(String toEmail, Users user) {
 		String body = "Dear Sponsor,<br> <p>Welcome to Project Hariyali.</p>"
 				+ "The Mahindra Foundation and Naandi Foundation would like to thank you for your donation."
@@ -148,7 +149,7 @@ public class EmailService {
 		FileSystemResource resource = null;
 			Map<String, String> responseCertifiate = generateCertificateForThankYou(user.getFirstName(), user.getEmailId());
 			commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
-					responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", user);
+					responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", user, user);
 			resource = new FileSystemResource(responseCertifiate.get("outputFile"));
 			File[] files = { resource.getFile() };
 			String mailBody = String.format(body, user.getFirstName());

@@ -125,7 +125,7 @@ public class UploadFormTenBeServiceImpl implements UploadFormTenBeService {
 				if (outputFile != null) {
 					commonService.saveDocumentDetails("DOCUMENT",
 							entry.getName().substring(entry.getName().indexOf("/") + 1), outputFile.toString(), "PDF",
-							"PAN", userToken);
+							"PAN", users, userToken);
 				}
 			}
 

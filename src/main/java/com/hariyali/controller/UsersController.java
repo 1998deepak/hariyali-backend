@@ -1,34 +1,10 @@
 package com.hariyali.controller;
 
-import java.util.List;
-import java.util.Optional;
-
-import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hariyali.EnumConstants;
 import com.hariyali.config.JwtHelper;
-import com.hariyali.dto.ApiRequest;
-import com.hariyali.dto.ApiResponse;
-import com.hariyali.dto.DonorListRequestDTO;
-import com.hariyali.dto.LoginRequest;
-import com.hariyali.dto.UsersDTO;
+import com.hariyali.dto.*;
+import com.hariyali.entity.Document;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.OtpModel;
 import com.hariyali.exceptions.CustomException;
@@ -38,10 +14,28 @@ import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.JwtService;
 import com.hariyali.service.UsersService;
 import com.hariyali.serviceimpl.OtpServiceImpl;
+import com.hariyali.utils.CommonService;
 import com.hariyali.utils.EncryptionDecryptionUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class UsersController {
 
 	@Autowired
@@ -67,6 +61,10 @@ public class UsersController {
 
 	@Autowired
 	private JwtHelper jwtHelper;
+
+	@Autowired
+	private CommonService commonService;
+
 
 	// method to get user by email
 	@GetMapping("/getAlluser")
@@ -264,4 +262,33 @@ public class UsersController {
 		response.setMessage("Too many request, number request per minutes exceeds");
 		return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
 	}
+
+	@PostMapping("/getUserDocuments")
+	public ResponseEntity<ApiResponse<List<Document>>> getUserDocuments(@RequestBody PaginationRequestDTO<Integer> dto){
+		return new ResponseEntity<>(commonService.getUserDocuments(dto), HttpStatus.OK);
+	}
+
+	/**
+	 * Rest endpoint to download plantation template
+	 *
+	 * @param response HttpServletResponse
+	 */
+	@PostMapping("/downloadUserDocument")
+	public void downloadTemplate(@RequestBody Document document, HttpServletResponse response) {
+
+		try {
+			String path = document.getFilePath();
+			FileInputStream inputStream = new FileInputStream(document.getFilePath());
+			response.setContentType("application/octet-stream");
+
+			// Set the filename based on the seasonType
+			String fileName = document.getFileName();
+			response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+			response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+			IOUtils.copy(inputStream, response.getOutputStream());
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Exception = " + e);
+		}
+	}// method
 }
