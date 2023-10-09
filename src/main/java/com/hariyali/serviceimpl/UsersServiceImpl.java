@@ -747,7 +747,7 @@ public class UsersServiceImpl implements UsersService {
 		Pageable pageable = PageRequest.of(requestDTO.getPageNumber(), requestDTO.getPageSize());
 
 		Page<Object[]> result = usersRepository.getAllUsersWithWebId(ofNullable(requestDTO.getSearchText()).orElse(""),
-				StringUtils.trimToNull(requestDTO.getDonorType()), pageable);
+				StringUtils.trimToNull(requestDTO.getDonorType()), requestDTO.getFromDate(), requestDTO.getToDate(), pageable);
 
 		if (!isNull(result) && !result.getContent().isEmpty()) {
 			List<UsersDTO> usersDTOS = of(result.getContent()).get().stream().map(this::toUsersDTO)
@@ -779,6 +779,7 @@ public class UsersServiceImpl implements UsersService {
 			dto.setRemark(ofNullable(user[9]).map(String::valueOf).orElse(""));
 			dto.setTotalPendingDonation(ofNullable(user[10]).map(String::valueOf).map(Integer::parseInt).orElse(0));
 			dto.setPanCard(ofNullable(user[11]).map(String::valueOf).orElse(""));
+			dto.setHasDocument(ofNullable(user[13]).map(String::valueOf).map(value ->  value.equalsIgnoreCase("1")).orElse(false));
 		}
 		return dto;
 	}

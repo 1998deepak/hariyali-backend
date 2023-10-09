@@ -9,11 +9,18 @@ import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import com.hariyali.dto.ApiResponse;
+import com.hariyali.dto.PaginationRequestDTO;
+import com.hariyali.dto.UsersDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.hariyali.EnumConstants;
@@ -26,6 +33,8 @@ import com.hariyali.repository.DonationRepository;
 import com.hariyali.repository.UsersRepository;
 
 import lombok.extern.slf4j.Slf4j;
+
+import static java.util.Optional.ofNullable;
 
 @Service
 @Slf4j
@@ -135,7 +144,7 @@ public class CommonService {
 
 	}
 	public void saveDocumentDetails(String idForEntity, String fileName, String filePath, String fileType,
-			String docType,Users users) {
+			String docType,Users users, Users userCreatedBy) {
 		System.err.println("idForEntity"+idForEntity);
 		LocalDate currentDate = LocalDate.now();
 		int year = currentDate.getYear();
@@ -150,8 +159,8 @@ public class CommonService {
 		document.setUpdatedDate(new Date());
 		document.setUsers(users);
 		if (users != null) {
-			document.setCreatedBy(users.getCreatedBy() == null ? "" : users.getCreatedBy());
-			document.setModifiedBy(users.getModifiedBy() == null ? "" : users.getModifiedBy());
+			document.setCreatedBy(userCreatedBy.getCreatedBy() == null ? "" : userCreatedBy.getCreatedBy());
+			document.setModifiedBy(userCreatedBy.getModifiedBy() == null ? "" : userCreatedBy.getModifiedBy());
 		}
 		document.setYear(year);
 //		Document document2 = documentRepository.findByYearAndDocTypeAndUsers(year, docType,users);
@@ -208,4 +217,34 @@ public class CommonService {
 
 		return password;
 	}
+
+	public ApiResponse<List<Document>> getUserDocuments(PaginationRequestDTO<Integer> dto){
+		ApiResponse<List<Document>> response = new ApiResponse<>();
+
+		Page<Object[]> documents = documentRepository.findByUserId(dto.getData(), PageRequest.of(dto.getPageNumber(), dto.getPageSize()));
+		if(!documents.isEmpty()){
+
+			response.setData(documents.getContent().stream().map(this::toDocument).collect(Collectors.toList()));
+			response.setTotalRecords(documents.getTotalElements());
+			response.setStatus("Success");
+		} else{
+			throw new CustomException("No document found");
+		}
+		return response;
+	}
+	
+	private Document toDocument(Object[] document){
+		Document dto = new Document();
+		if (document.length > 0) {
+			dto.setId(ofNullable(document[0]).map(String::valueOf).map(Integer::parseInt).orElse(0));
+			dto.setDocId(ofNullable(document[1]).map(String::valueOf).orElse(""));
+			dto.setDocType(ofNullable(document[2]).map(String::valueOf).orElse(""));
+			dto.setFileName(ofNullable(document[3]).map(String::valueOf).orElse(""));
+			dto.setFilePath(ofNullable(document[4]).map(String::valueOf).orElse(""));
+			dto.setFileType(ofNullable(document[5]).map(String::valueOf).orElse(""));
+			dto.setYear(ofNullable(document[6]).map(String::valueOf).map(Integer::valueOf).orElse(0));
+		}
+		return dto;
+	}
+	
 }

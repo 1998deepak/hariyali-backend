@@ -3,6 +3,8 @@ package com.hariyali.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Date;
+
 /**
  * DTO for donor list page request
  *
@@ -20,5 +22,7 @@ public class DonorListRequestDTO {
     Integer pageNumber;
     Integer pageSize;
     Integer userId;
+    Date fromDate;
+    Date toDate;
 
 }
