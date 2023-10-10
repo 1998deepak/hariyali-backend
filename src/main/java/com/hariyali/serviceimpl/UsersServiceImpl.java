@@ -135,7 +135,7 @@ public class UsersServiceImpl implements UsersService {
 
 	@Autowired
 	JwtServiceImpl jwtService;
-	
+
 	@Autowired
 	OtpRepository otpRepository;
 
@@ -287,9 +287,9 @@ public class UsersServiceImpl implements UsersService {
 		Users existingUser = usersRepository.findByEmailId(user.getEmailId());
 
 		if (existingUser != null) {
-			if(existingUser.getWebId() != null) {
+			if (existingUser.getWebId() != null) {
 				throw new CustomException("Email " + existingUser.getEmailId() + " already exists");
-			} else{
+			} else {
 				user.setUserId(existingUser.getUserId());
 			}
 		}
@@ -661,7 +661,7 @@ public class UsersServiceImpl implements UsersService {
 		int otpValue = random.nextInt((int) Math.pow(10, 6));
 		Users user = jwtService.findUserByDonorIdOrEmailId(donorId);
 		if (user != null) {
-			if(user.getPassword()==null) {
+			if (user.getPassword() == null) {
 				throw new CustomException("User not forund");
 			}
 			String otp = String.format("%0" + 6 + "d", otpValue);
@@ -676,13 +676,11 @@ public class UsersServiceImpl implements UsersService {
 					+ "<br><br>-Team Hariyali<br><br>"
 					+ "PS: For any support or queries please reach out to us at <a href='mailto:support@hariyali.org.in'>support@hariyali.org.in</a>";
 			emailService.sendSimpleEmail(user.getEmailId(), "Project Hariyali - Forgot Password", body);
-			
 
 		} else {
 			throw new CustomException("User not forund");
 		}
-		
-		
+
 		ApiResponse<String> response = new ApiResponse<>();
 		response.setStatus(EnumConstants.SUCCESS);
 		response.setStatusCode(HttpStatus.OK.value());
@@ -696,7 +694,7 @@ public class UsersServiceImpl implements UsersService {
 	public ApiResponse<String> verifyForgotOtp(String email, String otp) {
 		ApiResponse<String> result = new ApiResponse<>();
 		Users user = jwtService.findUserByDonorIdOrEmailId(email);
-		 OtpModel otpModel = otpServiceImpl.findByEmailOtp(email); 
+		OtpModel otpModel = otpServiceImpl.findByEmailOtp(email);
 //		 OtpModel otpModel = otpServiceImpl.findByOtp(otp);
 		if (user == null || !otp.equals(otpModel.getOtpCode())) {
 			throw new CustomExceptionNodataFound("Invalid OTP");
@@ -744,7 +742,8 @@ public class UsersServiceImpl implements UsersService {
 		Pageable pageable = PageRequest.of(requestDTO.getPageNumber(), requestDTO.getPageSize());
 
 		Page<Object[]> result = usersRepository.getAllUsersWithWebId(ofNullable(requestDTO.getSearchText()).orElse(""),
-				StringUtils.trimToNull(requestDTO.getDonorType()), requestDTO.getFromDate(), requestDTO.getToDate(), pageable);
+				StringUtils.trimToNull(requestDTO.getDonorType()), requestDTO.getFromDate(), requestDTO.getToDate(),
+				pageable);
 
 		if (!isNull(result) && !result.getContent().isEmpty()) {
 			List<UsersDTO> usersDTOS = of(result.getContent()).get().stream().map(this::toUsersDTO)
@@ -776,7 +775,8 @@ public class UsersServiceImpl implements UsersService {
 			dto.setRemark(ofNullable(user[9]).map(String::valueOf).orElse(""));
 			dto.setTotalPendingDonation(ofNullable(user[10]).map(String::valueOf).map(Integer::parseInt).orElse(0));
 			dto.setPanCard(ofNullable(user[11]).map(String::valueOf).orElse(""));
-			dto.setHasDocument(ofNullable(user[13]).map(String::valueOf).map(value ->  value.equalsIgnoreCase("1")).orElse(false));
+			dto.setHasDocument(
+					ofNullable(user[13]).map(String::valueOf).map(value -> value.equalsIgnoreCase("1")).orElse(false));
 		}
 		return dto;
 	}
@@ -927,8 +927,12 @@ public class UsersServiceImpl implements UsersService {
 						receiptService.generateReceipt(d);
 						Receipt receipt = receiptRepository.getUserReceipt(user.getUserId());
 						Users recipientData = usersRepository.findByEmailId(recipientEmail.getEmailId());
-						emailService.sendReceiptWithAttachment(user, d.getOrderId(), receipt);
-						emailService.sendThankyouLatter(user.getEmailId(), user);
+						if (d.getDonationType().equalsIgnoreCase("self-Donate")) {
+							emailService.sendReceiptWithAttachment(user, d.getOrderId(), receipt);
+							emailService.sendThankyouLatter(user.getEmailId(), user);
+						} else {
+							emailService.sendReceiptWithAttachment(user, d.getOrderId(), receipt);
+						}
 
 					} else {
 						sendRejectDonationEmails(user);
@@ -1107,9 +1111,9 @@ public class UsersServiceImpl implements UsersService {
 		ApiResponse<List<Donation>> response = new ApiResponse<>();
 
 		Page<Donation> result = donationRepository.getUserDonations(email, PageRequest.of(pageNo, pageSize));
-		if(result.getTotalElements() == 0){
+		if (result.getTotalElements() == 0) {
 			throw new CustomException("No user donatation found");
-		} else{
+		} else {
 			response.setTotalRecords(result.getTotalElements());
 			response.setData(result.getContent());
 			response.setStatus("Success");
