@@ -1,4 +1,5 @@
 package com.hariyali.service;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -78,4 +79,6 @@ public interface UsersService {
 	List<String> getAllUserIds();
 
 	ApiResponse<List<Donation>> getUserDonations(String email, Integer pageNo, Integer pageSize);
+
+	public ByteArrayInputStream downloadDonationReport(DonorListRequestDTO requestDTO);
 }

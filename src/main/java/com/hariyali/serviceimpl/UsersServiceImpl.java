@@ -4,8 +4,11 @@ import static java.util.Objects.isNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
@@ -13,7 +16,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
+import com.hariyali.entity.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,16 +48,6 @@ import com.hariyali.dto.DonationDTO;
 import com.hariyali.dto.DonorListRequestDTO;
 import com.hariyali.dto.LoginRequest;
 import com.hariyali.dto.UsersDTO;
-import com.hariyali.entity.Address;
-import com.hariyali.entity.Document;
-import com.hariyali.entity.Donation;
-import com.hariyali.entity.OtpModel;
-import com.hariyali.entity.PaymentInfo;
-import com.hariyali.entity.Receipt;
-import com.hariyali.entity.Recipient;
-import com.hariyali.entity.Roles;
-import com.hariyali.entity.UserPackages;
-import com.hariyali.entity.Users;
 import com.hariyali.exceptions.CustomException;
 import com.hariyali.exceptions.CustomExceptionDataAlreadyExists;
 import com.hariyali.exceptions.CustomExceptionNodataFound;
@@ -1118,6 +1115,132 @@ public class UsersServiceImpl implements UsersService {
 			response.setStatus("Success");
 		}
 		return response;
+	}
+
+	@Override
+	public ByteArrayInputStream downloadDonationReport(DonorListRequestDTO requestDTO) {
+		List<Object[]> userDonationReportData= usersRepository.getUserDonationReportData(ofNullable(requestDTO.getSearchText()).orElse(""),
+				StringUtils.trimToNull(requestDTO.getDonorType()), requestDTO.getFromDate(), requestDTO.getToDate());
+		Workbook workbook = new SXSSFWorkbook();
+
+		try {
+			Sheet sheet = workbook.createSheet("Donation List Report ");
+
+			Row row = sheet.createRow(0);
+			CellStyle style = workbook.createCellStyle();
+			XSSFFont font = (XSSFFont) workbook.createFont();
+			font.setBold(true);
+			font.setFontHeight(12);
+			style.setFont(font);
+
+			// Set the background color directly (YELLOW)
+			style.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
+			style.setFillPattern((short) FillPatternType.SOLID_FOREGROUND.ordinal());
+
+			Cell cell = row.createCell(0);
+			cell.setCellValue("Donor ID");
+			sheet.autoSizeColumn(0);
+			cell.setCellStyle(style);
+
+			cell = row.createCell(1);
+			cell.setCellValue("Donation ID");
+			sheet.autoSizeColumn(1);
+			cell.setCellStyle(style);
+
+			cell = row.createCell(2);
+			cell.setCellValue("Transaction Number");
+			sheet.autoSizeColumn(2);
+			cell.setCellStyle(style);
+
+			cell = row.createCell(3);
+			cell.setCellValue("Donor Name");
+			sheet.autoSizeColumn(3);
+			cell.setCellStyle(style);
+
+			cell = row.createCell(4);
+			cell.setCellValue("Giftee Name");
+			sheet.autoSizeColumn(4);
+			cell.setCellStyle(style);
+
+			cell = row.createCell(5);
+			cell.setCellValue("Organization Name");
+			sheet.autoSizeColumn(5);
+			cell.setCellStyle(style);
+
+			cell = row.createCell(6);
+			cell.setCellValue("Donor Type");
+			sheet.autoSizeColumn(6);
+			cell.setCellStyle(style);
+
+			cell = row.createCell(7);
+			cell.setCellValue("No of Plant donated");
+			sheet.autoSizeColumn(7);
+			cell.setCellStyle(style);
+
+			cell = row.createCell(8);
+			cell.setCellValue("Payment Reference Number");
+			sheet.autoSizeColumn(8);
+			cell.setCellStyle(style);
+
+			cell = row.createCell(9);
+			cell.setCellValue("Payment Tracking Id");
+			sheet.autoSizeColumn(9);
+			cell.setCellStyle(style);
+
+			cell = row.createCell(10);
+			cell.setCellValue("Payment Mode");
+			sheet.autoSizeColumn(10);
+			cell.setCellStyle(style);
+
+			cell = row.createCell(11);
+			cell.setCellValue("Payment Status");
+			sheet.autoSizeColumn(11);
+			cell.setCellStyle(style);
+
+			cell = row.createCell(12);
+			cell.setCellValue("Citizenship");
+			sheet.autoSizeColumn(12);
+			cell.setCellStyle(style);
+
+			cell = row.createCell(13);
+			cell.setCellValue("Email ID");
+			sheet.autoSizeColumn(13);
+			cell.setCellStyle(style);
+
+			cell = row.createCell(14);
+			cell.setCellValue("Mobile Number");
+			sheet.autoSizeColumn(14);
+			cell.setCellStyle(style);
+
+			cell = row.createCell(15);
+			cell.setCellValue("Status");
+			sheet.autoSizeColumn(15);
+			cell.setCellStyle(style);
+
+			// Auto-size columns
+			for (int i = 0; i <= 15; i++) {
+				sheet.autoSizeColumn(i);
+			}
+
+			AtomicInteger rowNumber = new AtomicInteger(1);
+			userDonationReportData.forEach(data ->  {
+				Row dataRow = sheet.createRow(rowNumber.getAndIncrement());
+				AtomicInteger colNumber = new AtomicInteger(0);
+				Arrays.stream(data).forEach(record ->{
+					Cell dataCell = dataRow.createCell(colNumber.getAndIncrement());
+					dataCell.setCellValue(ofNullable(data[colNumber.get()-1]).map(String::valueOf).orElse(""));
+					sheet.autoSizeColumn(colNumber.get()-1);
+				});
+			});
+
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			workbook.write(outputStream);
+			return new ByteArrayInputStream(outputStream.toByteArray());
+
+		} catch (Exception e) {
+			log.error("Exception = "+e);
+		}
+		return null;
 	}
 
 	@Override
