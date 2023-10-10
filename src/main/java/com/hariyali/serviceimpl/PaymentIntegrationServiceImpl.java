@@ -193,8 +193,8 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 								responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
 						emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
 								EnumConstants.content, user);
-						emailService.sendGiftingLetterEmail(donation, recipientData, donation.getDonationEvent(),
-								responseCertifiate.get("outputFile"));
+						emailService.sendGiftingLetterEmailCorporate(donation, recipientData, donation.getDonationEvent(),
+								user.getOrganisation(),responseCertifiate.get("outputFile"));
 					} else {
 						if (user.getDonarType().equalsIgnoreCase("Corporate")) {
 							Map<String, String> responseCertifiate = donationServiceImpl.generateCertificate(
@@ -205,8 +205,8 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 									responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
 							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
 									EnumConstants.content, user);
-							emailService.sendGiftingLetterEmail(donation, recipientData, donation.getDonationEvent(),
-									responseCertifiate.get("outputFile"));
+							emailService.sendGiftingLetterEmailCorporate(donation, recipientData, donation.getDonationEvent(),
+									user.getOrganisation(),responseCertifiate.get("outputFile"));
 						} else {
 							Map<String, String> responseCertifiate = donationServiceImpl.generateCertificate(
 									donation.getRecipient().get(0).getFirstName(), donation.getGiftContent(),
