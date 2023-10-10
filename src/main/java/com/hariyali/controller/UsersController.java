@@ -28,6 +28,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
@@ -286,6 +287,24 @@ public class UsersController {
 			response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
 			response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
 			IOUtils.copy(inputStream, response.getOutputStream());
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Exception = " + e);
+		}
+	}// method
+
+	@PostMapping("/exportDonationReport")
+	public void exportExcelUserPlant(HttpServletResponse response, @RequestBody DonorListRequestDTO dto) {
+
+		try {
+			ByteArrayInputStream byteArrayInputStream = usersService.downloadDonationReport(dto);
+			response.setContentType("application/octet-stream");
+
+			// Set the filename based on the seasonType
+			String fileName = "DonationReport.xlsx";
+			response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+			response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+			IOUtils.copy(byteArrayInputStream, response.getOutputStream());
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("Exception = " + e);
