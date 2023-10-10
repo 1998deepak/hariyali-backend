@@ -65,7 +65,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 
 	@Autowired
 	private PaymentInfoRepository paymentInfoRepository;
-	
+
 	@Autowired
 	private RecipientRepository recipientRepository;
 
@@ -80,7 +80,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 
 	@Autowired
 	EmailService emailService;
-	
+
 	@Autowired
 	CommonService commonService;
 
@@ -89,7 +89,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 
 	@Autowired
 	UserPackageRepository userPackageRepository;
-	
+
 	@Autowired
 	DonationServiceImpl donationServiceImpl;
 
@@ -155,7 +155,6 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 		String redirectUrl = frontendRedirectURL;
 		Users user = userRepository.getUserByDonationId(donation.getDonationId());
 
-
 		if ("Completed".equalsIgnoreCase(paymentInfo.getPaymentStatus())
 				|| "Success".equalsIgnoreCase(paymentInfo.getPaymentStatus())) {
 			if (user.getWebId() == null) {
@@ -181,34 +180,59 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 					Users recipientData = userRepository.findByEmailId(recipientEmail);
 					String fullNameOfDonar = user.getFirstName() + " " + user.getLastName();
 
-					if(!isNull(sessionRecipient)){
+					if (!isNull(sessionRecipient)) {
 						donation.getRecipient().get(0).setFirstName(sessionRecipient.getFirstName());
 						session.removeAttribute(orderId);
 					}
-					Map<String, String> responseCertifiate = donationServiceImpl.generateCertificate(
-							donation.getRecipient().get(0).getFirstName(), donation.getGiftContent(), donation.getDonationEvent(),
-							fullNameOfDonar, donation.getRecipient().get(0).getEmailId());
-					commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
-							responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
-					emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
-							user);
-//					emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subjectGiftee,
-//							EnumConstants.contentGiftee, recipientData);
-					emailService.sendGiftingLetterEmail(donation, recipientData, donation.getDonationEvent(),
-							responseCertifiate.get("outputFile"));
+					if (user.getDonarType().equalsIgnoreCase("Corporate")) {
+						Map<String, String> responseCertifiate = donationServiceImpl.generateCertificate(
+								donation.getRecipient().get(0).getFirstName(), donation.getGiftContent(),
+								donation.getDonationEvent(), user.getOrganisation(),
+								donation.getRecipient().get(0).getEmailId());
+						commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
+								responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
+						emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
+								EnumConstants.content, user);
+						emailService.sendGiftingLetterEmail(donation, recipientData, donation.getDonationEvent(),
+								responseCertifiate.get("outputFile"));
+					} else {
+						if (user.getDonarType().equalsIgnoreCase("Corporate")) {
+							Map<String, String> responseCertifiate = donationServiceImpl.generateCertificate(
+									donation.getRecipient().get(0).getFirstName(), donation.getGiftContent(),
+									donation.getDonationEvent(), user.getOrganisation(),
+									donation.getRecipient().get(0).getEmailId());
+							commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
+									responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
+							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
+									EnumConstants.content, user);
+							emailService.sendGiftingLetterEmail(donation, recipientData, donation.getDonationEvent(),
+									responseCertifiate.get("outputFile"));
+						} else {
+							Map<String, String> responseCertifiate = donationServiceImpl.generateCertificate(
+									donation.getRecipient().get(0).getFirstName(), donation.getGiftContent(),
+									donation.getDonationEvent(), fullNameOfDonar,
+									donation.getRecipient().get(0).getEmailId());
+							commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
+									responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
+							emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject,
+									EnumConstants.content, user);
+							emailService.sendGiftingLetterEmail(donation, recipientData, donation.getDonationEvent(),
+									responseCertifiate.get("outputFile"));
+						}
+					}
 				}
 			} else {
 				if (donation.getDonationType().equalsIgnoreCase("gift-donate")) {
 					String recipientEmail = donation.getRecipient().get(0).getEmailId();
 					Users recipientData = userRepository.findByEmailId(recipientEmail);
 					String fullNameOfDonar = user.getFirstName() + " " + user.getLastName();
-					if(!isNull(sessionRecipient)){
+					if (!isNull(sessionRecipient)) {
 						donation.getRecipient().get(0).setFirstName(sessionRecipient.getFirstName());
 						session.removeAttribute(orderId);
 					}
 					Map<String, String> responseCertifiate = donationServiceImpl.generateCertificate(
-							donation.getRecipient().get(0).getFirstName(), donation.getGiftContent(), donation.getDonationEvent(),
-							fullNameOfDonar, recipientData.getEmailId());
+							donation.getRecipient().get(0).getFirstName(), donation.getGiftContent(),
+							donation.getDonationEvent(), fullNameOfDonar, recipientData.getEmailId());
 					commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
 							responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
 //					emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subjectGiftee,
@@ -226,7 +250,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 					}
 				}
 			}
-		} else{
+		} else {
 			if (user.getWebId() == null) {
 				userRepository.delete(user);
 			} else {
@@ -262,11 +286,11 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 		ApiResponse<PaymentInfoDTO> response = new ApiResponse<>();
 		PaymentInfo info = paymentInfoRepository.findByOrderId(orderId);
 		PaymentInfoDTO dto = new PaymentInfoDTO();
-		if(!isNull(info)) {
+		if (!isNull(info)) {
 			dto.setBankPaymentRefNo(info.getBankPaymentRefNo());
 			dto.setPaymentStatus(info.getPaymentStatus());
 			dto.setRemark(info.getRemark());
-		} else{
+		} else {
 			response.setStatus("Failed");
 		}
 		response.setData(dto);

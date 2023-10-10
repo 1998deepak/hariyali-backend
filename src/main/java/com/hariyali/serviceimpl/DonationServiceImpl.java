@@ -174,22 +174,24 @@ public class DonationServiceImpl implements DonationService {
 			Receipt receipt = receiptRepository.getUserReceipt(userEmail.getUserId());
 			int donationCnt = donationRepository.donationCount(userEmail.getEmailId());
 			if (donationCnt > 1) {
+				if(donationDto.getDonationType().equalsIgnoreCase("Self-Donate")){
 				emailService.sendReceiptWithAttachment(userEmail, donationDto.getOrderId(), receipt);
 				emailService.sendThankyouLatter(userEmail.getEmailId(), userEmail);
+				}else {
+					emailService.sendReceiptWithAttachment(userEmail, donationDto.getOrderId(), receipt);
+				}
 			} else {
+				if(donationDto.getDonationType().equalsIgnoreCase("Self-Donate")){
 				emailService.sendWelcomeLetterMail(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content,
 						userEmail);
 				emailService.sendReceiptWithAttachment(userEmail, donationDto.getOrderId(), receipt);
 				emailService.sendThankyouLatter(userEmail.getEmailId(), userEmail);
+				}else {
+					emailService.sendWelcomeLetterMail(userEmail.getEmailId(), EnumConstants.subject, EnumConstants.content,
+							userEmail);
+					emailService.sendReceiptWithAttachment(userEmail, donationDto.getOrderId(), receipt);
+				}
 			}
-//			if ("gift-donate".equalsIgnoreCase(donationDto.getDonationType())) {
-//				String fullNameOfDonar = usersDTO.getFirstName() + " " + usersDTO.getLastName();
-//				Map<String, String> responseCertifiate = generateCertificate(
-//						donationDto.getRecipient().get(0).getFirstName(), donationDto.getGiftContent(), donationDto.getDonationEvent(),
-//						fullNameOfDonar, donationDto.getRecipient().get(0).getEmailId());
-//				emailService.sendGiftingLetterEmail(modelMapper.map(donationDto, Donation.class), null, donationDto.getDonationEvent(),
-//						responseCertifiate.get("outputFile"));
-//			}
 
 			return response;
 		} else if ("online".equalsIgnoreCase(donationDTO.getDonationMode())) {
@@ -261,6 +263,7 @@ public class DonationServiceImpl implements DonationService {
 				donationDTO.setTotalAmount(donation.getTotalAmount());
 				donationDTO.setOrderId(donation.getOrderId());
 				donationDTO.setDonationCode(donation.getDonationCode());
+				donationDTO.setDonationType(donation.getDonationType());
 				// set paymentInfo donation wise
 				if (donation.getPaymentInfo() != null) {
 					for (PaymentInfo paymentInfo : donation.getPaymentInfo()) {
@@ -329,20 +332,31 @@ public class DonationServiceImpl implements DonationService {
 								}
 							}
 						}
-						Users recipientData = usersRepository.findByEmailId(donation.getRecipient().get(0).getEmailId());
+						Users recipientData = usersRepository
+								.findByEmailId(donation.getRecipient().get(0).getEmailId());
 						String fullNameOfDonar = resulEntity.getFirstName() + " " + resulEntity.getLastName();
+						if (donation.getDonationType().equalsIgnoreCase("Gift-Donate")) {
+							if (resulEntity.getDonarType().equalsIgnoreCase("Corporate")) {
+								Map<String, String> responseCertifiate = generateCertificate(
+										donation.getRecipient().get(0).getFirstName(), donationDTO.getGiftContent(),
+										donationDTO.getDonationEvent(), resulEntity.getOrganisation(),
+										resulEntity.getEmailId());
 
-						Map<String, String> responseCertifiate = generateCertificate(donation.getRecipient().get(0).getFirstName(),
-								donationDTO.getGiftContent(), donationDTO.getDonationEvent(), fullNameOfDonar,
-								resulEntity.getEmailId());
+								commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
+										responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
+								emailService.sendGiftingLetterEmail(donation, recipientData,
+										donation.getDonationEvent(), responseCertifiate.get("outputFile"));
+							} else {
+								Map<String, String> responseCertifiate = generateCertificate(
+										donation.getRecipient().get(0).getFirstName(), donationDTO.getGiftContent(),
+										donationDTO.getDonationEvent(), fullNameOfDonar, resulEntity.getEmailId());
 
-						commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
-								responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
-//						emailService.sendWelcomeLetterMail(recipientData.getEmailId(), EnumConstants.subjectGiftee,
-//								EnumConstants.contentGiftee, recipientData);
-						emailService.sendGiftingLetterEmail(donation,recipientData, donation.getDonationEvent(),
-								responseCertifiate.get("outputFile"));
-
+								commonService.saveDocumentDetails("DOCUMENT", responseCertifiate.get("filePath"),
+										responseCertifiate.get("outputFile"), "PDF", "CERTIFICATE", donation);
+								emailService.sendGiftingLetterEmail(donation, recipientData,
+										donation.getDonationEvent(), responseCertifiate.get("outputFile"));
+							}
+						}
 					}
 
 				}
@@ -351,7 +365,7 @@ public class DonationServiceImpl implements DonationService {
 		}
 		Donation donation = donationRepository.getById(donationDTO.getDonationId());
 		String paymentStatus = paymentIfoRepository.getPaymentStatusByDonationId(donationDTO.getDonationId());
-		if (paymentStatus.equalsIgnoreCase("Completed") || "Success".equalsIgnoreCase(paymentStatus) ) {
+		if (paymentStatus.equalsIgnoreCase("Completed") || "Success".equalsIgnoreCase(paymentStatus)) {
 			receiptService.generateReceipt(donation);
 		}
 		response.setData(donationDTO);
@@ -485,7 +499,7 @@ public class DonationServiceImpl implements DonationService {
 									// Check if the email already exists
 									Users existingUser = usersRepository.findByEmailId(recipientEmail);
 									if (existingUser != null) {
-										request.getSession().setAttribute(orderId+"",recipients);
+										request.getSession().setAttribute(orderId + "", recipients);
 										continue;
 									}
 
@@ -502,14 +516,17 @@ public class DonationServiceImpl implements DonationService {
 		if (usersDTO != null) {
 			Users users = usersRepository.findByEmailId(usersDTO.getEmailId());
 			if (users != null) {
-				if(("Corporate").equalsIgnoreCase(usersDTO.getDonarType())){
-					if (!("INDIA").equalsIgnoreCase(usersDTO.getAddress().stream().map(a->a.getCountry()).findFirst().get())) {
+				if (("Corporate").equalsIgnoreCase(usersDTO.getDonarType())) {
+					if (!("INDIA").equalsIgnoreCase(
+							usersDTO.getAddress().stream().map(a -> a.getCountry()).findFirst().get())) {
 						response.setStatus(EnumConstants.OTHERTHANINDIA);
 						response.setGatewayURL("/FcraAccount");
 						DonationDTO donationDTO = new DonationDTO();
-						Double amount=usersDTO.getDonations().stream().map(d->d.getUserPackage()).findFirst().get().stream().map(u->u.getAmount()).findFirst().get();
+						Double amount = usersDTO.getDonations().stream().map(d -> d.getUserPackage()).findFirst().get()
+								.stream().map(u -> u.getAmount()).findFirst().get();
 						donationDTO.setTotalAmount(amount);
-						donationDTO.setCreatedBy(usersDTO.getAddress().stream().map(a->a.getCountry()).findFirst().get());
+						donationDTO.setCreatedBy(
+								usersDTO.getAddress().stream().map(a -> a.getCountry()).findFirst().get());
 						response.setData(donationDTO);
 						// removing password for FCRA USER
 						users.setPassword(null);
@@ -517,44 +534,13 @@ public class DonationServiceImpl implements DonationService {
 						return response;
 					}
 				}
-				if(("Individual").equalsIgnoreCase(usersDTO.getDonarType())){
-				 if (!("INDIA").equalsIgnoreCase(usersDTO.getCitizenship())) {
-					response.setStatus(EnumConstants.OTHERTHANINDIA);
-					response.setGatewayURL("/FcraAccount");
-					DonationDTO donationDTO = new DonationDTO();
-					Double amount=usersDTO.getDonations().stream().map(d->d.getUserPackage()).findFirst().get().stream().map(u->u.getAmount()).findFirst().get();
-					donationDTO.setTotalAmount(amount);
-					donationDTO.setCreatedBy(usersDTO.getCitizenship());
-					response.setData(donationDTO);
-					// removing password for FCRA USER
-					users.setPassword(null);
-					usersRepository.save(users);
-					return response;
-				}
-			  }
-			} else {
-				if (usersDTO.getCitizenship() != null || usersDTO.getCountry() != null) {
-					if(("Corporate").equalsIgnoreCase(usersDTO.getDonarType())){
-						if (!("INDIA").equalsIgnoreCase(usersDTO.getAddress().stream().map(a->a.getCountry()).findFirst().get())) {
-							response.setStatus(EnumConstants.OTHERTHANINDIA);
-							response.setGatewayURL("/FcraAccount");
-							DonationDTO donationDTO = new DonationDTO();
-							Double amount=usersDTO.getDonations().stream().map(d->d.getUserPackage()).findFirst().get().stream().map(u->u.getAmount()).findFirst().get();
-							donationDTO.setTotalAmount(amount);
-							donationDTO.setCreatedBy(usersDTO.getAddress().stream().map(a->a.getCountry()).findFirst().get());
-							response.setData(donationDTO);
-							// removing password for FCRA USER
-							users.setPassword(null);
-							usersRepository.save(users);
-							return response;
-						}
-					}
-					if(("Individual").equalsIgnoreCase(usersDTO.getDonarType())){
-					 if (!("INDIA").equalsIgnoreCase(usersDTO.getCitizenship())) {
+				if (("Individual").equalsIgnoreCase(usersDTO.getDonarType())) {
+					if (!("INDIA").equalsIgnoreCase(usersDTO.getCitizenship())) {
 						response.setStatus(EnumConstants.OTHERTHANINDIA);
 						response.setGatewayURL("/FcraAccount");
 						DonationDTO donationDTO = new DonationDTO();
-						Double amount=usersDTO.getDonations().stream().map(d->d.getUserPackage()).findFirst().get().stream().map(u->u.getAmount()).findFirst().get();
+						Double amount = usersDTO.getDonations().stream().map(d -> d.getUserPackage()).findFirst().get()
+								.stream().map(u -> u.getAmount()).findFirst().get();
 						donationDTO.setTotalAmount(amount);
 						donationDTO.setCreatedBy(usersDTO.getCitizenship());
 						response.setData(donationDTO);
@@ -563,7 +549,43 @@ public class DonationServiceImpl implements DonationService {
 						usersRepository.save(users);
 						return response;
 					}
-				  }
+				}
+			} else {
+				if (usersDTO.getCitizenship() != null || usersDTO.getCountry() != null) {
+					if (("Corporate").equalsIgnoreCase(usersDTO.getDonarType())) {
+						if (!("INDIA").equalsIgnoreCase(
+								usersDTO.getAddress().stream().map(a -> a.getCountry()).findFirst().get())) {
+							response.setStatus(EnumConstants.OTHERTHANINDIA);
+							response.setGatewayURL("/FcraAccount");
+							DonationDTO donationDTO = new DonationDTO();
+							Double amount = usersDTO.getDonations().stream().map(d -> d.getUserPackage()).findFirst()
+									.get().stream().map(u -> u.getAmount()).findFirst().get();
+							donationDTO.setTotalAmount(amount);
+							donationDTO.setCreatedBy(
+									usersDTO.getAddress().stream().map(a -> a.getCountry()).findFirst().get());
+							response.setData(donationDTO);
+							// removing password for FCRA USER
+							users.setPassword(null);
+							usersRepository.save(users);
+							return response;
+						}
+					}
+					if (("Individual").equalsIgnoreCase(usersDTO.getDonarType())) {
+						if (!("INDIA").equalsIgnoreCase(usersDTO.getCitizenship())) {
+							response.setStatus(EnumConstants.OTHERTHANINDIA);
+							response.setGatewayURL("/FcraAccount");
+							DonationDTO donationDTO = new DonationDTO();
+							Double amount = usersDTO.getDonations().stream().map(d -> d.getUserPackage()).findFirst()
+									.get().stream().map(u -> u.getAmount()).findFirst().get();
+							donationDTO.setTotalAmount(amount);
+							donationDTO.setCreatedBy(usersDTO.getCitizenship());
+							response.setData(donationDTO);
+							// removing password for FCRA USER
+							users.setPassword(null);
+							usersRepository.save(users);
+							return response;
+						}
+					}
 				}
 			}
 		}
@@ -582,9 +604,11 @@ public class DonationServiceImpl implements DonationService {
 			queryString += "&redirect_url=" + gatewayConfiguration.getRedirectURL();
 			queryString += "&cancel_url=" + gatewayConfiguration.getRedirectURL();
 			queryString += "&language=EN";
-			queryString += "&billing_name=" + ofNullable(usersDTO.getFirstName()).filter(StringUtils::isNotEmpty)
-					.orElse(resulEntity.getFirstName()) + " " + ofNullable(usersDTO.getLastName())
-					.filter(StringUtils::isNotEmpty).orElse(resulEntity.getLastName());
+			queryString += "&billing_name="
+					+ ofNullable(usersDTO.getFirstName()).filter(StringUtils::isNotEmpty)
+							.orElse(resulEntity.getFirstName())
+					+ " " + ofNullable(usersDTO.getLastName()).filter(StringUtils::isNotEmpty)
+							.orElse(resulEntity.getLastName());
 			AddressDTO address = ofNullable(usersDTO.getAddress()).orElse(resulEntity.getAddress().stream()
 					.map(addressEntity -> modelMapper.map(addressEntity, AddressDTO.class))
 					.collect(Collectors.toList())).stream().findFirst().get();
@@ -593,9 +617,12 @@ public class DonationServiceImpl implements DonationService {
 			queryString += "&billing_city=" + address.getCity();
 			queryString += "&billing_state=" + address.getState();
 			queryString += "&billing_zip=" + address.getPostalCode();
-			queryString += "&billing_country=" + StringUtils.capitalize(ofNullable(address.getCountry()).orElse("").toLowerCase());
-			queryString += "&billing_tel=" + ofNullable(usersDTO.getMobileNo()).filter(StringUtils::isNotEmpty).orElse(resulEntity.getMobileNo());
-			queryString += "&billing_email=" + ofNullable(usersDTO.getEmailId()).filter(StringUtils::isNotEmpty).orElse(resulEntity.getEmailId());
+			queryString += "&billing_country="
+					+ StringUtils.capitalize(ofNullable(address.getCountry()).orElse("").toLowerCase());
+			queryString += "&billing_tel=" + ofNullable(usersDTO.getMobileNo()).filter(StringUtils::isNotEmpty)
+					.orElse(resulEntity.getMobileNo());
+			queryString += "&billing_email=" + ofNullable(usersDTO.getEmailId()).filter(StringUtils::isNotEmpty)
+					.orElse(resulEntity.getEmailId());
 			log.info(queryString);
 			AesCryptUtil aesUtil = new AesCryptUtil(gatewayConfiguration.getAccessKey());
 			String encRequest = aesUtil.encrypt(queryString);
@@ -851,20 +878,24 @@ public class DonationServiceImpl implements DonationService {
 		donation.setRemark(dto.getRemark());
 		donation.setApprovalStatus(dto.getApprovalStatus());
 		donationRepository.save(donation);
-		if(donation.getIsApproved()) {
+		if (donation.getIsApproved()) {
 
 			String paymentStatus = paymentIfoRepository.getPaymentStatusByDonationId(donation.getDonationId());
 			if ("Completed".equalsIgnoreCase(paymentStatus) || "Success".equalsIgnoreCase(paymentStatus)) {
 				receiptService.generateReceipt(donation);
 				Receipt receipt = receiptRepository.findByDonation(donation);
+				if(donation.getDonationType().equalsIgnoreCase("Self-Donate")){
 				emailService.sendReceiptWithAttachment(donation.getUsers(), donation.getOrderId(), receipt);
 				emailService.sendThankyouLatter(donation.getUsers().getEmailId(), donation.getUsers());
+				}else {
+					emailService.sendReceiptWithAttachment(donation.getUsers(), donation.getOrderId(), receipt);
+				}
 			}
 
-			response.setMessage("Donation approved by "+userName);
+			response.setMessage("Donation approved by " + userName);
 		} else {
 			sendRejectDonationEmails(donation.getUsers());
-			response.setMessage("Donation rejected by "+userName);
+			response.setMessage("Donation rejected by " + userName);
 		}
 		response.setStatus("Success");
 		return response;
