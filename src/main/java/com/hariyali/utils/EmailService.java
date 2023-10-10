@@ -102,6 +102,19 @@ public class EmailService {
 				files);
 		log.info("Mail Sent...");
 	}
+	
+	public void sendGiftingLetterEmailCorporate(Donation donation, Users recipientData, String donationEvent,String organization, String path) {
+		int noOfPlant = donationRepository.getNoOfPlants(donation.getDonationId());
+		String giftorMail = userRepository.getGiftorEmailByDonation(donation.getDonationId());
+		FileSystemResource resource = new FileSystemResource(path);
+		File[] files = { resource.getFile() };
+		String subject = EnumConstants.GIFTING_MSG_SUBJECT;
+		String body = EnumConstants.GIFTING_MSG_BODY;
+		String mailBody = String.format(body, donation.getRecipient().get(0).getFirstName(), noOfPlant,organization);
+		ccServiceEmailAPI.sendCorrespondenceMailForGift(donation.getRecipient().get(0).getEmailId(), subject, mailBody, giftorMail,
+				files);
+		log.info("Mail Sent...");
+	}
 
 	public void sendWebIdEmail(String toEmail, Users user) {
 		String body = "Dear Sponsor,<br> <p>Welcome to Project Hariyali.</p>"
