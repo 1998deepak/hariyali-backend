@@ -168,11 +168,11 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
                             if ((noOfPlantsPlanted - (packages.getNoOfBouquets() - allocatedPlant)) > 0) {
                                 allocatedPlant = packages.getNoOfBouquets() - allocatedPlant;
                                 packages.setPlanted(true);
-                               emailService.sendPlantationMail(packages, plantationMaster);
+                               emailService.sendPlantationMail(packages, plantationMaster,allocatedPlant);
                             } else {
                                 packages.setPlanted(false);
                                 allocatedPlant = noOfPlantsPlanted.intValue();
-                                emailService.sendPlantationMail(packages, plantationMaster);
+                                emailService.sendPlantationMail(packages, plantationMaster,allocatedPlant);
                             }
                             noOfPlantsPlanted -= allocatedPlant;
                             packages.setPlantAllocated(allocatedPlant);
