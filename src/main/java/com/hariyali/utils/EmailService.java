@@ -194,14 +194,14 @@ public class EmailService {
 
 	}
 
-	public void sendPlantationMail(UserPackages packages, PlantationMaster plantationMaster) {
+	public void sendPlantationMail(UserPackages packages, PlantationMaster plantationMaster,Integer allocatedPlant) {
 		String date = toDateString(plantationMaster.getPlantationDate(), "dd-MM-yyyy");
 		String subject = "Project Hariyali – Plantation Report";
 		SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
 		String year = yearFormat.format(plantationMaster.getPlantationDate());
 		String messsage = "Dear " + packages.getUserDonation().getUsers().getFirstName()
 				+ ",<br>Thank you for contributing to Project Hariyali.<br>" + "For the donation dated, " + date + ","
-				+ plantationMaster.getNoOfPlantsPlanted() + " plant/s have been planted in "
+				+ allocatedPlant + " plant/s have been planted in "
 				+ plantationMaster.getSeason() + " " + year + " in the village " + plantationMaster.getVillage()
 				+ "in the state of " + plantationMaster.getState() + ".<br>"
 				+ "We will be taking care of your plants for two years to ensure  its optimum growth and nurturing in the initial years for 100% survival of the sapling.  <br>"
