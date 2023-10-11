@@ -119,7 +119,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			" ,(SELECT 1 from tbl_user_document where userId = u.user_id AND doc_type<>'CERTIFICATE' limit 1) AS HasDocument " +
 			" FROM tbl_user_master u left join tbl_donation d ON IFNULL(d.approval_status, 'Pending') = 'Pending' and d.userId = u.user_id\n" +
 			" WHERE \n" +
-			" ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
+			" ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  AND role_id = 2 \n" +
 			" AND ((:fromDate is not null AND d.donation_date between :fromDate and IFNULL(:toDate, SYSDATE() )) OR :fromDate is null)"+
 			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR emailId LIKE CONCAT(:searchText, '%') \n" +
 			" OR concat(first_name, ' ', last_name) LIKE CONCAT(:searchText, '%') OR pan_card LIKE CONCAT(:searchText, '%') OR aadhar_card LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%')) \n" +
@@ -128,7 +128,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			, countQuery = "SELECT COUNT(*) FROM (SELECT u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, CASE WHEN IFNULL(d.approval_status, 'Pending') = 'Pending' THEN COUNT(d.userId) ELSE 0 END AS pending_count, MIN(d.donation_date) AS DonationDate\n" +
 			"FROM tbl_user_master u left join tbl_donation d ON IFNULL(d.approval_status, 'Pending') = 'Pending' and d.userId = u.user_id\n" +
 			"WHERE \n" +
-			" ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  \n" +
+			" ((:donorType is not null AND donor_type = :donorType) OR :donorType is null) AND role_id = 2 \n" +
 			" AND ((:fromDate is not null AND d.donation_date between :fromDate and IFNULL(:toDate, SYSDATE() )) OR :fromDate is null)"+
 			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR emailId LIKE CONCAT(:searchText, '%') \n" +
 			" OR concat(first_name, ' ', last_name) LIKE CONCAT(:searchText, '%') OR pan_card LIKE CONCAT(:searchText, '%') OR aadhar_card LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%')) \n" +
