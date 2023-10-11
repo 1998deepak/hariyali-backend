@@ -238,7 +238,7 @@ public class UsersServiceImpl implements UsersService {
 					String[] parts = str.split("\\|\\|");
 					System.out.println(parts[0] + ":=>" + parts[1]);
 				} catch (Exception e) {
-					throw new CustomException("Something went wrong...!");
+					throw new CustomException("Something went wrong.");
 				}
 			}
 		}
@@ -431,20 +431,23 @@ public class UsersServiceImpl implements UsersService {
 		Object user = usersRepository.getUserByEmail(email);
 		if (user == null)
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
-		// Gson gson = new Gson();
 		Gson gson = new GsonBuilder().registerTypeAdapterFactory(LocalDateTypeAdapter.FACTORY).create();
 		Users entity = gson.fromJson(user.toString(), Users.class);
 		if (entity.getEmailId() != null) {
 			if (entity.getDonorId() != null) {
 				throw new CustomExceptionDataAlreadyExists("Donor with " + entity.getEmailId()
 						+ " is already registered, Kindly do click here to login and continue your donation");
+			} else{
+				Users users = usersRepository.findByUserId(entity.getUserId());
+				usersRepository.delete(users);
+				throw new CustomExceptionNodataFound("No user found with emailId " + email);
 			}
-			response.setData(modelMapper.map(user, UsersDTO.class));
-			response.setStatus(EnumConstants.SUCCESS);
-			response.setStatusCode(HttpStatus.OK.value());
+//			response.setData(modelMapper.map(user, UsersDTO.class));
+//			response.setStatus(EnumConstants.SUCCESS);
+//			response.setStatusCode(HttpStatus.OK.value());
 		} else
 			throw new CustomExceptionNodataFound("No user found with emailId " + email);
-		return response;
+//		return response;
 	}
 
 	public ApiResponse<UsersDTO> getExistingUserByEmail(String email) {

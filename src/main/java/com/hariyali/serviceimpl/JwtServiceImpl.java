@@ -416,7 +416,7 @@ public class JwtServiceImpl implements JwtService {
 						result.setMessage("Otp Send Successfully");
 						result.setStatusCode(HttpStatus.OK.value());
 						return result;
-					} else throw new ConcurrentSessionException("You cannot login because you have too many session active!");
+					} else throw new ConcurrentSessionException("You cannot login because you have too many session active.");
 
 				} else {
 	                user.setLastloginDate(new Date());
