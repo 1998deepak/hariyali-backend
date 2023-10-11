@@ -30,8 +30,7 @@ public class ContactUsController {
 	@PostMapping("/saveContact")
 	public ContactUs saveContact(@RequestBody ContactUs contactUs) {
 		ContactUs contact = contactUsServiceImpl.createContact(contactUs);
-		emailService.sendSimpleEmailToHariyaliTeam(contact.getContactEmail(), contact.getContactSubject(),
-				contact.getMassage());
+		emailService.sendSimpleEmailToHariyaliTeam(contactUs);
 		return contact;
 	}
 
