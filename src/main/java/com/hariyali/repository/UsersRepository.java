@@ -115,7 +115,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "			 where users.is_deleted=false AND users.user_id=addr.userId", nativeQuery = true)
 	Object getAllUsersWithDonarID();
 
-	@Query(value = "SELECT u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, CASE WHEN IFNULL(d.approval_status, 'Pending') = 'Pending' THEN COUNT(d.userId) ELSE 0 END AS pending_count, IFNULL(aadhar_card, pan_card) AS PANORAADHAR, MIN(d.donation_date) AS DonationDate\n" +
+	@Query(value = "SELECT u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, CASE WHEN IFNULL(d.approval_status, 'Pending') = 'Pending' THEN COUNT(d.userId) ELSE 0 END AS pending_count, CASE WHEN IFNULL(aadhar_card, '') = '' then pan_card ELSE  aadhar_card END AS PANORAADHAR, MIN(d.donation_date) AS DonationDate\n" +
 			" ,(SELECT 1 from tbl_user_document where userId = u.user_id AND doc_type<>'CERTIFICATE' limit 1) AS HasDocument " +
 			" FROM tbl_user_master u left join tbl_donation d ON IFNULL(d.approval_status, 'Pending') = 'Pending' and d.userId = u.user_id\n" +
 			" WHERE \n" +
