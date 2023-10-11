@@ -371,7 +371,7 @@ public class DonationServiceImpl implements DonationService {
 		response.setData(donationDTO);
 		response.setStatus(EnumConstants.SUCCESS);
 		response.setStatusCode(HttpStatus.OK.value());
-		response.setMessage("Donation added Successfully..!");
+		response.setMessage("Donation added Successfully.");
 		return response;
 	}
 
@@ -632,7 +632,7 @@ public class DonationServiceImpl implements DonationService {
 		}
 		response.setStatus(EnumConstants.SUCCESS);
 		response.setStatusCode(HttpStatus.OK.value());
-		response.setMessage("Donation added Successfully..!");
+		response.setMessage("Donation added Successfully.");
 		return response;
 	}
 
@@ -730,7 +730,7 @@ public class DonationServiceImpl implements DonationService {
 		emailService.sendSimpleEmail(user.getEmailId(), subject, body);
 		response.setStatus(EnumConstants.SUCCESS);
 		response.setStatusCode(HttpStatus.OK.value());
-		response.setMessage("Donation updated Successfully..!");
+		response.setMessage("Donation updated Successfully.");
 		return response;
 	}
 
@@ -752,7 +752,7 @@ public class DonationServiceImpl implements DonationService {
 			response.setData(result);
 			response.setStatus(EnumConstants.SUCCESS);
 			response.setStatusCode(HttpStatus.OK.value());
-			response.setMessage("Data fetched successfully..!!");
+			response.setMessage("Data fetched successfully.");
 			return response;
 
 		} else {
@@ -791,10 +791,10 @@ public class DonationServiceImpl implements DonationService {
 			response.setTotalRecords(result.getTotalElements());
 			response.setStatus(EnumConstants.SUCCESS);
 			response.setStatusCode(HttpStatus.OK.value());
-			response.setMessage("Data fetched successfully..!!");
+			response.setMessage("Data fetched successfully.");
 			return response;
 		} else
-			throw new CustomException("No donation found!!");
+			throw new CustomException("No donation found.");
 	}
 
 	@Override

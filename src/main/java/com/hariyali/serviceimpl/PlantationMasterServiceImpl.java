@@ -91,7 +91,7 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
             response.setTotalRecords(result.getTotalElements());
             response.setStatus(EnumConstants.SUCCESS);
             response.setStatusCode(HttpStatus.OK.value());
-            response.setMessage("Data fetched successfully..!!");
+            response.setMessage("Data fetched successfully.");
             return response;
         } else
             throw new CustomException("No record found for given filter");
@@ -143,15 +143,15 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
                     }
                 });
                 response.setStatus("Success");
-                response.setMessage("File uploaded successfully!");
+                response.setMessage("File uploaded successfully.");
                 return  response;
             } catch (IOException e){
                 log.error("Exception  = "+ e);
-                throw new CustomException("Error while uploading");
+                throw new CustomException("Error while uploading.");
             }
 
         } else{
-            throw new CustomException("Invalid file, Please upload excel file!");
+            throw new CustomException("Invalid file, Please upload excel file.");
         }
     }//method
 
