@@ -301,7 +301,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 //
 //	Users findByEmailIdAndApprovalStatus(String email, String approvalStatus);
 
-	@Query(value = "select u.donorId, d.donation_code, p.order_id AS transactionNo, u.donor_type, concat(u.first_name, ' ', u.last_name) as donor_name \n" +
+	@Query(value = "select u.donorId, d.donation_code, d.order_id AS transactionNo, u.donor_type, concat(u.first_name, ' ', u.last_name) as donor_name \n" +
 			",u.organisation, case when upper(donation_type) = upper('Gift-Donate') then 'Gift a Tree' ELSE 'Plant a tree' end, up.no_of_bouquets, p.bank_payment_ref_no, p.payment_tracking_id, p.payment_mode, p.payment_status, u.citizenship, u.emailId, u.mobile_number, d.approval_status " +
 			"from tbl_user_master u, tbl_donation d, tbl_payment_info p, tbl_user_packages up \n" +
 			"WHERE  u.approval_status = 'Approved' AND role_id = 2 AND u.user_id = d.userId AND p.donationId = d.donation_id AND up.donationId = d.donation_id AND DATE(d.donation_date) between :fromDate AND :toDate AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)"+
