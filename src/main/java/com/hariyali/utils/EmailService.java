@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.hariyali.EnumConstants;
+import com.hariyali.entity.ContactUs;
 import com.hariyali.entity.Donation;
 import com.hariyali.entity.Plantation;
 import com.hariyali.entity.PlantationMaster;
@@ -71,8 +72,10 @@ public class EmailService {
 
 	}
 
-	public void sendSimpleEmailToHariyaliTeam(String toEmail, String subject, String body) {
-		ccServiceEmailAPI.sendSupportMail(toEmail, subject, body);
+	public void sendSimpleEmailToHariyaliTeam(ContactUs contactUs) {
+		String body = "Dear team,\n Donar "+contactUs.getContactName()+" contact us with "+contactUs.getMassage() + " " + contactUs.getContactEmail() + " mail Id of "+ contactUs.getContactName();
+		String subject = contactUs.getContactSubject();
+		ccServiceEmailAPI.sendSupportMail(body, subject);
 		log.info("Mail Sent To Hariyali Team ...");
 
 	}
@@ -203,7 +206,7 @@ public class EmailService {
 				+ ",<br>Thank you for contributing to Project Hariyali.<br>" + "For the donation dated, " + date + ","
 				+ allocatedPlant + " plant/s have been planted in "
 				+ plantationMaster.getSeason() + " " + year + " in the village " + plantationMaster.getVillage()
-				+ "in the state of " + plantationMaster.getState() + ".<br>"
+				+ " in the state of " + plantationMaster.getState() + ".<br>"
 				+ "We will be taking care of your plants for two years to ensure  its optimum growth and nurturing in the initial years for 100% survival of the sapling.  <br>"
 				+ "Thanks once again.<br>" + "<br>" + "Team Hariyali <br>" + "Mahindra Foundation<br>"
 				+ "3rd Floor, Cecil Court, Near Regal Cinema,<br>" + "Mahakavi Bhushan Marg, Colaba, <br>"

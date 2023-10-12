@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hariyali.dto.EmailContentDto;
+import com.hariyali.entity.ContactUs;
 import com.hariyali.exceptions.EmailNotConfiguredException;
 import com.hariyali.exceptions.ExpiredEmailConfigurationUsageException;
 import com.hariyali.exceptions.InactiveConfigurationUsageException;
@@ -46,11 +47,9 @@ public class CCServiceEmailAPI {
 	String HOST;
 
 	/* Send Mail */
-	public void sendSupportMail(String toUser, String subject, String emailContent) throws EmailNotConfiguredException {
-//		String mailBody = ("<!DOCTYPE html>\n" + "<html>\n" + "<head>\n" + "</head>\n" + "<body>\n" + emailContent
-//				+ "</body>\n" + "</html>");
-		EmailContentDto emailContentDto = new EmailContentDto("support@hariyali.org.in",
-				Arrays.asList(toUser.split(",")), null, null, subject, emailContent, null, null, true, null);
+	public void sendSupportMail(String subject, String emailContent) throws EmailNotConfiguredException {
+		EmailContentDto emailContentDto = new EmailContentDto("correspondence@hariyali.org.in",
+				Arrays.asList("support@hariyali.org.in".split(",")), null, null, subject, emailContent, null, null, true, null);
 		try {
 			sendEmail(emailContentDto, null);
 		} catch (IOException e) {
