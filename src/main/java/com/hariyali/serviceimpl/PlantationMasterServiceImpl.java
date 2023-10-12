@@ -173,6 +173,7 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
                                 packages.setPlanted(false);
                                 allocatedPlant = noOfPlantsPlanted.intValue();
                                 emailService.sendPlantationMail(packages, plantationMaster,allocatedPlant);
+                                allocatedPlant += ofNullable(packages.getPlantAllocated()).orElse(0);
                             }
                             noOfPlantsPlanted -= allocatedPlant;
                             packages.setPlantAllocated(allocatedPlant);
