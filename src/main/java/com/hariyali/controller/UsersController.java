@@ -34,6 +34,8 @@ import java.io.FileInputStream;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
+
 @RestController
 @RequestMapping("/api/v1")
 @Slf4j
@@ -265,7 +267,11 @@ public class UsersController {
 	}
 
 	@PostMapping("/getUserDocuments")
-	public ResponseEntity<ApiResponse<List<Document>>> getUserDocuments(@RequestBody PaginationRequestDTO<Integer> dto){
+	public ResponseEntity<ApiResponse<List<Document>>> getUserDocuments(@RequestBody PaginationRequestDTO<Integer> dto, HttpServletRequest request){
+		if(isNull(dto.getData()) || dto.getData() == 0) {// if donor user is login
+			String emailId = jwtHelper.getUsernameFromToken(request.getHeader("Authorization").substring(7));
+			dto.setData(userRepository.findByEmailId(emailId).getUserId());
+		}
 		return new ResponseEntity<>(commonService.getUserDocuments(dto), HttpStatus.OK);
 	}
 
