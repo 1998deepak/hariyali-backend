@@ -115,21 +115,21 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 			+ "			 where users.is_deleted=false AND users.user_id=addr.userId", nativeQuery = true)
 	Object getAllUsersWithDonarID();
 
-	@Query(value = "SELECT u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, CASE WHEN IFNULL(d.approval_status, 'Pending') = 'Pending' THEN COUNT(d.userId) ELSE 0 END AS pending_count, CASE WHEN IFNULL(aadhar_card, '') = '' then pan_card ELSE  aadhar_card END AS PANORAADHAR, MIN(d.donation_date) AS DonationDate\n" +
+	@Query(value = "SELECT u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, SUM(CASE WHEN d.approval_status = 'Pending' and p.paymentInfo_id is not null THEN 1 ELSE 0 END) AS pending_count, CASE WHEN IFNULL(aadhar_card, '') = '' then pan_card ELSE  aadhar_card END AS PANORAADHAR, MIN(d.donation_date) AS DonationDate\n" +
 			" ,(SELECT 1 from tbl_user_document where userId = u.user_id AND doc_type<>'CERTIFICATE' limit 1) AS HasDocument " +
-			" FROM tbl_user_master u left join tbl_donation d ON IFNULL(d.approval_status, 'Pending') = 'Pending' and d.userId = u.user_id\n" +
-			" WHERE \n" +
-			" ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  AND role_id = 2 \n" +
-			" AND ((:fromDate is not null AND d.donation_date between :fromDate and IFNULL(:toDate, SYSDATE() )) OR :fromDate is null)"+
+			" FROM tbl_user_master u left join tbl_donation d ON d.userId = u.user_id left join tbl_payment_info p ON d.donation_id = p.donationId\n" +
+			" WHERE u.approval_status = 'Approved' \n" +
+			" AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)  AND role_id = 2 \n" +
+			" AND ((:fromDate is not null AND DATE(d.donation_date) between :fromDate and IFNULL(:toDate, SYSDATE() )) OR :fromDate is null)"+
 			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR emailId LIKE CONCAT(:searchText, '%') \n" +
 			" OR concat(first_name, ' ', last_name) LIKE CONCAT(:searchText, '%') OR pan_card LIKE CONCAT(:searchText, '%') OR aadhar_card LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%')) \n" +
 			" GROUP BY u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark\n" +
 			" ORDER BY DonationDate"
 			, countQuery = "SELECT COUNT(*) FROM (SELECT u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, CASE WHEN IFNULL(d.approval_status, 'Pending') = 'Pending' THEN COUNT(d.userId) ELSE 0 END AS pending_count, MIN(d.donation_date) AS DonationDate\n" +
 			"FROM tbl_user_master u left join tbl_donation d ON IFNULL(d.approval_status, 'Pending') = 'Pending' and d.userId = u.user_id\n" +
-			"WHERE \n" +
-			" ((:donorType is not null AND donor_type = :donorType) OR :donorType is null) AND role_id = 2 \n" +
-			" AND ((:fromDate is not null AND d.donation_date between :fromDate and IFNULL(:toDate, SYSDATE() )) OR :fromDate is null)"+
+			"WHERE u.approval_status = 'Approved' \n" +
+			" AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null) AND role_id = 2 \n" +
+			" AND ((:fromDate is not null AND DATE(d.donation_date) between :fromDate and IFNULL(:toDate, SYSDATE() )) OR :fromDate is null)"+
 			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR emailId LIKE CONCAT(:searchText, '%') \n" +
 			" OR concat(first_name, ' ', last_name) LIKE CONCAT(:searchText, '%') OR pan_card LIKE CONCAT(:searchText, '%') OR aadhar_card LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%')) \n" +
 			" GROUP BY u.user_id, u.webId, u.donorId, u.first_name, u.last_name, u.donor_type, u.organisation, u.approval_status, u.emailId, u.remark, u.aadhar_card, u.pan_card\n" +
@@ -301,13 +301,12 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
 //
 //	Users findByEmailIdAndApprovalStatus(String email, String approvalStatus);
 
-	@Query(value = "select u.donorId, d.donation_code, ifnull(p.bank_payment_ref_no, p.order_id) AS transactionNo, u.donor_type, concat(u.first_name, ' ', u.last_name) as donor_name \n" +
-			",u.organisation, case when upper(donation_type) = upper('Gift-Donate') then 'Gift a Tree' ELSE 'Plant a tree' end, up.no_of_bouquets, p.order_id, p.payment_tracking_id, p.payment_mode, p.payment_status, u.citizenship, u.emailId, u.mobile_number, d.approval_status " +
+	@Query(value = "select u.donorId, d.donation_code, p.order_id AS transactionNo, u.donor_type, concat(u.first_name, ' ', u.last_name) as donor_name \n" +
+			",u.organisation, case when upper(donation_type) = upper('Gift-Donate') then 'Gift a Tree' ELSE 'Plant a tree' end, up.no_of_bouquets, p.bank_payment_ref_no, p.payment_tracking_id, p.payment_mode, p.payment_status, u.citizenship, u.emailId, u.mobile_number, d.approval_status " +
 			"from tbl_user_master u, tbl_donation d, tbl_payment_info p, tbl_user_packages up \n" +
-			"WHERE u.user_id = d.userId AND p.donationId = d.donation_id AND up.donationId = d.donation_id AND d.donation_date between :fromDate AND :toDate AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)"+
+			"WHERE  u.approval_status = 'Approved' AND role_id = 2 AND u.user_id = d.userId AND p.donationId = d.donation_id AND up.donationId = d.donation_id AND DATE(d.donation_date) between :fromDate AND :toDate AND ((:donorType is not null AND donor_type = :donorType) OR :donorType is null)"+
 			" AND (WebId like CONCAT(:searchText, '%') OR donorId LIKE CONCAT(:searchText, '%') OR emailId LIKE CONCAT(:searchText, '%') \n" +
 			" OR concat(first_name, ' ', last_name) LIKE CONCAT(:searchText, '%') OR pan_card LIKE CONCAT(:searchText, '%') OR aadhar_card LIKE CONCAT(:searchText, '%') OR organisation LIKE CONCAT(:searchText, '%')) \n"
-
 			, nativeQuery = true)
 	public List<Object[]> getUserDonationReportData(@Param("searchText") String searchText,
 													@Param("donorType") String donorType,
