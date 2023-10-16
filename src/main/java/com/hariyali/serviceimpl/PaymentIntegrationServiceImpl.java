@@ -174,6 +174,7 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 				if (donation.getDonationType().equalsIgnoreCase("self-donate")) {
 					emailService.sendWelcomeLetterMail(user.getEmailId(), EnumConstants.subject, EnumConstants.content,
 							user);
+					emailService.sendThankyouLatter(user.getEmailId(), donation.getUsers());
 				}
 				if (donation.getDonationType().equalsIgnoreCase("gift-donate")) {
 					String recipientEmail = donation.getRecipient().get(0).getEmailId();
@@ -239,6 +240,9 @@ public class PaymentIntegrationServiceImpl implements PaymentIntegrationService 
 //							EnumConstants.contentGiftee, recipientData);
 					emailService.sendGiftingLetterEmail(donation, recipientData, donation.getDonationEvent(),
 							responseCertifiate.get("outputFile"));
+				}
+				if (donation.getDonationType().equalsIgnoreCase("self-donate")) {
+					emailService.sendThankyouLatter(user.getEmailId(), donation.getUsers());
 				}
 			}
 			// Call Gogreen API
