@@ -8,6 +8,7 @@ import com.hariyali.dto.PlantationMasterDTO;
 import com.hariyali.entity.Plantation;
 import com.hariyali.exceptions.CustomException;
 import com.hariyali.repository.PlantationRepository;
+import com.hariyali.repository.UsersRepository;
 import com.hariyali.service.CommitmentService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -39,6 +40,9 @@ public class CommitmentServiceImpl implements CommitmentService {
 
     @Autowired
     private PlantationRepository repository;
+    
+    @Autowired
+    private UsersRepository usersRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -53,6 +57,7 @@ public class CommitmentServiceImpl implements CommitmentService {
                     .map(entity -> {
                         PlantationDTO plantationDTO = modelMapper.map(entity, PlantationDTO.class);
                         plantationDTO.getPlantationMaster().setPlantationDateString(toDateString(plantationDTO.getPlantationMaster().getPlantationDate(), "dd/MM/yyyy"));
+                        plantationDTO.setDonorId(usersRepository.getDonorIdbyUserId(plantationDTO.getDonation().getUsers().getUserId()));
                         return plantationDTO;
                     }).collect(Collectors.toList());
             response.setData(plantationDTOS);
