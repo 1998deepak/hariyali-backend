@@ -13,5 +13,6 @@ public class ReceiptDto {
 	String reciept_Path;
 	String reciept_number;
 	Date recieptDate;
-
+	String donationNumber;
+	String transactionNumber;
 }

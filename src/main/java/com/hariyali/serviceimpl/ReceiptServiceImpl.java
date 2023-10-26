@@ -396,6 +396,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                 receiptDTO.setRecieptDate(receipt.getRecieptDate());
                 receiptDTO.setReciept_Path(receipt.getReciept_Path());
                 receiptDTO.setDonation_id(receipt.getDonation().getDonationId());
+                receiptDTO.setDonationNumber(receipt.getDonation().getDonationCode());
+                receiptDTO.setTransactionNumber(receipt.getDonation().getOrderId());
                 receiptDTOList.add(receiptDTO);
             }
             return receiptDTOList;
