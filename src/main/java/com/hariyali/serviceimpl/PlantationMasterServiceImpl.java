@@ -175,7 +175,7 @@ public class PlantationMasterServiceImpl implements PlantationMasterService{
                                 emailService.sendPlantationMail(packages, plantationMaster,allocatedPlant);
                             }
                             noOfPlantsPlanted -= allocatedPlant;
-                            packages.setPlantAllocated(allocatedPlant);
+                            packages.setPlantAllocated(allocatedPlant + ofNullable(packages.getPlantAllocated()).orElse(0));
 
                             updatedUserPackages.add(packages);
                             plantations.add(toPlantation(packages, plantationMaster, allocatedPlant, createdBy));
