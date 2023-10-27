@@ -886,7 +886,7 @@ public class DonationServiceImpl implements DonationService {
 				Receipt receipt = receiptRepository.findByDonation(donation);
 				if(donation.getDonationType().equalsIgnoreCase("Self-Donate")){
 				emailService.sendReceiptWithAttachment(donation.getUsers(), donation.getOrderId(), receipt);
-				emailService.sendThankyouLatter(donation.getUsers().getEmailId(), donation.getUsers());
+				
 				}else {
 					emailService.sendReceiptWithAttachment(donation.getUsers(), donation.getOrderId(), receipt);
 				}
