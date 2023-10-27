@@ -22,4 +22,5 @@ public class PlantationDTO {
 	private Boolean year1Report;
 	private Boolean year2Report;
 	private String createdBy;
+	private String donorId;
 }
