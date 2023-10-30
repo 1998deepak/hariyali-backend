@@ -73,7 +73,7 @@ public class EmailService {
 	}
 
 	public void sendSimpleEmailToHariyaliTeam(ContactUs contactUs) {
-		String body = "Dear team,\n Donor "+contactUs.getContactName()+" contact us with "+contactUs.getMassage() + " " + contactUs.getContactEmail() + " mail Id of "+ contactUs.getContactName();
+		String body = "Dear team,\n\n Name : "+contactUs.getContactName()+" \n Message : "+contactUs.getMassage() + "\n Email Id : " + contactUs.getContactEmail();
 		String subject = contactUs.getContactSubject();
 		ccServiceEmailAPI.sendSupportMail(subject ,body );
 		log.info("Mail Sent To Hariyali Team ...");
